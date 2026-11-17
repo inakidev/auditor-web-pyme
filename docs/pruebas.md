@@ -34,6 +34,17 @@ Marcar cada caso cuando exista su prueba y pase.
 - [ ] Redirección 302 hacia un destino interno
 - [ ] Cadena de más de 3 redirecciones
 - [ ] Respuesta de más de 2 MB y respuesta que nunca termina (timeout)
+- [ ] Rangos adicionales: `192.0.0.1`, `198.18.0.1`, `240.0.0.1`, `255.255.255.255`, `100.64.0.1`
+- [ ] IPv6 con IPv4 embebida: `[64:ff9b::7f00:1]` (NAT64), `[2002:7f00:1::]` (6to4), `[2001::1]` (Teredo)
+- [ ] IP literal: se valida sin llamar al resolver DNS
+- [ ] DNS con varias respuestas, una pública y una interna: se rechaza
+- [ ] Redirección con `Location` relativa que se resuelve bien; redirecciones a otro esquema, a un puerto no permitido o con credenciales: se rechazan
+- [ ] Timeout global: DNS lento, servidor que envía el cuerpo de a goteo (cada byte reinicia la inactividad, pero se corta igual a los 10 s)
+- [ ] `Content-Length` falso (dice poco y manda más de 2 MB) y bomba de compresión (pocos KB comprimidos que superan 2 MB al descomprimir)
+- [ ] Conexión nueva por salto (sin reutilizar sockets)
+- [ ] Certificado autofirmado y certificado con un nombre que no coincide: se rechazan sin tocar la verificación TLS
+- [ ] Puerto no permitido rechazado por el camino de producción (sin la fábrica de pruebas)
+- [ ] Arranque en producción sin `AUDITOR_CONTACT_URL`: falla
 
 ## 3. Registro de ejecuciones
 
