@@ -24,10 +24,10 @@ El avance se mide en **puntos de historia** sobre el alcance de la versión entr
 
 | Indicador | Valor |
 |---|---|
-| Puntos terminados | 0 de 85 |
-| Avance | 0 % |
+| Puntos terminados | 3 de 85 |
+| Avance | 3,5 % |
 | Meta del Avance 3 | 51 puntos (60 %) |
-| Última actualización | [completar] |
+| Última actualización | 17/11/2026 (H0) |
 
 > Actualizá esta tabla cada vez que se cierra una historia. Una historia cuenta solo si cumple su definición de hecho (pruebas en verde, revisión hecha y documentación al día).
 
@@ -43,12 +43,16 @@ docs/             Requisitos, plan, planificación, trazabilidad, pruebas y mant
 
 ## Cómo ejecutarlo
 
-Se completa al terminar la historia H0 (preparación del repositorio):
+Requisitos: Node.js 24 LTS y pnpm 12. Copiá `.env.example` como `.env` antes de empezar.
 
 ```
 pnpm install
-pnpm dev      # levanta la API y la interfaz
-pnpm test     # corre todas las pruebas
+pnpm dev            # API en http://127.0.0.1:3000 e interfaz en http://localhost:5173
+pnpm test           # todas las pruebas (pnpm test:scanner: solo el scanner)
+pnpm lint           # ESLint y Prettier
+pnpm typecheck      # TypeScript estricto
+pnpm build          # compila todos los paquetes
+docker compose up   # API en contenedor (requiere Docker)
 ```
 
 ## Metodología y planificación

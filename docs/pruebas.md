@@ -50,7 +50,7 @@ Marcar cada caso cuando exista su prueba y pase.
 
 | Fecha | Nivel | Alcance | Resultado | Pruebas (pasan/total) | Cobertura | Observaciones |
 |---|---|---|---|---|---|---|
-| | | | | | | |
+| 17/11/2026 | Unitarias | H0: salud de la API, configuración, regla anti-fetch, web | Verde | 35/35 | 96,7 % líneas | Lint, typecheck y audit sin errores |
 
 ## 4. Registro de defectos
 

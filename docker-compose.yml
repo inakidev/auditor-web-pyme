@@ -1,0 +1,14 @@
+# Entorno local con la imagen de producción. Requiere un .env (ver .env.example).
+services:
+  api:
+    build: .
+    env_file: .env
+    environment:
+      HOST: 0.0.0.0
+    ports:
+      - '127.0.0.1:3000:3000'
+    read_only: true
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL

@@ -33,13 +33,13 @@ Estados: Pendiente, En curso, Hecho o Pospuesto (fuera de la versión entregable
 | RNF-01 SSRF y abuso | H1 | Suite SSRF y revisión manual del cliente HTTP | Pendiente |
 | RNF-02 Autenticación robusta | H12 | Pruebas de sesión, CSRF y bloqueo | Pendiente |
 | RNF-03 Sin XSS | H8 | Fixtures maliciosos y CSP | Pendiente |
-| RNF-04 Dependencias sin vulnerabilidades | H0 | Auditoría de dependencias en CI | Pendiente |
+| RNF-04 Dependencias sin vulnerabilidades | H0 | `pnpm audit --prod --audit-level high` en CI | Hecho |
 | RNF-05 Privacidad | H11, H14 | Revisión del modelo de datos y prueba de purga | Pendiente |
 | RNF-06 Auditoría en 30 s (p95) | H16 | Medición con sitios de fixture | Pendiente |
 | RNF-07 Respuesta de interfaz en 2 s | H16 | Medición en e2e | Pendiente |
 | RNF-08 Usabilidad y accesibilidad | H8, H16 | Prueba con 2 o 3 personas; contraste AA | Pendiente |
 | RNF-09 Fallos del sitio objetivo | H2, H3 | Servidor de fixture que falla a propósito | Pendiente |
-| RNF-10 Mantenibilidad y cobertura | H0 | Reporte de cobertura en CI | Pendiente |
-| RNF-11 Portabilidad con Docker | H15 | Despliegue desde cero | Pendiente |
-| RNF-12 Observabilidad | H0, H15 | Revisión de registros; punto de salud | Pendiente |
+| RNF-10 Mantenibilidad y cobertura | H0 | Umbrales de cobertura en CI; TS estricto; `test/eslint-rules.test.ts` | Hecho |
+| RNF-11 Portabilidad con Docker | H0, H15 | Imagen base construida en CI (H0); despliegue desde cero (H15) | En curso |
+| RNF-12 Observabilidad | H0, H15 | `GET /api/health` y logs sin IP (`apps/api/src/app.test.ts`) | En curso |
 | RNF-13 Ética y límites | H1, H13 | Revisión del catálogo y de los límites | Pendiente |
