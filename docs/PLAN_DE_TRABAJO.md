@@ -18,7 +18,7 @@ Objetivo personal: terminar el proyecto completo antes de fin de noviembre. El l
 | Etapa | Historias | Puntos de la etapa | Acumulado | Puerta de salida (qué tiene que funcionar) |
 |---|---|---|---|---|
 | 1 | H0, H1 | 11 | 11 | Integración continua en verde y suite SSRF completa pasando |
-| 2 | H2, H3, H4 | 15 | 26 | Rebanada vertical: desde el navegador se ingresa una URL local de prueba y se ven los hallazgos de seguridad |
+| 2 | H2, H3, H4 | 15 | 26 | Rebanada vertical: desde el navegador se ingresa la URL de un sitio propio publicado y se ven los hallazgos de seguridad (la integración con un servidor local se prueba dentro de las pruebas automáticas) |
 | 3 | H5, H6, H7 | 11 | 37 | Auditoría con puntaje por categoría y global sobre los fixtures |
 | 4 | H8, H9, H10 | 13 | 50 | Informe completo y legible en móvil, con recomendaciones en español |
 | 5 | H11, H12 | 11 | 61 | Contacto con consentimiento y panel de consultores con sesión (supera el 60 % del Avance 3) |

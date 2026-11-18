@@ -79,7 +79,7 @@ El ritmo lo marca el tiempo dedicado: cada etapa termina cuando cumple su puerta
 | Etapa | Historias | Puntos de la etapa | Acumulado planificado | Puerta de salida |
 |---|---|---|---|---|
 | 1 | H0, H1 | 11 | 11 | Integración continua en verde y suite SSRF completa |
-| 2 | H2, H3, H4 | 15 | 26 | Rebanada vertical: URL local, auditoría y hallazgos de seguridad en el navegador |
+| 2 | H2, H3, H4 | 15 | 26 | Rebanada vertical: URL de un sitio propio publicado, auditoría y hallazgos de seguridad en el navegador |
 | 3 | H5, H6, H7 | 11 | 37 | Auditoría con puntaje por categoría y global |
 | 4 | H8, H9, H10 | 13 | 50 | Informe completo y legible en móvil |
 | 5 | H11, H12 | 11 | 61 | Contacto con consentimiento y panel con sesión (supera el 60 %) |
