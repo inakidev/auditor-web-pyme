@@ -27,7 +27,7 @@ El avance se mide en **puntos de historia** sobre el alcance de la versión entr
 | Puntos terminados | 26 de 85 |
 | Avance | 30,6 % |
 | Meta del Avance 3 | 51 puntos (60 %) |
-| Última actualización | 18/11/2026 (H2, H3 y H4; falta la demo de la etapa 2) |
+| Última actualización | 18/11/2026 (cierre de la etapa 2: H2, H3 y H4) |
 
 > Actualizá esta tabla cada vez que se cierra una historia. Una historia cuenta solo si cumple su definición de hecho (pruebas en verde, revisión hecha y documentación al día).
 

@@ -95,7 +95,7 @@ Al cerrar cada etapa se anotan la fecha y las horas dedicadas, y se compara el a
 | Etapa | Fecha de cierre | Horas dedicadas | Puntos planificados (acumulado) | Puntos reales (acumulado) | Desvío | Causa y acción |
 |---|---|---|---|---|---|---|
 | 1 | 18/11/2026 | 3 | 11 | 11 | 0 | Sin desvío. Bloqueo de facturación de GitHub Actions (ajeno al proyecto) resuelto por soporte en 1 día |
-| 2 | | | 26 | | | |
+| 2 | 18/11/2026 | 1,5 | 26 | 26 | 0 | Sin desvío. Demo en el navegador contra clinica-chubut.vercel.app (sitio propio): 8 de 8 checks de seguridad cumplen |
 | 3 | | | 37 | | | |
 | 4 | | | 50 | | | |
 | 5 | | | 61 | | | |
