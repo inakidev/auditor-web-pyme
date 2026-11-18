@@ -9,6 +9,7 @@ describe('loadConfig', () => {
       port: 3000,
       logLevel: 'info',
       contactUrl: PLACEHOLDER_CONTACT_URL,
+      databasePath: './data/auditor.db',
     });
   });
 

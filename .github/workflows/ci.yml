@@ -32,6 +32,15 @@ jobs:
       - run: pnpm test:coverage
       - run: pnpm audit --prod --audit-level high
       - run: pnpm build
+      - name: Prueba de humo del build (dist de la API)
+        env:
+          NODE_ENV: production
+          AUDITOR_CONTACT_URL: https://auditor.example.com/contacto
+          DATABASE_PATH: ${{ runner.temp }}/smoke.db
+          PORT: '3999'
+        run: |
+          node apps/api/dist/server.js &
+          curl --retry 15 --retry-connrefused --retry-delay 1 -fsS http://127.0.0.1:3999/api/health
 
   docker:
     name: Build de la imagen Docker
@@ -41,3 +50,8 @@ jobs:
         with:
           persist-credentials: false
       - run: docker build -t auditor-web-pyme:ci .
+      - name: Prueba de humo de la imagen
+        run: |
+          docker run -d --name smoke -p 3000:3000 -e AUDITOR_CONTACT_URL=https://auditor.example.com/contacto auditor-web-pyme:ci
+          curl --retry 15 --retry-connrefused --retry-delay 1 -fsS http://127.0.0.1:3000/api/health
+          docker rm -f smoke

@@ -45,7 +45,7 @@ Total de la versión entregable: **85 puntos**. Prioridad: M (debe) o S (deberí
 |---|---|---|---|---|---|
 | H0 | Preparación: repositorio, integración continua, Docker base | RNF-04, 10, 11, 12 | 3 | M | Hecho |
 | H1 | Cliente HTTP seguro y suite de pruebas SSRF | RF-02, RNF-01, 13 | 8 | M | Hecho |
-| H2 | API de auditorías, cola y estado | RF-01, RF-09 | 5 | M | Pendiente |
+| H2 | API de auditorías, cola y estado | RF-01, RF-09 | 5 | M | Hecho |
 | H3 | Checks de seguridad núcleo (SEC-01 a 05 y 07 a 09) | RF-03 | 5 | M | Pendiente |
 | H4 | Interfaz mínima: URL, progreso y resultados | RF-01, RF-08 | 5 | M | Pendiente |
 | H5 | Checks de SEO y rendimiento liviano | RF-04 | 5 | M | Pendiente |

@@ -4,6 +4,7 @@ export interface AppConfig {
   readonly port: number;
   readonly logLevel: string;
   readonly contactUrl: string;
+  readonly databasePath: string;
 }
 
 export class ConfigError extends Error {
@@ -56,5 +57,6 @@ export function loadConfig(source: NodeJS.ProcessEnv): AppConfig {
     port: parsePort(source['PORT']),
     logLevel: source['LOG_LEVEL'] ?? 'info',
     contactUrl: parseContactUrl(source['AUDITOR_CONTACT_URL'], env),
+    databasePath: source['DATABASE_PATH'] ?? './data/auditor.db',
   };
 }

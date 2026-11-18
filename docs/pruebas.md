@@ -52,6 +52,7 @@ Marcar cada caso cuando exista su prueba y pase.
 |---|---|---|---|---|---|---|
 | 17/11/2026 | Unitarias | H0: salud de la API, configuración, regla anti-fetch, web | Verde | 35/35 | 96,7 % líneas | Lint, typecheck y audit sin errores |
 | 17/11/2026 | Unitarias, integración y seguridad | H1: suite SSRF, integración con servidores locales HTTP/HTTPS, camino de producción | Verde | 156/156 | 97,7 % líneas (scanner/net 98,2 %) | Sin red real; 3 corridas seguidas estables |
+| 18/11/2026 | Unitarias e integración | H2: validación previa de URL, cola, API de auditorías con SQLite en memoria, recuperación al reiniciar, redacción de logs | Verde | 203/203 | 95,5 % líneas | Prueba de humo del dist de la API en local |
 
 ## 4. Registro de defectos
 

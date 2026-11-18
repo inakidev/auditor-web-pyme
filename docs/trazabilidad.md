@@ -8,7 +8,7 @@ Estados: Pendiente, En curso, Hecho o Pospuesto (fuera de la versión entregable
 
 | Requisito | Historia | Pruebas previstas | Commit o PR | Estado |
 |---|---|---|---|---|
-| RF-01 Solicitar auditoría | H2, H4 | Validación de URL; integración de la API | | Pendiente |
+| RF-01 Solicitar auditoría | H2, H4 | `scanner/test/target-url.test.ts`; `api/src/routes/audits.test.ts` | `feat(api): agrega auditorías…` | En curso (falta la interfaz, H4) |
 | RF-02 Validar destino | H1 | `packages/scanner/test/safe-fetch.{ssrf,integration,production}.test.ts` | `feat(scanner): agrega safeFetch…` | Hecho |
 | RF-03 Checks de seguridad | H3, H10 | Un archivo de pruebas por check, con fixtures | | Pendiente |
 | RF-04 Checks de SEO | H5 | Fixtures de HTML en español e inglés | | Pendiente |
@@ -16,7 +16,7 @@ Estados: Pendiente, En curso, Hecho o Pospuesto (fuera de la versión entregable
 | RF-06 Checks de confianza | H10 | Fixtures con y sin contacto y privacidad | | Pendiente |
 | RF-07 Puntaje | H7 | Cálculo determinista con casos de borde | | Pendiente |
 | RF-08 Informe web | H4, H8 | Componentes y e2e; revisión de legibilidad | | Pendiente |
-| RF-09 Enlace único con vencimiento | H2, H8 | Token, estado 410 al vencer | | Pendiente |
+| RF-09 Enlace único con vencimiento | H2, H8 | `api/src/routes/audits.test.ts` (token de 256 bits, hash en la base, 404 y 410) | `feat(api): agrega auditorías…` | Hecho |
 | RF-10 Exportar a PDF | H17 | Generación y contenido | | Pendiente |
 | RF-11 Contacto con consentimiento | H11 | Sin consentimiento no se guarda | | Pendiente |
 | RF-12 Panel de consultores | H12 | Acceso con y sin sesión; filtros | | Pendiente |
@@ -38,7 +38,7 @@ Estados: Pendiente, En curso, Hecho o Pospuesto (fuera de la versión entregable
 | RNF-06 Auditoría en 30 s (p95) | H16 | Medición con sitios de fixture | Pendiente |
 | RNF-07 Respuesta de interfaz en 2 s | H16 | Medición en e2e | Pendiente |
 | RNF-08 Usabilidad y accesibilidad | H8, H16 | Prueba con 2 o 3 personas; contraste AA | Pendiente |
-| RNF-09 Fallos del sitio objetivo | H2, H3 | Servidor de fixture que falla a propósito | Pendiente |
+| RNF-09 Fallos del sitio objetivo | H2, H3 | Errores del scanner → estado `failed` con mensaje claro (H2); checks posibles con HTTPS caído (H3) | En curso |
 | RNF-10 Mantenibilidad y cobertura | H0 | Umbrales de cobertura en CI; TS estricto; `test/eslint-rules.test.ts` | Hecho |
 | RNF-11 Portabilidad con Docker | H0, H15 | Imagen base construida en CI (H0); despliegue desde cero (H15) | En curso |
 | RNF-12 Observabilidad | H0, H15 | `GET /api/health` y logs sin IP (`apps/api/src/app.test.ts`); CI en verde | En curso |

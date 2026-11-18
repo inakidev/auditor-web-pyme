@@ -3,3 +3,4 @@ pnpm-lock.yaml
 **/coverage
 *.md
 *.pem
+apps/api/drizzle
