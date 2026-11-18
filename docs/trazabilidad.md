@@ -8,14 +8,14 @@ Estados: Pendiente, En curso, Hecho o Pospuesto (fuera de la versión entregable
 
 | Requisito | Historia | Pruebas previstas | Commit o PR | Estado |
 |---|---|---|---|---|
-| RF-01 Solicitar auditoría | H2, H4 | `scanner/test/target-url.test.ts`; `api/src/routes/audits.test.ts` | `feat(api): agrega auditorías…` | En curso (falta la interfaz, H4) |
+| RF-01 Solicitar auditoría | H2, H4 | `scanner/test/target-url.test.ts`; `api/src/routes/audits.test.ts`; `web/src/App.test.tsx` | `feat(api): agrega auditorías…`, `feat(web): agrega la interfaz mínima…` | Hecho |
 | RF-02 Validar destino | H1 | `packages/scanner/test/safe-fetch.{ssrf,integration,production}.test.ts` | `feat(scanner): agrega safeFetch…` | Hecho |
 | RF-03 Checks de seguridad | H3, H10 | `scanner/test/checks/security.test.ts` (fixtures, sin red) y `run-audit.integration.test.ts` | `feat(scanner): agrega los checks…` | En curso (H3 hecho; SEC-06 y SEC-10 a 16 en H10) |
 | RF-04 Checks de SEO | H5 | Fixtures de HTML en español e inglés | | Pendiente |
 | RF-05 Checks de analítica | H6 | Fixtures con GA4, GTM, Matomo y sin medición | | Pendiente |
 | RF-06 Checks de confianza | H10 | Fixtures con y sin contacto y privacidad | | Pendiente |
 | RF-07 Puntaje | H7 | Cálculo determinista con casos de borde | | Pendiente |
-| RF-08 Informe web | H4, H8 | Componentes y e2e; revisión de legibilidad | | Pendiente |
+| RF-08 Informe web | H4, H8 | `web/src/App.test.tsx` (estados del informe, orden por severidad); e2e en H16 | `feat(web): agrega la interfaz mínima…` | En curso (H4 hecho; informe completo en H8) |
 | RF-09 Enlace único con vencimiento | H2, H8 | `api/src/routes/audits.test.ts` (token de 256 bits, hash en la base, 404 y 410) | `feat(api): agrega auditorías…` | Hecho |
 | RF-10 Exportar a PDF | H17 | Generación y contenido | | Pendiente |
 | RF-11 Contacto con consentimiento | H11 | Sin consentimiento no se guarda | | Pendiente |
@@ -32,7 +32,7 @@ Estados: Pendiente, En curso, Hecho o Pospuesto (fuera de la versión entregable
 |---|---|---|---|
 | RNF-01 SSRF y abuso | H1 | Suite SSRF en verde y revisión manual de `safeFetch` aprobada (18/11/2026) | Hecho |
 | RNF-02 Autenticación robusta | H12 | Pruebas de sesión, CSRF y bloqueo | Pendiente |
-| RNF-03 Sin XSS | H8 | Fixtures maliciosos y CSP | Pendiente |
+| RNF-03 Sin XSS | H4, H8 | Evidencia maliciosa escapada (`web/src/App.test.tsx`); regla ESLint contra dangerouslySetInnerHTML; CSP en H8/H15 | En curso |
 | RNF-04 Dependencias sin vulnerabilidades | H0 | `pnpm audit --prod --audit-level high` en CI | Hecho |
 | RNF-05 Privacidad | H11, H14 | Revisión del modelo de datos y prueba de purga | Pendiente |
 | RNF-06 Auditoría en 30 s (p95) | H16 | Medición con sitios de fixture | Pendiente |
