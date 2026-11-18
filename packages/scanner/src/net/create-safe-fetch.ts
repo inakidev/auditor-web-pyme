@@ -4,6 +4,7 @@ import type { LookupAddress } from 'node:dns';
 import http, { type IncomingHttpHeaders, type IncomingMessage } from 'node:http';
 import https, { type RequestOptions } from 'node:https';
 import { isIP, type LookupFunction } from 'node:net';
+import type { TLSSocket } from 'node:tls';
 import { Transform } from 'node:stream';
 import { pipeline } from 'node:stream/promises';
 import { createBrotliDecompress, createGunzip, createInflate } from 'node:zlib';
@@ -47,10 +48,25 @@ export interface SafeFetchResponse {
   readonly body: Buffer;
   /** Content-Encoding que mandó el servidor (lo usa PER-01). */
   readonly contentEncoding: string | null;
-  /** URLs que redirigieron, en orden. */
-  readonly redirects: readonly string[];
+  /** Saltos que redirigieron, en orden, con su código (SEC-02). */
+  readonly redirects: readonly RedirectHop[];
+  /** Datos TLS del último salto si fue HTTPS (SEC-03 y SEC-04). */
+  readonly tls: TlsInfo | null;
   /** IP validada a la que se conectó en el último salto. */
   readonly address: string;
+}
+
+export interface RedirectHop {
+  readonly url: string;
+  readonly status: number;
+}
+
+export interface TlsInfo {
+  /** Versión negociada, por ejemplo TLSv1.3. */
+  readonly protocol: string | null;
+  readonly validFrom: string | null;
+  readonly validTo: string | null;
+  readonly issuer: string | null;
 }
 
 export type SafeFetch = (input: string, options: SafeFetchOptions) => Promise<SafeFetchResponse>;
@@ -58,7 +74,10 @@ export type SafeFetch = (input: string, options: SafeFetchOptions) => Promise<Sa
 export interface SafeFetchDeps {
   readonly resolver: Resolver;
   /** Solo pruebas: dirige la conexión a un servidor local después de validar la IP pública. */
-  readonly testEndpoint?: (validatedIp: string) => { readonly host: string; readonly port: number };
+  readonly testEndpoint?: (
+    validatedIp: string,
+    port: number,
+  ) => { readonly host: string; readonly port: number };
   /** Solo pruebas: CA adicional de confianza. No desactiva ninguna verificación. */
   readonly ca?: string | Buffer;
   /** Solo pruebas: timeout global más corto. */
@@ -74,14 +93,14 @@ export function createSafeFetch(deps: SafeFetchDeps): SafeFetch {
 
     try {
       let url = parseTargetUrl(input);
-      const redirects: string[] = [];
+      const redirects: RedirectHop[] = [];
       for (;;) {
         const hop = await fetchHop(url, request, deps, signal);
         if (hop.kind === 'final') return { ...hop.response, redirects };
         if (redirects.length === MAX_REDIRECTS) {
           throw new SafeFetchError('TOO_MANY_REDIRECTS', 'Demasiadas redirecciones (máximo 3)');
         }
-        redirects.push(url.href);
+        redirects.push({ url: url.href, status: hop.status });
         url = resolveRedirect(hop.location, url);
       }
     } catch (error) {
@@ -117,7 +136,7 @@ function buildRequestSettings(options: SafeFetchOptions): RequestSettings {
 }
 
 type Hop =
-  | { readonly kind: 'redirect'; readonly location: string }
+  | { readonly kind: 'redirect'; readonly location: string; readonly status: number }
   | { readonly kind: 'final'; readonly response: Omit<SafeFetchResponse, 'redirects'> };
 
 /** Un salto: validar URL e IP, conectar a la IP validada y leer la respuesta con topes. */
@@ -132,7 +151,7 @@ async function fetchHop(
   const addresses =
     literal === null ? await resolveAll(url.hostname, deps, signal) : [literalAddress(literal)];
   const first = addresses[0] as ResolvedAddress;
-  const endpoint = deps.testEndpoint?.(first.address);
+  const endpoint = deps.testEndpoint?.(first.address, effectivePort(url));
 
   const options: RequestOptions = {
     method: settings.method,
@@ -158,11 +177,13 @@ async function fetchHop(
   if (deps.ca !== undefined) options.ca = deps.ca;
 
   const res = await sendRequest(url.protocol === 'https:' ? https : http, options);
+  const status = res.statusCode ?? 0;
   const location = res.headers.location;
-  if (REDIRECT_STATUSES.has(res.statusCode ?? 0) && location !== undefined) {
+  if (REDIRECT_STATUSES.has(status) && location !== undefined) {
     res.destroy();
-    return { kind: 'redirect', location };
+    return { kind: 'redirect', location, status };
   }
+  const tls = url.protocol === 'https:' ? tlsInfoOf(res) : null;
 
   const contentEncoding = res.headers['content-encoding']?.trim().toLowerCase() ?? null;
   const body = await readBody(res, contentEncoding, settings.method, signal);
@@ -170,12 +191,40 @@ async function fetchHop(
     kind: 'final',
     response: {
       url: url.href,
-      status: res.statusCode ?? 0,
+      status,
       headers: res.headers,
       body,
       contentEncoding,
       address: first.address,
+      tls,
     },
+  };
+}
+
+function isoDate(value: string | undefined): string | null {
+  return value === undefined || Number.isNaN(Date.parse(value))
+    ? null
+    : new Date(value).toISOString();
+}
+
+/** Lee versión y certificado de la conexión ya verificada (nunca se reintenta sin verificar). */
+function tlsInfoOf(res: IncomingMessage): TlsInfo | null {
+  const socket = res.socket as Partial<TLSSocket> | null;
+  if (
+    typeof socket?.getPeerCertificate !== 'function' ||
+    typeof socket.getProtocol !== 'function'
+  ) {
+    return null;
+  }
+  const cert = socket.getPeerCertificate();
+  // Sin certificado, Node devuelve un objeto vacío aunque los tipos digan lo contrario.
+  const issuerInfo = cert.issuer as Partial<typeof cert.issuer> | undefined;
+  const issuer: unknown = issuerInfo?.O ?? issuerInfo?.CN;
+  return {
+    protocol: socket.getProtocol(),
+    validFrom: isoDate(cert.valid_from),
+    validTo: isoDate(cert.valid_to),
+    issuer: typeof issuer === 'string' ? issuer : null,
   };
 }
 

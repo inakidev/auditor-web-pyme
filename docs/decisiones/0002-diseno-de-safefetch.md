@@ -23,3 +23,8 @@ La herramienta visita URLs que ingresan terceros. Sin controles, sirve para SSRF
 - Los errores tienen un código cerrado (`SafeFetchErrorCode`) que la API traduce a mensajes en español.
 - La información TLS (versión negociada, certificado) para SEC-03/SEC-04 se agrega en H3 sobre esta misma conexión.
 - El límite de 1 request por segundo por dominio y `robots.txt` (regla 3) van en el orquestador del rastreo (H2/H3), no en `safeFetch`.
+
+## Actualización (H3, 18/11/2026)
+- La respuesta incluye el código de cada salto (`redirects: { url, status }[]`, para SEC-02) y los datos TLS de la conexión ya verificada (`tls`: versión, emisor y vigencia, para SEC-03 y SEC-04).
+- Si la verificación TLS falla, `SafeFetchError.detail` lleva el código de Node (por ejemplo `CERT_HAS_EXPIRED`) y el orquestador arma `tls: { valid: false, error }`. **Nunca se reintenta con la verificación apagada** para obtener datos del certificado.
+- El orquestador espera 1 s entre requests al mismo dominio. Las redirecciones dentro de una misma llamada (máximo 3) se siguen enseguida, como hace un navegador; queda anotado como limitación conocida de la regla 3.

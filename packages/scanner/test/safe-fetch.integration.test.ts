@@ -177,6 +177,7 @@ describe('respuesta básica', () => {
     expect(res.address).toBe('8.8.8.8');
     expect(res.redirects).toEqual([]);
     expect(res.contentEncoding).toBeNull();
+    expect(res.tls).toBeNull();
   });
 
   it('envía User-Agent identificable, identity por defecto y nada de cookies ni credenciales', async () => {
@@ -236,12 +237,12 @@ describe('redirecciones', () => {
   it('resuelve una Location relativa contra la URL actual', async () => {
     const res = await local('http://publico.test/rel', OPTIONS);
     expect(res.url).toBe('http://publico.test/ok?desde=rel');
-    expect(res.redirects).toEqual(['http://publico.test/rel']);
+    expect(res.redirects).toEqual([{ url: 'http://publico.test/rel', status: 302 }]);
   });
 
   it('acepta una cadena de 3 redirecciones', async () => {
     const res = await local('http://publico.test/chain/3', OPTIONS);
-    expect(res.redirects).toHaveLength(3);
+    expect(res.redirects.map((r) => r.status)).toEqual([308, 307, 308]);
   });
 
   it('rechaza una cadena de más de 3 redirecciones', async () => {
@@ -364,11 +365,17 @@ describe('TLS (sin tocar la verificación)', () => {
     const fetcher = fetcherTo(() => caSigned, { ca: tls('ca.crt') });
     const res = await fetcher('https://fixture.test/ok', OPTIONS);
     expect(res.body.toString()).toBe('hola');
+    expect(res.tls?.protocol).toMatch(/^TLSv1.[23]$/);
+    expect(res.tls?.issuer).toBe('Auditor Web Pyme Test CA');
+    expect(Date.parse(res.tls?.validTo ?? '')).toBeGreaterThan(Date.parse('2036-01-01'));
   });
 
   it('rechaza un certificado autofirmado', async () => {
     const fetcher = fetcherTo(() => selfSigned, { ca: tls('ca.crt') });
-    expect(await rejectionCode(fetcher('https://fixture.test/ok', OPTIONS))).toBe('TLS_ERROR');
+    await expect(fetcher('https://fixture.test/ok', OPTIONS)).rejects.toMatchObject({
+      code: 'TLS_ERROR',
+      detail: 'DEPTH_ZERO_SELF_SIGNED_CERT',
+    });
   });
 
   it('rechaza un certificado cuyo nombre no coincide', async () => {
