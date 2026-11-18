@@ -72,6 +72,7 @@ describe('orden y resumen del informe', () => {
       warn: 0,
       pass: 1,
       na: 0,
+      not_evaluated: 0,
     });
   });
 });

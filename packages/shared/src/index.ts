@@ -7,7 +7,8 @@ export type AuditStatus = (typeof AUDIT_STATUSES)[number];
 export const CATEGORIES = ['security', 'seo', 'analytics', 'trust', 'performance'] as const;
 export type Category = (typeof CATEGORIES)[number];
 
-export const FINDING_STATUSES = ['pass', 'warn', 'fail', 'na'] as const;
+/** not_evaluated: el control no se pudo evaluar; se muestra y queda fuera del puntaje. */
+export const FINDING_STATUSES = ['pass', 'warn', 'fail', 'na', 'not_evaluated'] as const;
 export type FindingStatus = (typeof FINDING_STATUSES)[number];
 
 /** C crítica, A alta, M media, B baja, I informativa (catálogo del plan, sección 5). */

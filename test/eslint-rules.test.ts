@@ -37,11 +37,19 @@ const BLOCKED = [
   ["import { request } from 'undici'; void request;", 'no-restricted-imports'],
   ["void import('node:http');", 'no-restricted-syntax'],
   ["void import('https');", 'no-restricted-syntax'],
+  ["import { fromURL } from 'cheerio'; void fromURL;", 'no-restricted-imports'],
 ] as const;
 
 describe('regla anti-fetch (fuera de safeFetch)', () => {
   it.each(BLOCKED)('bloquea %s en apps/api', async (code, rule) => {
     expect(await ruleIds(code, 'apps/api/src/probe.ts')).toContain(rule);
+  });
+
+  it('permite cheerio.load (parseo sin red)', async () => {
+    const code = "import { load } from 'cheerio'; void load('<p>x</p>');";
+    expect(await ruleIds(code, 'packages/scanner/src/checks/probe.ts')).not.toContain(
+      'no-restricted-imports',
+    );
   });
 
   it('bloquea fetch también en el scanner fuera de net/', async () => {

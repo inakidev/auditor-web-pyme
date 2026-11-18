@@ -31,6 +31,8 @@ export function response(overrides: {
     contentEncoding: null,
     redirects: overrides.redirects ?? [],
     address: '8.8.8.8',
+    rawBytes: 13,
+    timings: { ttfbMs: 200, totalMs: 250 },
     tls:
       overrides.tls === undefined
         ? overrides.url.startsWith('https:')
@@ -69,7 +71,19 @@ export function context(overrides: Partial<AuditContext> = {}): AuditContext {
         : http.ok
           ? http.response
           : null;
-  return { url: 'https://ejemplo.com/', now: NOW, https, http, tls, primary };
+  return {
+    url: 'https://ejemplo.com/',
+    now: NOW,
+    https,
+    http,
+    tls,
+    primary,
+    html: overrides.html ?? null,
+    robots: overrides.robots ?? { kind: 'missing' },
+    sitemap: overrides.sitemap ?? { kind: 'missing' },
+    favicon: overrides.favicon ?? { kind: 'declared' },
+    links: overrides.links ?? { found: 0, results: [], budgetExhausted: false },
+  };
 }
 
 /** Respuesta HTTPS con cabeceras dadas, como respuesta principal. */

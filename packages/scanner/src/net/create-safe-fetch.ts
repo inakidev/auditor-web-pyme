@@ -52,6 +52,10 @@ export interface SafeFetchResponse {
   readonly redirects: readonly RedirectHop[];
   /** Datos TLS del último salto si fue HTTPS (SEC-03 y SEC-04). */
   readonly tls: TlsInfo | null;
+  /** Bytes recibidos antes de descomprimir (PER-03). */
+  readonly rawBytes: number;
+  /** Tiempos de toda la llamada con reloj monotónico, medidos desde nuestro servidor (PER-02). */
+  readonly timings: { readonly ttfbMs: number; readonly totalMs: number };
   /** IP validada a la que se conectó en el último salto. */
   readonly address: string;
 }
@@ -86,6 +90,7 @@ export interface SafeFetchDeps {
 
 export function createSafeFetch(deps: SafeFetchDeps): SafeFetch {
   return async function safeFetch(input, options) {
+    const started = performance.now();
     const request = buildRequestSettings(options);
     const timeout = AbortSignal.timeout(deps.timeoutMs ?? TIMEOUT_MS);
     const signal =
@@ -95,7 +100,7 @@ export function createSafeFetch(deps: SafeFetchDeps): SafeFetch {
       let url = parseTargetUrl(input);
       const redirects: RedirectHop[] = [];
       for (;;) {
-        const hop = await fetchHop(url, request, deps, signal);
+        const hop = await fetchHop(url, request, deps, signal, started);
         if (hop.kind === 'final') return { ...hop.response, redirects };
         if (redirects.length === MAX_REDIRECTS) {
           throw new SafeFetchError('TOO_MANY_REDIRECTS', 'Demasiadas redirecciones (máximo 3)');
@@ -145,6 +150,7 @@ async function fetchHop(
   settings: RequestSettings,
   deps: SafeFetchDeps,
   signal: AbortSignal,
+  started: number,
 ): Promise<Hop> {
   assertAllowedUrl(url);
   const literal = ipLiteralOf(url.hostname);
@@ -183,10 +189,11 @@ async function fetchHop(
     res.destroy();
     return { kind: 'redirect', location, status };
   }
+  const ttfbMs = performance.now() - started;
   const tls = url.protocol === 'https:' ? tlsInfoOf(res) : null;
 
   const contentEncoding = res.headers['content-encoding']?.trim().toLowerCase() ?? null;
-  const body = await readBody(res, contentEncoding, settings.method, signal);
+  const { body, rawBytes } = await readBody(res, contentEncoding, settings.method, signal);
   return {
     kind: 'final',
     response: {
@@ -197,6 +204,8 @@ async function fetchHop(
       contentEncoding,
       address: first.address,
       tls,
+      rawBytes,
+      timings: { ttfbMs, totalMs: performance.now() - started },
     },
   };
 }
@@ -303,11 +312,11 @@ function resolveRedirect(location: string, base: URL): URL {
 }
 
 /** Transform que corta el flujo al superar el tope de bytes. */
-function byteLimit(max: number): Transform {
-  let seen = 0;
+function byteLimit(max: number, counter: { bytes: number } = { bytes: 0 }): Transform {
   return new Transform({
     transform(chunk: Buffer, _encoding, callback) {
-      seen += chunk.length;
+      counter.bytes += chunk.length;
+      const seen = counter.bytes;
       if (seen > max) {
         callback(new SafeFetchError('BODY_TOO_LARGE', 'La respuesta supera los 2 MB'));
       } else {
@@ -341,10 +350,10 @@ async function readBody(
   encoding: string | null,
   method: 'GET' | 'HEAD',
   signal: AbortSignal,
-): Promise<Buffer> {
+): Promise<{ body: Buffer; rawBytes: number }> {
   if (method === 'HEAD' || res.statusCode === 204 || res.statusCode === 304) {
     res.destroy();
-    return Buffer.alloc(0);
+    return { body: Buffer.alloc(0), rawBytes: 0 };
   }
   let decoder: Transform | null;
   try {
@@ -353,18 +362,26 @@ async function readBody(
     res.destroy();
     throw error;
   }
+  const raw = { bytes: 0 };
   const chunks: Buffer[] = [];
   const collect = async (source: AsyncIterable<Buffer>) => {
     for await (const chunk of source) chunks.push(chunk);
   };
   if (decoder === null) {
-    await pipeline(res, byteLimit(MAX_BODY_BYTES), collect, { signal });
+    await pipeline(res, byteLimit(MAX_BODY_BYTES, raw), collect, { signal });
   } else {
-    await pipeline(res, byteLimit(MAX_BODY_BYTES), decoder, byteLimit(MAX_BODY_BYTES), collect, {
-      signal,
-    });
+    await pipeline(
+      res,
+      byteLimit(MAX_BODY_BYTES, raw),
+      decoder,
+      byteLimit(MAX_BODY_BYTES),
+      collect,
+      {
+        signal,
+      },
+    );
   }
-  return Buffer.concat(chunks);
+  return { body: Buffer.concat(chunks), rawBytes: raw.bytes };
 }
 
 function abortable<T>(promise: Promise<T>, signal: AbortSignal): Promise<T> {

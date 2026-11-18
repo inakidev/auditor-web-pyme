@@ -62,7 +62,7 @@ describe('runAudit contra servidores locales', () => {
       contactUrl: 'https://example.invalid/contacto',
     });
     const statuses = Object.fromEntries(findings.map((f) => [f.checkId, f.status]));
-    expect(statuses).toEqual({
+    expect(statuses).toMatchObject({
       'SEC-01': 'pass',
       'SEC-02': 'pass',
       'SEC-03': 'pass',

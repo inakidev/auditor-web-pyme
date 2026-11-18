@@ -178,6 +178,9 @@ describe('respuesta básica', () => {
     expect(res.redirects).toEqual([]);
     expect(res.contentEncoding).toBeNull();
     expect(res.tls).toBeNull();
+    expect(res.rawBytes).toBe(4);
+    expect(res.timings.ttfbMs).toBeGreaterThan(0);
+    expect(res.timings.totalMs).toBeGreaterThanOrEqual(res.timings.ttfbMs);
   });
 
   it('envía User-Agent identificable, identity por defecto y nada de cookies ni credenciales', async () => {
@@ -311,6 +314,8 @@ describe('compresión', () => {
     const res = await local('http://publico.test/gzip', { ...OPTIONS, acceptEncoding: 'gzip-br' });
     expect(res.body.toString()).toBe('hola comprimido');
     expect(res.contentEncoding).toBe('gzip');
+    expect(res.rawBytes).toBeLessThan(res.body.length + 30);
+    expect(res.rawBytes).not.toBe(res.body.length);
   });
 
   it('descomprime brotli', async () => {

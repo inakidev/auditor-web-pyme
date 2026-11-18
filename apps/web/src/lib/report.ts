@@ -5,6 +5,7 @@ export const STATUS_LABEL: Record<FindingStatus, string> = {
   warn: 'Advertencia',
   pass: 'Cumple',
   na: 'No aplica',
+  not_evaluated: 'No evaluado',
 };
 
 export const SEVERITY_LABEL: Record<Severity, string> = {
@@ -35,9 +36,10 @@ export const STATUS_STYLE: Record<FindingStatus, string> = {
   warn: 'bg-amber-100 text-amber-900 border-amber-300',
   pass: 'bg-green-100 text-green-900 border-green-300',
   na: 'bg-slate-100 text-slate-800 border-slate-300',
+  not_evaluated: 'bg-slate-50 text-slate-800 border-dashed border-slate-400',
 };
 
-const STATUS_ORDER: FindingStatus[] = ['fail', 'warn', 'pass', 'na'];
+const STATUS_ORDER: FindingStatus[] = ['fail', 'warn', 'not_evaluated', 'pass', 'na'];
 const SEVERITY_ORDER: Severity[] = ['critical', 'high', 'medium', 'low', 'info'];
 
 /** Primero lo que no cumple y, dentro de cada estado, lo más grave. */
@@ -50,7 +52,13 @@ export function sortFindings(findings: readonly Finding[]): Finding[] {
 }
 
 export function countByStatus(findings: readonly Finding[]): Record<FindingStatus, number> {
-  const counts: Record<FindingStatus, number> = { fail: 0, warn: 0, pass: 0, na: 0 };
+  const counts: Record<FindingStatus, number> = {
+    fail: 0,
+    warn: 0,
+    pass: 0,
+    na: 0,
+    not_evaluated: 0,
+  };
   for (const finding of findings) counts[finding.status] += 1;
   return counts;
 }

@@ -15,6 +15,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@auditor/shared": "workspace:*"
+    "@auditor/shared": "workspace:*",
+    "cheerio": "^1.2.0"
   }
 }

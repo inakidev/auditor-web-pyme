@@ -30,10 +30,14 @@ const withNodePrefix = (modules) => modules.flatMap((m) => [m, `node:${m}`]);
 const restrictedImports = (nodeModules) => [
   'error',
   {
-    paths: [...withNodePrefix(nodeModules), ...HTTP_CLIENT_PACKAGES].map((name) => ({
-      name,
-      message: NET_MESSAGE,
-    })),
+    paths: [
+      ...[...withNodePrefix(nodeModules), ...HTTP_CLIENT_PACKAGES].map((name) => ({
+        name,
+        message: NET_MESSAGE,
+      })),
+      // cheerio trae undici: su helper fromURL descargaría páginas sin pasar por safeFetch.
+      { name: 'cheerio', importNames: ['fromURL'], message: NET_MESSAGE },
+    ],
     patterns: [{ group: HTTP_CLIENT_PACKAGES.map((p) => `${p}/*`), message: NET_MESSAGE }],
   },
 ];

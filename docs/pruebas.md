@@ -55,6 +55,7 @@ Marcar cada caso cuando exista su prueba y pase.
 | 18/11/2026 | Unitarias e integración | H2: validación previa de URL, cola, API de auditorías con SQLite en memoria, recuperación al reiniciar, redacción de logs | Verde | 203/203 | 95,5 % líneas | Prueba de humo del dist de la API en local |
 | 18/11/2026 | Unitarias e integración | H3: 8 checks de seguridad con fixtures (incluye que la evidencia nunca muestre valores crudos), orquestador sin red e integración contra servidores locales HTTP y HTTPS | Verde | 261/261 | 96,8 % líneas (scanner/checks 100 %) | CI con prueba de humo del dist y de la imagen Docker |
 | 18/11/2026 | Unitarias | H4: cliente de la API, consulta periódica (corta en done/failed, reintentos espaciados), orden del informe, estados de las páginas y evidencia maliciosa escapada | Verde | 279/279 | 96,2 % líneas | `pnpm dev` verificado: proxy de Vite a la API |
+| 18/11/2026 | Unitarias e integración | H5: SEO-01 a 15 y PER-01 a 03 con fixtures, parser de robots.txt (incluye patrón patológico), planificador compartido, recolección con presupuesto, regla ESLint contra fromURL | Verde | 345/345 | 96,6 % líneas (checks 100 %) | |
 
 ## 4. Registro de defectos
 
