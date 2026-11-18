@@ -1,6 +1,6 @@
 # 0002. Diseño de safeFetch (cliente HTTP seguro)
 
-- **Estado:** aceptada (pendiente de revisión manual línea por línea)
+- **Estado:** aceptada (revisión manual aprobada el 18/11/2026)
 - **Fecha:** 2026-11-17
 - **Historia:** H1 (RF-02, RNF-01, RNF-13)
 

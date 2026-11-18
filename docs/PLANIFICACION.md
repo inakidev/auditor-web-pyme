@@ -44,7 +44,7 @@ Total de la versión entregable: **85 puntos**. Prioridad: M (debe) o S (deberí
 | ID | Historia | Requisitos | Pts. | Prior. | Estado |
 |---|---|---|---|---|---|
 | H0 | Preparación: repositorio, integración continua, Docker base | RNF-04, 10, 11, 12 | 3 | M | Hecho |
-| H1 | Cliente HTTP seguro y suite de pruebas SSRF | RF-02, RNF-01, 13 | 8 | M | En revisión |
+| H1 | Cliente HTTP seguro y suite de pruebas SSRF | RF-02, RNF-01, 13 | 8 | M | Hecho |
 | H2 | API de auditorías, cola y estado | RF-01, RF-09 | 5 | M | Pendiente |
 | H3 | Checks de seguridad núcleo (SEC-01 a 05 y 07 a 09) | RF-03 | 5 | M | Pendiente |
 | H4 | Interfaz mínima: URL, progreso y resultados | RF-01, RF-08 | 5 | M | Pendiente |
@@ -94,7 +94,7 @@ Al cerrar cada etapa se anotan la fecha y las horas dedicadas, y se compara el a
 
 | Etapa | Fecha de cierre | Horas dedicadas | Puntos planificados (acumulado) | Puntos reales (acumulado) | Desvío | Causa y acción |
 |---|---|---|---|---|---|---|
-| 1 | | | 11 | | | |
+| 1 | 18/11/2026 | 3 | 11 | 11 | 0 | Sin desvío. Bloqueo de facturación de GitHub Actions (ajeno al proyecto) resuelto por soporte en 1 día |
 | 2 | | | 26 | | | |
 | 3 | | | 37 | | | |
 | 4 | | | 50 | | | |
