@@ -53,5 +53,5 @@ jobs:
       - name: Prueba de humo de la imagen
         run: |
           docker run -d --name smoke -p 3000:3000 -e AUDITOR_CONTACT_URL=https://auditor.example.com/contacto auditor-web-pyme:ci
-          curl --retry 15 --retry-connrefused --retry-delay 1 -fsS http://127.0.0.1:3000/api/health
+          curl --retry 20 --retry-all-errors --retry-delay 1 -fsS http://127.0.0.1:3000/api/health || { docker logs smoke; exit 1; }
           docker rm -f smoke
