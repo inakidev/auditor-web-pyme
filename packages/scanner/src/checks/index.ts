@@ -1,3 +1,4 @@
+import { ana01, ana02, ana03, ana04, ana05 } from './analytics.js';
 import type { Check } from './check.js';
 import { per01, per02, per03 } from './performance.js';
 import { sec05, sec07, sec08, sec09 } from './security/headers.js';
@@ -49,8 +50,11 @@ export const SEO_CHECKS: readonly Check[] = [
 
 export const PERFORMANCE_CHECKS: readonly Check[] = [per01, per02, per03];
 
+export const ANALYTICS_CHECKS: readonly Check[] = [ana01, ana02, ana03, ana04, ana05];
+
 export const ALL_CHECKS: readonly Check[] = [
   ...SECURITY_CHECKS,
   ...SEO_CHECKS,
   ...PERFORMANCE_CHECKS,
+  ...ANALYTICS_CHECKS,
 ];

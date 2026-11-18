@@ -12,7 +12,7 @@ Estados: Pendiente, En curso, Hecho o Pospuesto (fuera de la versión entregable
 | RF-02 Validar destino | H1 | `packages/scanner/test/safe-fetch.{ssrf,integration,production}.test.ts` | `feat(scanner): agrega safeFetch…` | Hecho |
 | RF-03 Checks de seguridad | H3, H10 | `scanner/test/checks/security.test.ts` (fixtures, sin red) y `run-audit.integration.test.ts` | `feat(scanner): agrega los checks…` | En curso (H3 hecho; SEC-06 y SEC-10 a 16 en H10) |
 | RF-04 Checks de SEO | H5 | `scanner/test/checks/seo.test.ts` (fixtures es/en, incluye página en inglés con descripción en español), `crawl/*.test.ts` | `feat(scanner): agrega los checks de SEO…` | Hecho |
-| RF-05 Checks de analítica | H6 | Fixtures con GA4, GTM, Matomo y sin medición | | Pendiente |
+| RF-05 Checks de analítica | H6 | `scanner/test/checks/analytics.test.ts` (GA4, GTM, Matomo, Plausible, UA, Meta Pixel, aviso de cookies, sin medición; la evidencia no muestra IDs) | `feat(scanner): agrega los checks de analítica…` | Hecho |
 | RF-06 Checks de confianza | H10 | Fixtures con y sin contacto y privacidad | | Pendiente |
 | RF-07 Puntaje | H7 | Cálculo determinista con casos de borde | | Pendiente |
 | RF-08 Informe web | H4, H8 | `web/src/App.test.tsx` (estados del informe, orden por severidad); e2e en H16 | `feat(web): agrega la interfaz mínima…` | En curso (H4 hecho; informe completo en H8) |

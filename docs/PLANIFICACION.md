@@ -49,7 +49,7 @@ Total de la versión entregable: **85 puntos**. Prioridad: M (debe) o S (deberí
 | H3 | Checks de seguridad núcleo (SEC-01 a 05 y 07 a 09) | RF-03 | 5 | M | Hecho |
 | H4 | Interfaz mínima: URL, progreso y resultados | RF-01, RF-08 | 5 | M | Hecho |
 | H5 | Checks de SEO y rendimiento liviano | RF-04 | 5 | M | Hecho |
-| H6 | Checks de analítica | RF-05 | 3 | M | Pendiente |
+| H6 | Checks de analítica | RF-05 | 3 | M | Hecho |
 | H7 | Puntaje por categoría y global | RF-07 | 3 | M | Pendiente |
 | H8 | Informe web legible en móvil | RF-08, RNF-03, 08 | 5 | M | Pendiente |
 | H9 | Recomendaciones en español rioplatense | RF-19 | 3 | S | Pendiente |
