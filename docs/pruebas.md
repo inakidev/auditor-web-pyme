@@ -58,12 +58,13 @@ Marcar cada caso cuando exista su prueba y pase.
 | 18/11/2026 | Unitarias e integración | H5: SEO-01 a 15 y PER-01 a 03 con fixtures, parser de robots.txt (incluye patrón patológico), planificador compartido, recolección con presupuesto, regla ESLint contra fromURL | Verde | 345/345 | 96,6 % líneas (checks 100 %) | |
 | 18/11/2026 | Unitarias | H6: ANA-01 a 05 con fixtures (solo HTML inicial, sin ejecutar JavaScript; la evidencia nombra la herramienta sin IDs) | Verde | 358/358 | | |
 | 18/11/2026 | Unitarias e integración | H7: fórmula del puntaje, exclusión de "no aplica" y "no evaluado", reponderación del global, bandas, determinismo; puntajes guardados y devueltos por la API; resumen en la web | Verde | 374/374 | 96,9 % líneas (scoring 100 %) | |
+| 18/11/2026 | Aceptación (sitio propio) | Auditoría real de clinica-chubut.vercel.app con SEO, rendimiento, analítica y puntaje | Verde tras corregir D-01 | 23 hallazgos | | 8 s de duración; 77/100 (B) sobre 4 de 5 áreas |
 
 ## 4. Registro de defectos
 
 | ID | Fecha | Descripción | Severidad | Requisito afectado | Estado | Commit de la corrección |
 |---|---|---|---|---|---|---|
-| | | | | | | |
+| D-01 | 18/11/2026 | Con el reloj monotónico (fracciones de ms), `AbortSignal.timeout` recibía un deadline no entero y la auditoría real fallaba con INTERNAL_ERROR. Los fixtures no lo detectaban porque el reloj falso no avanzaba entre lecturas. Se encontró al auditar un sitio propio; se agregó una prueba de regresión con un reloj que avanza en fracciones. | Alta | RF-04 | Corregido | `fix(scanner): redondea el deadline…` |
 
 ## 5. Prueba de usabilidad (cuando haya un prototipo funcional)
 

@@ -33,7 +33,7 @@ export class HostScheduler {
       const last = this.#lastStart.get(key);
       if (last !== undefined) {
         const wait = this.#options.intervalMs - (this.#options.now() - last);
-        if (wait > 0) await this.#options.sleep(wait, signal);
+        if (wait > 0) await this.#options.sleep(Math.ceil(wait), signal);
       }
       signal?.throwIfAborted();
       this.#lastStart.set(key, this.#options.now());

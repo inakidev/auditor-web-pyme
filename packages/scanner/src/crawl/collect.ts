@@ -211,7 +211,9 @@ async function checkLinks(
       continue;
     }
     // El deadline de cada request se acota a lo que queda del presupuesto.
-    results.push(classify(await request(url.href, 'HEAD', deps.timeoutSignal(remaining)), url));
+    results.push(
+      classify(await request(url.href, 'HEAD', deps.timeoutSignal(Math.floor(remaining))), url),
+    );
   }
   return { found: all.length, results, budgetExhausted };
 }

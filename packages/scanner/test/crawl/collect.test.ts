@@ -183,4 +183,27 @@ describe('collectExtras', () => {
       ['not_verified', 'auth'],
     ]);
   });
+
+  it('con un reloj monotónico fraccionario, el deadline de cada request es un entero (defecto D-01)', async () => {
+    const { deps } = setup({ 'https://ejemplo.com/robots.txt': { status: 404 } }, { stepMs: 0.37 });
+    const received: number[] = [];
+    const extras = await collectExtras(
+      PRIMARY,
+      load('<link rel="icon" href="/i.png"><a href="/a">A</a>'),
+      {
+        ...deps,
+        // Como performance.now(): cada lectura avanza una fracción de milisegundo.
+        now: (() => {
+          let t = 0;
+          return () => (t += 0.37);
+        })(),
+        timeoutSignal: (ms: number) => {
+          received.push(ms);
+          return AbortSignal.timeout(ms);
+        },
+      },
+    );
+    expect(extras.links.results[0]?.outcome).toBe('ok');
+    expect(received.every((ms) => Number.isInteger(ms))).toBe(true);
+  });
 });
