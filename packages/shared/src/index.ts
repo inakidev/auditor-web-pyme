@@ -30,6 +30,19 @@ export interface Finding {
   readonly effort: Effort;
 }
 
+export const BANDS = ['A', 'B', 'C', 'D', 'E'] as const;
+export type Band = (typeof BANDS)[number];
+
+/** Puntajes de 0 a 100. null = sin datos (ningún check aplicable con peso). */
+export interface Scores {
+  readonly total: number | null;
+  readonly band: Band | null;
+  readonly categories: Readonly<Record<Category, number | null>>;
+  /** Sobre cuántas categorías se calculó el global. */
+  readonly categoriesUsed: number;
+  readonly categoriesTotal: number;
+}
+
 export const MAX_URL_LENGTH = 2048;
 
 /** Cuerpo de POST /api/audits. strict(): rechaza campos desconocidos. */
@@ -57,4 +70,6 @@ export interface AuditView {
   readonly expiresAt: string;
   readonly error: { readonly code: string; readonly message: string } | null;
   readonly findings: readonly Finding[];
+  /** Solo cuando la auditoría terminó. */
+  readonly scores: Scores | null;
 }

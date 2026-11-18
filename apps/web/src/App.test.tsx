@@ -71,6 +71,7 @@ describe('estados del informe', () => {
     expiresAt: '2026-12-18T12:00:00.000Z',
     error: null,
     findings: [],
+    scores: null,
   };
   const renderWith = (view: AuditView) => {
     const client = new QueryClient();
@@ -107,7 +108,21 @@ describe('estados del informe', () => {
       recommendation: 'Agregá HSTS.',
       effort: 'low',
     };
-    const html = renderWith({ ...base, status: 'done', findings: [finding] });
+    const html = renderWith({
+      ...base,
+      status: 'done',
+      findings: [finding],
+      scores: {
+        total: 78,
+        band: 'B',
+        categories: { security: 60, seo: 100, analytics: null, trust: null, performance: null },
+        categoriesUsed: 2,
+        categoriesTotal: 5,
+      },
+    });
+    expect(html).toContain('78 de 100 (B)');
+    expect(html).toMatch(/Calculado sobre (<!-- -->)?2(<!-- -->)? de (<!-- -->)?5/);
+    expect(html).toMatch(/Confianza y contacto: (<!-- -->)?<strong>sin datos/);
     expect(html).toContain('Informe de tu sitio');
     expect(html).toMatch(/No cumple: (<!-- -->)?1/);
     expect(html).toContain('Falta la cabecera HSTS');

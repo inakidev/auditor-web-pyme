@@ -1,4 +1,5 @@
-import type { Finding } from '@auditor/shared';
+import { scoreFindings } from '@auditor/scanner';
+import { CATEGORIES, type Category, type Finding, type Scores } from '@auditor/shared';
 import { asc, eq } from 'drizzle-orm';
 import type { Db } from '../db/client.js';
 import { audits, findings } from '../db/schema.js';
@@ -63,7 +64,21 @@ export function createAuditRepository(db: Db) {
             .values(results.map((f) => ({ ...f, auditId: id })))
             .run();
         }
-        tx.update(audits).set({ status: 'done', finishedAt: now }).where(eq(audits.id, id)).run();
+        const scores = scoreFindings(results);
+        tx.update(audits)
+          .set({
+            status: 'done',
+            finishedAt: now,
+            scoreTotal: scores.total,
+            scoreBand: scores.band,
+            scoreSecurity: scores.categories.security,
+            scoreSeo: scores.categories.seo,
+            scoreAnalytics: scores.categories.analytics,
+            scoreTrust: scores.categories.trust,
+            scorePerf: scores.categories.performance,
+          })
+          .where(eq(audits.id, id))
+          .run();
       });
     },
 
@@ -92,3 +107,21 @@ export function createAuditRepository(db: Db) {
 }
 
 export type AuditRepository = ReturnType<typeof createAuditRepository>;
+
+/** Puntajes guardados de una auditoría terminada. */
+export function scoresOf(row: AuditRow): Scores {
+  const categories: Record<Category, number | null> = {
+    security: row.scoreSecurity,
+    seo: row.scoreSeo,
+    analytics: row.scoreAnalytics,
+    trust: row.scoreTrust,
+    performance: row.scorePerf,
+  };
+  return {
+    total: row.scoreTotal,
+    band: row.scoreBand,
+    categories,
+    categoriesUsed: CATEGORIES.filter((c) => categories[c] !== null).length,
+    categoriesTotal: CATEGORIES.length,
+  };
+}

@@ -4,6 +4,7 @@ import https from 'node:https';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { createAuditRunner } from '../src/audit/run-audit.js';
 import { createSafeFetch } from '../src/net/create-safe-fetch.js';
+import { scoreFindings } from '../src/scoring/score.js';
 
 // Rebanada vertical del scanner contra servidores locales (HTTP en "80" y HTTPS en "443").
 // La política de IP no se relaja: fixture.test resuelve a una IP pública y la fábrica interna
@@ -72,5 +73,10 @@ describe('runAudit contra servidores locales', () => {
       'SEC-08': 'pass',
       'SEC-09': 'pass',
     });
+    // Puerta de salida de la etapa 3: puntaje por categoría y global sobre los fixtures.
+    const scores = scoreFindings(findings);
+    expect(scores.categories.security).toBe(100);
+    expect(scores.total).not.toBeNull();
+    expect(scores.categoriesUsed).toBeGreaterThanOrEqual(3);
   });
 });

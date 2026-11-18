@@ -57,6 +57,7 @@ Marcar cada caso cuando exista su prueba y pase.
 | 18/11/2026 | Unitarias | H4: cliente de la API, consulta periódica (corta en done/failed, reintentos espaciados), orden del informe, estados de las páginas y evidencia maliciosa escapada | Verde | 279/279 | 96,2 % líneas | `pnpm dev` verificado: proxy de Vite a la API |
 | 18/11/2026 | Unitarias e integración | H5: SEO-01 a 15 y PER-01 a 03 con fixtures, parser de robots.txt (incluye patrón patológico), planificador compartido, recolección con presupuesto, regla ESLint contra fromURL | Verde | 345/345 | 96,6 % líneas (checks 100 %) | |
 | 18/11/2026 | Unitarias | H6: ANA-01 a 05 con fixtures (solo HTML inicial, sin ejecutar JavaScript; la evidencia nombra la herramienta sin IDs) | Verde | 358/358 | | |
+| 18/11/2026 | Unitarias e integración | H7: fórmula del puntaje, exclusión de "no aplica" y "no evaluado", reponderación del global, bandas, determinismo; puntajes guardados y devueltos por la API; resumen en la web | Verde | 374/374 | 96,9 % líneas (scoring 100 %) | |
 
 ## 4. Registro de defectos
 

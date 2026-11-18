@@ -8,7 +8,7 @@ import {
 import type { FastifyInstance } from 'fastify';
 import { isErrorCode, messageFor, sendError } from '../errors.js';
 import type { JobQueue } from '../jobs/queue.js';
-import type { AuditRepository } from '../services/audits.js';
+import { scoresOf, type AuditRepository } from '../services/audits.js';
 import { generateToken, hashToken } from '../tokens.js';
 
 export const MAX_BODY_BYTES = 2 * 1024;
@@ -64,6 +64,7 @@ export function registerAuditRoutes(app: FastifyInstance, deps: AuditRoutesDeps)
           ? null
           : { code: audit.errorCode, message: messageFor(audit.errorCode) },
       findings: audit.status === 'done' ? repo.findingsOf(audit.id) : [],
+      scores: audit.status === 'done' ? scoresOf(audit) : null,
     };
     return reply.send(view);
   });

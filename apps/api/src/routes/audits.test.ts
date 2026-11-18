@@ -55,6 +55,13 @@ describe('POST /api/audits', () => {
       url: 'https://ejemplo.com/',
       error: null,
       findings: [FINDING],
+      scores: {
+        total: 0,
+        band: 'E',
+        categories: { security: 0, seo: null, analytics: null, trust: null, performance: null },
+        categoriesUsed: 1,
+        categoriesTotal: 5,
+      },
     });
   });
 
@@ -127,6 +134,8 @@ describe('GET /api/audits/:token', () => {
       (await app.inject({ method: 'GET', url: `/api/audits/${t}` })).json<{ status: string }>()
         .status;
     expect(await status(first)).toBe('running');
+    const running = await app.inject({ method: 'GET', url: `/api/audits/${first}` });
+    expect(running.json<{ scores: unknown }>().scores).toBeNull();
     expect(await status(second)).toBe('queued');
     release();
     await new Promise((r) => setTimeout(r, 10));

@@ -2,6 +2,7 @@
 export { runAudit } from './audit/run-audit.js';
 export { normalizeTargetUrl } from './net/target-url.js';
 export { safeFetch } from './net/safe-fetch.js';
+export { scoreFindings } from './scoring/score.js';
 export type { AuditResult, RunAuditOptions } from './audit/run-audit.js';
 export type {
   AcceptEncoding,

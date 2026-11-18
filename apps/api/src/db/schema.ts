@@ -1,8 +1,15 @@
-import { AUDIT_STATUSES, CATEGORIES, EFFORTS, FINDING_STATUSES, SEVERITIES } from '@auditor/shared';
+import {
+  AUDIT_STATUSES,
+  BANDS,
+  CATEGORIES,
+  EFFORTS,
+  FINDING_STATUSES,
+  SEVERITIES,
+} from '@auditor/shared';
 import { index, integer, sqliteTable, text } from 'drizzle-orm/sqlite-core';
 
-// Modelo de datos del plan (sección 3). Los puntajes (H7), el lead (H11) y la IP hasheada (H13)
-// se agregan con migraciones en sus historias.
+// Modelo de datos del plan (sección 3). El lead (H11) y la IP hasheada (H13) se agregan con
+// migraciones en sus historias.
 
 export const audits = sqliteTable(
   'audits',
@@ -18,6 +25,14 @@ export const audits = sqliteTable(
     startedAt: integer('started_at', { mode: 'timestamp_ms' }),
     finishedAt: integer('finished_at', { mode: 'timestamp_ms' }),
     expiresAt: integer('expires_at', { mode: 'timestamp_ms' }).notNull(),
+    // Puntajes de 0 a 100 (H7); null = sin datos.
+    scoreTotal: integer('score_total'),
+    scoreBand: text('score_band', { enum: BANDS }),
+    scoreSecurity: integer('score_security'),
+    scoreSeo: integer('score_seo'),
+    scoreAnalytics: integer('score_analytics'),
+    scoreTrust: integer('score_trust'),
+    scorePerf: integer('score_perf'),
   },
   (t) => [
     index('audits_domain_idx').on(t.domain),

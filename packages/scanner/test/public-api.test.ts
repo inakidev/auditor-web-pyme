@@ -8,9 +8,14 @@ import * as factory from '../src/net/create-safe-fetch.js';
 const read = (path: string) => readFileSync(new URL(path, import.meta.url), 'utf8');
 
 describe('API pública del scanner', () => {
-  it('exporta en runtime solo safeFetch, runAudit y normalizeTargetUrl', async () => {
+  it('exporta en runtime solo safeFetch, runAudit, normalizeTargetUrl y scoreFindings', async () => {
     const exported = await import('../src/index.js');
-    expect(Object.keys(exported).sort()).toEqual(['normalizeTargetUrl', 'runAudit', 'safeFetch']);
+    expect(Object.keys(exported).sort()).toEqual([
+      'normalizeTargetUrl',
+      'runAudit',
+      'safeFetch',
+      'scoreFindings',
+    ]);
   });
 
   it('ningún valor exportado es la fábrica ni la expone', async () => {

@@ -12,6 +12,7 @@ const view = (status: AuditView['status']): AuditView => ({
   expiresAt: '',
   error: null,
   findings: [],
+  scores: null,
 });
 
 describe('consulta periódica', () => {

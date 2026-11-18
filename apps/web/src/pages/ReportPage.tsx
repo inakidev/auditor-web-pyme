@@ -2,6 +2,7 @@ import type { AuditView } from '@auditor/shared';
 import { useQuery } from '@tanstack/react-query';
 import { Link, useParams } from 'react-router';
 import { FindingsList } from '../components/FindingsList.js';
+import { ScoreSummary } from '../components/ScoreSummary.js';
 import { getAudit } from '../lib/api-client.js';
 import { pollInterval, retryDelay, shouldRetry } from '../lib/polling.js';
 import { countByStatus } from '../lib/report.js';
@@ -78,6 +79,7 @@ export function ReportPage() {
         </li>
         <li className="rounded bg-green-100 px-3 py-1 text-green-900">Cumple: {counts.pass}</li>
       </ul>
+      {audit.scores !== null && <ScoreSummary scores={audit.scores} />}
       <FindingsList findings={audit.findings} />
       {NEW_AUDIT_LINK}
     </div>
