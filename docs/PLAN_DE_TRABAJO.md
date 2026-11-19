@@ -22,7 +22,7 @@ Objetivo personal: terminar el proyecto completo antes de fin de noviembre. El l
 | 3 | H5, H6, H7 | 11 | 37 | Auditoría con puntaje por categoría y global sobre los fixtures |
 | 4 | H8, H9, H10 | 13 | 50 | Informe completo y legible en móvil, con recomendaciones en español |
 | 5 | H11, H12 | 11 | 61 | Contacto con consentimiento y panel de consultores con sesión (supera el 60 % del Avance 3) |
-| 6 | H13, H14, H15 | 13 | 74 | Aplicación desplegada con HTTPS, límites de uso y purga automática |
+| 6 | H13, H14, H15 | 13 | 74 | Aplicación desplegada con HTTPS, límites de uso y purga automática. Antes de exponer el sistema, el aviso de privacidad real tiene que estar publicado; hasta entonces no se cargan correos reales |
 | 7 | H16, H17, H18 y cierre | 11 | 85 | Pruebas e2e y de usabilidad hechas, documentación al día y entrega lista |
 
 **Avance 3:** se entrega al cerrar la etapa 5 (61 puntos, 72 %). La meta de la consigna es el 60 %, o sea 51 puntos.

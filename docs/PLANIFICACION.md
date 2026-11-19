@@ -83,7 +83,7 @@ El ritmo lo marca el tiempo dedicado: cada etapa termina cuando cumple su puerta
 | 3 | H5, H6, H7 | 11 | 37 | Auditoría con puntaje por categoría y global |
 | 4 | H8, H9, H10 | 13 | 50 | Informe completo y legible en móvil |
 | 5 | H11, H12 | 11 | 61 | Contacto con consentimiento y panel con sesión (supera el 60 %) |
-| 6 | H13, H14, H15 | 13 | 74 | Aplicación desplegada con HTTPS, límites de uso y purga |
+| 6 | H13, H14, H15 | 13 | 74 | Aplicación desplegada con HTTPS, límites de uso y purga; aviso de privacidad publicado antes de exponer el sistema (hasta entonces, sin correos reales) |
 | 7 | H16, H17, H18 y cierre | 11 | 85 | Pruebas e2e y de usabilidad, documentación al día |
 
 Hitos de la materia: **Avance 3** (60 %, al cerrar la etapa 5) y **entrega final** (proyecto completo, al cerrar la etapa 7).
