@@ -97,7 +97,7 @@ Al cerrar cada etapa se anotan la fecha y las horas dedicadas, y se compara el a
 | 1 | 18/11/2026 | 3 | 11 | 11 | 0 | Sin desvío. Bloqueo de facturación de GitHub Actions (ajeno al proyecto) resuelto por soporte en 1 día |
 | 2 | 18/11/2026 | 1,5 | 26 | 26 | 0 | Sin desvío. Demo en el navegador contra clinica-chubut.vercel.app (sitio propio): 8 de 8 checks de seguridad cumplen |
 | 3 | 18/11/2026 | 1 | 37 | 37 | 0 | Sin desvío. Se encontró y corrigió el defecto D-01 al auditar un sitio propio; se sumó el GET de respaldo con tope reducido |
-| 4 | | | 50 | | | |
+| 4 | 18/11/2026 | 0,75 | 50 | 50 | 0 | Sin desvío. Auditoría real con los 44 checks (5 de 5 áreas); 6 guías corregidas con `pnpm check:guides`; GET de respaldo ampliado a 404/410 |
 | 5 | | | 61 | | | |
 | 6 | | | 74 | | | |
 | 7 | | | 85 | | | |

@@ -239,9 +239,11 @@ async function checkLinks(
       await request(url.href, 'HEAD', deps.timeoutSignal(Math.floor(remaining))),
       url,
     );
-    // Solo si el servidor no acepta HEAD (405/501): GET de respaldo con un tope de pocos KB.
+    // GET de respaldo con un tope de pocos KB: si el servidor no acepta HEAD (405/501) o si
+    // responde 404/410, porque algunos servidores contestan mal al HEAD y el enlace sí funciona.
     const left = deadline - deps.now();
-    if (result.reason === 'method' && left >= MIN_REMAINING_MS) {
+    const confirm = result.reason === 'method' || result.status === 404 || result.status === 410;
+    if (confirm && left >= MIN_REMAINING_MS) {
       result = classify(
         await request(url.href, 'GET', deps.timeoutSignal(Math.floor(left)), FALLBACK_BODY_BYTES),
         url,

@@ -45,7 +45,29 @@ function setup(routes: Record<string, Route>, opts: { stepMs?: number } = {}) {
 const ROBOTS = (body: string): Route => ({ body, headers: { 'content-type': 'text/plain' } });
 
 describe('collectExtras', () => {
-  it('el GET de respaldo (solo tras 405/501) baja apenas unos KB', async () => {
+  it('un 404 al HEAD se confirma con GET: si el GET responde bien, el enlace no está roto', async () => {
+    const { deps, calls } = setup({
+      'https://ejemplo.com/robots.txt': { status: 404 },
+      'HEAD https://ejemplo.com/a': { status: 404 },
+      'GET https://ejemplo.com/a': { status: 200 },
+      'HEAD https://ejemplo.com/b': { status: 410 },
+      'GET https://ejemplo.com/b': { status: 410 },
+      'HEAD https://ejemplo.com/c': { status: 500 },
+    });
+    const html = load(
+      '<link rel="icon" href="/i.png"><a href="/a">A</a><a href="/b">B</a><a href="/c">C</a>',
+    );
+    const results = (await collectExtras(PRIMARY, html, deps)).links.results;
+    expect(results.map((r) => [r.outcome, r.status])).toEqual([
+      ['ok', 200],
+      ['broken', 410],
+      ['broken', 500],
+    ]);
+    // Un 500 no se reintenta: solo 404/410 (y 405/501) llevan GET de respaldo.
+    expect(calls.filter((c) => c === 'GET https://ejemplo.com/c')).toEqual([]);
+  });
+
+  it('el GET de respaldo (tras 405/501 o 404/410) baja apenas unos KB', async () => {
     const { deps, seenOptions } = setup({
       'https://ejemplo.com/robots.txt': { status: 404 },
       'HEAD https://ejemplo.com/a': { status: 405 },
@@ -94,6 +116,7 @@ describe('collectExtras', () => {
       'GET https://ejemplo.com/.well-known/security.txt',
       'HEAD https://ejemplo.com/a',
       'HEAD https://ejemplo.com/roto',
+      'GET https://ejemplo.com/roto',
       'HEAD https://ejemplo.com/b?token=secreto',
       'HEAD https://ejemplo.com/metodo',
       'GET https://ejemplo.com/metodo',
