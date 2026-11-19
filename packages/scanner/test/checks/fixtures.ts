@@ -32,6 +32,7 @@ export function response(overrides: {
     redirects: overrides.redirects ?? [],
     address: '8.8.8.8',
     rawBytes: 13,
+    truncated: false,
     timings: { ttfbMs: 200, totalMs: 250 },
     tls:
       overrides.tls === undefined
@@ -82,6 +83,7 @@ export function context(overrides: Partial<AuditContext> = {}): AuditContext {
     robots: overrides.robots ?? { kind: 'missing' },
     sitemap: overrides.sitemap ?? { kind: 'missing' },
     favicon: overrides.favicon ?? { kind: 'declared' },
+    securityTxt: overrides.securityTxt ?? { kind: 'missing' },
     links: overrides.links ?? { found: 0, results: [], budgetExhausted: false },
   };
 }

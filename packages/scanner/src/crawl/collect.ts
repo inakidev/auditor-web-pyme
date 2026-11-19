@@ -6,6 +6,7 @@ import type {
   LinkResult,
   LinkSummary,
   RobotsState,
+  SecurityTxtState,
   SitemapState,
 } from '../audit/context.js';
 import type { SafeFetch, SafeFetchOptions, SafeFetchResponse } from '../net/create-safe-fetch.js';
@@ -34,6 +35,7 @@ export interface Extras {
   readonly robots: RobotsState;
   readonly sitemap: SitemapState;
   readonly favicon: FaviconState;
+  readonly securityTxt: SecurityTxtState;
   readonly links: LinkSummary;
 }
 
@@ -78,8 +80,9 @@ export async function collectExtras(
   const robots = await fetchRobots(base, request);
   const sitemap = await resolveSitemap(base, robots, request);
   const favicon = await resolveFavicon(base, html, request);
+  const securityTxt = await fetchSecurityTxt(base, request);
   const links = await checkLinks(base, html, robots, request, deps);
-  return { robots, sitemap, favicon, links };
+  return { robots, sitemap, favicon, securityTxt, links };
 }
 
 type Requester = (
@@ -98,6 +101,18 @@ async function fetchRobots(base: URL, request: Requester): Promise<RobotsState> 
   if ((status >= 400 && status < 500) || contentType.includes('html')) return { kind: 'missing' };
   if (status >= 500) return { kind: 'error', code: `HTTP_${String(status)}` };
   return { kind: 'found', robots: parseRobots(body.toString('utf8')) };
+}
+
+/** security.txt (RFC 9116): estándar público, se pide con un GET de pocos KB. */
+async function fetchSecurityTxt(base: URL, request: Requester): Promise<SecurityTxtState> {
+  const url = new URL('/.well-known/security.txt', base).href;
+  const attempt = await request(url, 'GET', undefined, FALLBACK_BODY_BYTES);
+  if (!attempt.ok) return { kind: 'error', code: attempt.code };
+  const { status, headers, body } = attempt.response;
+  const contentType = headers['content-type'] ?? '';
+  if ((status >= 400 && status < 500) || contentType.includes('html')) return { kind: 'missing' };
+  if (status >= 500) return { kind: 'error', code: `HTTP_${String(status)}` };
+  return { kind: 'found', hasContact: /^s*contacts*:/im.test(body.toString('utf8')) };
 }
 
 async function resolveSitemap(
@@ -168,13 +183,7 @@ function classify(attempt: Attempt, url: URL): LinkResult {
       url: shown,
       outcome: 'not_verified',
       status: null,
-      // Un GET de respaldo que supera los pocos KB permitidos no confirma el estado del enlace.
-      reason:
-        attempt.code === 'ABORTED'
-          ? 'budget'
-          : attempt.code === 'BODY_TOO_LARGE'
-            ? 'method'
-            : 'error',
+      reason: attempt.code === 'ABORTED' ? 'budget' : 'error',
     };
   }
   const { status } = attempt.response;

@@ -59,6 +59,7 @@ Marcar cada caso cuando exista su prueba y pase.
 | 18/11/2026 | Unitarias | H6: ANA-01 a 05 con fixtures (solo HTML inicial, sin ejecutar JavaScript; la evidencia nombra la herramienta sin IDs) | Verde | 358/358 | | |
 | 18/11/2026 | Unitarias e integración | H7: fórmula del puntaje, exclusión de "no aplica" y "no evaluado", reponderación del global, bandas, determinismo; puntajes guardados y devueltos por la API; resumen en la web | Verde | 374/374 | 96,9 % líneas (scoring 100 %) | |
 | 18/11/2026 | Aceptación (sitio propio) | Auditoría real de clinica-chubut.vercel.app con SEO, rendimiento, analítica y puntaje | Verde tras corregir D-01 | 23 hallazgos | | 8 s de duración; 77/100 (B) sobre 4 de 5 áreas |
+| 18/11/2026 | Unitarias e integración | H10: SEC-06 y SEC-10 a 16, TRU-01 a 05, security.txt con GET de 8 KB, respuestas recortadas con maxBodyBytes (incluye bomba de compresión) | Verde | 423/423 | 97 % líneas | |
 
 ## 4. Registro de defectos
 

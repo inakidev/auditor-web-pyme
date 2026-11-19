@@ -398,12 +398,28 @@ describe('TLS (sin tocar la verificación)', () => {
 });
 
 describe('maxBodyBytes (solo baja el tope)', () => {
-  it('con un tope chico corta una respuesta más grande', async () => {
-    expect(
-      await rejectionCode(local('http://publico.test/medium', { ...OPTIONS, maxBodyBytes: 4096 })),
-    ).toBe('BODY_TOO_LARGE');
-    const res = await local('http://publico.test/ok', { ...OPTIONS, maxBodyBytes: 4096 });
-    expect(res.body.toString()).toBe('hola');
+  it('con un tope chico devuelve la respuesta recortada y marcada (truncated)', async () => {
+    const res = await local('http://publico.test/medium', { ...OPTIONS, maxBodyBytes: 4096 });
+    expect(res.status).toBe(200);
+    expect(res.truncated).toBe(true);
+    expect(res.body.length).toBe(4096);
+    const small = await local('http://publico.test/ok', { ...OPTIONS, maxBodyBytes: 4096 });
+    expect(small.body.toString()).toBe('hola');
+    expect(small.truncated).toBe(false);
+  });
+
+  it('recorta sobre los bytes descomprimidos (bomba de compresión)', async () => {
+    const res = await local('http://publico.test/gzip-bomb', {
+      ...OPTIONS,
+      acceptEncoding: 'gzip-br',
+      maxBodyBytes: 4096,
+    });
+    expect(res.truncated).toBe(true);
+    expect(res.body.length).toBe(4096);
+  });
+
+  it('sin maxBodyBytes, superar 2 MB sigue siendo un error', async () => {
+    expect(await rejectionCode(local('http://publico.test/big', OPTIONS))).toBe('BODY_TOO_LARGE');
   });
 
   it.each([Number.NaN, -1, 0, 1.5, Number.POSITIVE_INFINITY, MAX_BODY_BYTES * 2])(

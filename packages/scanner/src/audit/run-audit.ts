@@ -40,6 +40,7 @@ const NO_EXTRAS: Extras = {
   robots: { kind: 'error', code: 'NO_RESPONSE' },
   sitemap: { kind: 'error', code: 'NO_RESPONSE' },
   favicon: { kind: 'error', code: 'NO_RESPONSE' },
+  securityTxt: { kind: 'error', code: 'NO_RESPONSE' },
   links: { found: 0, results: [], budgetExhausted: false },
 };
 

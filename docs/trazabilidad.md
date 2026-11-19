@@ -10,10 +10,10 @@ Estados: Pendiente, En curso, Hecho o Pospuesto (fuera de la versión entregable
 |---|---|---|---|---|
 | RF-01 Solicitar auditoría | H2, H4 | `scanner/test/target-url.test.ts`; `api/src/routes/audits.test.ts`; `web/src/App.test.tsx` | `feat(api): agrega auditorías…`, `feat(web): agrega la interfaz mínima…` | Hecho |
 | RF-02 Validar destino | H1 | `packages/scanner/test/safe-fetch.{ssrf,integration,production}.test.ts` | `feat(scanner): agrega safeFetch…` | Hecho |
-| RF-03 Checks de seguridad | H3, H10 | `scanner/test/checks/security.test.ts` (fixtures, sin red) y `run-audit.integration.test.ts` | `feat(scanner): agrega los checks…` | En curso (H3 hecho; SEC-06 y SEC-10 a 16 en H10) |
+| RF-03 Checks de seguridad | H3, H10 | `scanner/test/checks/security.test.ts` (fixtures, sin red) y `run-audit.integration.test.ts`, `security-extra.test.ts` | `feat(scanner): agrega los checks…` (H3 y H10) | Hecho |
 | RF-04 Checks de SEO | H5 | `scanner/test/checks/seo.test.ts` (fixtures es/en, incluye página en inglés con descripción en español), `crawl/*.test.ts` | `feat(scanner): agrega los checks de SEO…` | Hecho |
 | RF-05 Checks de analítica | H6 | `scanner/test/checks/analytics.test.ts` (GA4, GTM, Matomo, Plausible, UA, Meta Pixel, aviso de cookies, sin medición; la evidencia no muestra IDs) | `feat(scanner): agrega los checks de analítica…` | Hecho |
-| RF-06 Checks de confianza | H10 | Fixtures con y sin contacto y privacidad | | Pendiente |
+| RF-06 Checks de confianza | H10 | `scanner/test/checks/trust.test.ts` (contacto, formulario, privacidad, redes, datos del negocio; la evidencia nunca copia datos) | `feat(scanner): agrega los checks de confianza…` | Hecho |
 | RF-07 Puntaje | H7 | `scanner/test/scoring.test.ts` (fórmula, exclusiones, repondera, bandas, determinismo); `api/src/routes/audits.test.ts`; integración con fixtures | `feat: agrega el puntaje…` | Hecho |
 | RF-08 Informe web | H4, H8 | `web/src/App.test.tsx` (estados del informe, orden por severidad); e2e en H16 | `feat(web): agrega la interfaz mínima…` | En curso (H4 hecho; informe completo en H8) |
 | RF-09 Enlace único con vencimiento | H2, H8 | `api/src/routes/audits.test.ts` (token de 256 bits, hash en la base, 404 y 410) | `feat(api): agrega auditorías…` | Hecho |

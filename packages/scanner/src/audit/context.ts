@@ -31,6 +31,11 @@ export type FaviconState =
   | { readonly kind: 'missing' }
   | { readonly kind: 'error'; readonly code: string };
 
+export type SecurityTxtState =
+  | { readonly kind: 'found'; readonly hasContact: boolean }
+  | { readonly kind: 'missing' }
+  | { readonly kind: 'error'; readonly code: string };
+
 export interface LinkResult {
   /** URL sin query ni fragmento (para mostrar). */
   readonly url: string;
@@ -64,5 +69,6 @@ export interface AuditContext {
   readonly robots: RobotsState;
   readonly sitemap: SitemapState;
   readonly favicon: FaviconState;
+  readonly securityTxt: SecurityTxtState;
   readonly links: LinkSummary;
 }

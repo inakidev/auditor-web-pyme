@@ -26,10 +26,11 @@ async function run(id: string, ctx: AuditContext): Promise<Finding> {
 }
 
 const SECRET = 'valor-secreto-123';
+const H3 = ['SEC-01', 'SEC-02', 'SEC-03', 'SEC-04', 'SEC-05', 'SEC-07', 'SEC-08', 'SEC-09'];
 
 describe('catálogo', () => {
-  it('incluye exactamente los checks de H3', () => {
-    expect(SECURITY_CHECKS.map((c) => c.id)).toEqual([
+  it('incluye los checks de H3 (los de H10 se prueban en security-extra.test.ts)', () => {
+    expect(SECURITY_CHECKS.map((c) => c.id).filter((id) => H3.includes(id))).toEqual([
       'SEC-01',
       'SEC-02',
       'SEC-03',
@@ -48,8 +49,8 @@ describe('catálogo', () => {
       'x-frame-options': 'DENY',
       'referrer-policy': 'strict-origin-when-cross-origin',
     });
-    for (const check of SECURITY_CHECKS) {
-      expect((await run(check.id, ctx)).status, check.id).toBe('pass');
+    for (const id of H3) {
+      expect((await run(id, ctx)).status, id).toBe('pass');
     }
   });
 });

@@ -54,8 +54,12 @@ describe('collectExtras', () => {
     const html = load('<link rel="icon" href="/i.png"><a href="/a">A</a>');
     const extras = await collectExtras(PRIMARY, html, deps);
     expect(extras.links.results[0]).toMatchObject({ outcome: 'broken', status: 404 });
+    // Solo dos pedidos con tope reducido: security.txt y el GET de respaldo del enlace.
     const capped = seenOptions.filter((o) => o.maxBodyBytes !== undefined);
-    expect(capped.map((o) => [o.method, o.maxBodyBytes])).toEqual([['GET', FALLBACK_BODY_BYTES]]);
+    expect(capped.map((o) => [o.method, o.maxBodyBytes])).toEqual([
+      ['GET', FALLBACK_BODY_BYTES],
+      ['GET', FALLBACK_BODY_BYTES],
+    ]);
   });
 
   it('robots, sitemap declarado, favicon declarado y enlaces filtrados', async () => {
@@ -87,6 +91,7 @@ describe('collectExtras', () => {
     expect(extras.favicon).toEqual({ kind: 'declared' });
     expect(calls).toEqual([
       'GET https://ejemplo.com/robots.txt',
+      'GET https://ejemplo.com/.well-known/security.txt',
       'HEAD https://ejemplo.com/a',
       'HEAD https://ejemplo.com/roto',
       'HEAD https://ejemplo.com/b?token=secreto',
@@ -124,7 +129,32 @@ describe('collectExtras', () => {
       'GET https://ejemplo.com/robots.txt',
       'HEAD https://ejemplo.com/sitemap.xml',
       'HEAD https://ejemplo.com/favicon.ico',
+      'GET https://ejemplo.com/.well-known/security.txt',
     ]);
+  });
+
+  it('security.txt: se pide con GET de 8 KB y se busca Contact', async () => {
+    const { deps, seenOptions } = setup({
+      'https://ejemplo.com/robots.txt': { status: 404 },
+      'https://ejemplo.com/.well-known/security.txt': ROBOTS(
+        'Contact: mailto:seguridad@ejemplo.com\nExpires: 2027-01-01T00:00:00Z',
+      ),
+    });
+    const extras = await collectExtras(PRIMARY, load('<link rel="icon" href="/i.png">'), deps);
+    expect(extras.securityTxt).toEqual({ kind: 'found', hasContact: true });
+    const sec = seenOptions.find((o) => o.maxBodyBytes !== undefined);
+    expect(sec?.maxBodyBytes).toBe(FALLBACK_BODY_BYTES);
+  });
+
+  it('security.txt ausente o devuelto como HTML cuenta como inexistente', async () => {
+    const { deps } = setup({
+      'https://ejemplo.com/robots.txt': { status: 404 },
+      'https://ejemplo.com/.well-known/security.txt': {
+        body: '<html>',
+        headers: { 'content-type': 'text/html' },
+      },
+    });
+    expect((await collectExtras(PRIMARY, null, deps)).securityTxt).toEqual({ kind: 'missing' });
   });
 
   it('un robots.txt que devuelve HTML se toma como inexistente', async () => {

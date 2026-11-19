@@ -28,3 +28,6 @@ La herramienta visita URLs que ingresan terceros. Sin controles, sirve para SSRF
 - La respuesta incluye el código de cada salto (`redirects: { url, status }[]`, para SEC-02) y los datos TLS de la conexión ya verificada (`tls`: versión, emisor y vigencia, para SEC-03 y SEC-04).
 - Si la verificación TLS falla, `SafeFetchError.detail` lleva el código de Node (por ejemplo `CERT_HAS_EXPIRED`) y el orquestador arma `tls: { valid: false, error }`. **Nunca se reintenta con la verificación apagada** para obtener datos del certificado.
 - El orquestador espera 1 s entre requests al mismo dominio. Las redirecciones dentro de una misma llamada (máximo 3) se siguen enseguida, como hace un navegador; queda anotado como limitación conocida de la regla 3.
+
+## Actualización (H10, 18/11/2026)
+- `maxBodyBytes` solo puede bajar el tope (`Math.min(pedido, 2 MB)`, entero positivo; cualquier otro valor usa el tope normal) y nunca viene de datos del usuario. Si el cuerpo lo supera, la respuesta se devuelve **recortada con `truncated: true`** (así se conoce el código de estado); superar los 2 MB sin `maxBodyBytes` sigue siendo un error. Lo usan el GET de respaldo de los enlaces (tras 405/501) y `security.txt`, ambos con 8 KB.

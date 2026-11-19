@@ -5,7 +5,7 @@ import http, { type IncomingHttpHeaders, type IncomingMessage } from 'node:http'
 import https, { type RequestOptions } from 'node:https';
 import { isIP, type LookupFunction } from 'node:net';
 import type { TLSSocket } from 'node:tls';
-import { Transform } from 'node:stream';
+import { Transform, Writable } from 'node:stream';
 import { pipeline } from 'node:stream/promises';
 import { createBrotliDecompress, createGunzip, createInflate } from 'node:zlib';
 import { SafeFetchError } from './errors.js';
@@ -59,6 +59,8 @@ export interface SafeFetchResponse {
   readonly tls: TlsInfo | null;
   /** Bytes recibidos antes de descomprimir (PER-03). */
   readonly rawBytes: number;
+  /** true si se pidió maxBodyBytes y el cuerpo se recortó en ese tope. */
+  readonly truncated: boolean;
   /** Tiempos de toda la llamada con reloj monotónico, medidos desde nuestro servidor (PER-02). */
   readonly timings: { readonly ttfbMs: number; readonly totalMs: number };
   /** IP validada a la que se conectó en el último salto. */
@@ -207,7 +209,7 @@ async function fetchHop(
   const tls = url.protocol === 'https:' ? tlsInfoOf(res) : null;
 
   const contentEncoding = res.headers['content-encoding']?.trim().toLowerCase() ?? null;
-  const { body, rawBytes } = await readBody(res, contentEncoding, settings, signal);
+  const { body, rawBytes, truncated } = await readBody(res, contentEncoding, settings, signal);
   return {
     kind: 'final',
     response: {
@@ -219,6 +221,7 @@ async function fetchHop(
       address: first.address,
       tls,
       rawBytes,
+      truncated,
       timings: { ttfbMs, totalMs: performance.now() - started },
     },
   };
@@ -359,16 +362,23 @@ function decoderFor(encoding: string | null): Transform | null {
 }
 
 /** Lee el cuerpo con tope sobre bytes reales y, si hay compresión, sobre bytes descomprimidos. */
+/** Señal interna: se alcanzó maxBodyBytes y se recortó el cuerpo (no es un error). */
+class TruncatedSignal extends Error {}
+
+/**
+ * Lee el cuerpo con tope de 2 MB sobre bytes reales y, si hay compresión, sobre bytes
+ * descomprimidos (superarlo es un error). Con maxBodyBytes menor, el cuerpo se recorta ahí.
+ */
 async function readBody(
   res: IncomingMessage,
   encoding: string | null,
   settings: Pick<RequestSettings, 'method' | 'maxBodyBytes'>,
   signal: AbortSignal,
-): Promise<{ body: Buffer; rawBytes: number }> {
+): Promise<{ body: Buffer; rawBytes: number; truncated: boolean }> {
   const { method, maxBodyBytes } = settings;
   if (method === 'HEAD' || res.statusCode === 204 || res.statusCode === 304) {
     res.destroy();
-    return { body: Buffer.alloc(0), rawBytes: 0 };
+    return { body: Buffer.alloc(0), rawBytes: 0, truncated: false };
   }
   let decoder: Transform | null;
   try {
@@ -379,17 +389,42 @@ async function readBody(
   }
   const raw = { bytes: 0 };
   const chunks: Buffer[] = [];
-  const collect = async (source: AsyncIterable<Buffer>) => {
-    for await (const chunk of source) chunks.push(chunk);
-  };
-  if (decoder === null) {
-    await pipeline(res, byteLimit(maxBodyBytes, raw), collect, { signal });
-  } else {
-    await pipeline(res, byteLimit(maxBodyBytes, raw), decoder, byteLimit(maxBodyBytes), collect, {
-      signal,
-    });
+  let kept = 0;
+  let truncated = false;
+  // Destino ordenado: recorta exactamente en maxBodyBytes cuando se pidió un tope menor.
+  const sink = new Writable({
+    write(chunk: Buffer, _encoding, callback) {
+      if (kept + chunk.length > maxBodyBytes) {
+        chunks.push(chunk.subarray(0, maxBodyBytes - kept));
+        kept = maxBodyBytes;
+        truncated = true;
+        callback(new TruncatedSignal());
+        return;
+      }
+      chunks.push(chunk);
+      kept += chunk.length;
+      callback();
+    },
+  });
+  try {
+    if (decoder === null) {
+      await pipeline(res, byteLimit(MAX_BODY_BYTES, raw), sink, { signal });
+    } else {
+      await pipeline(
+        res,
+        byteLimit(MAX_BODY_BYTES, raw),
+        decoder,
+        byteLimit(MAX_BODY_BYTES),
+        sink,
+        {
+          signal,
+        },
+      );
+    }
+  } catch (error) {
+    if (!(error instanceof TruncatedSignal)) throw error;
   }
-  return { body: Buffer.concat(chunks), rawBytes: raw.bytes };
+  return { body: Buffer.concat(chunks), rawBytes: raw.bytes, truncated };
 }
 
 function abortable<T>(promise: Promise<T>, signal: AbortSignal): Promise<T> {
