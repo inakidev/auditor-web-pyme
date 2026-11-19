@@ -35,7 +35,7 @@ Estados: Pendiente, En curso, Hecho o Pospuesto (fuera de la versión entregable
 | RNF-03 Sin XSS | H4, H8 | Evidencia maliciosa escapada (`web/src/App.test.tsx`); regla ESLint contra dangerouslySetInnerHTML; CSP en H8/H15 | En curso |
 | RNF-04 Dependencias sin vulnerabilidades | H0 | `pnpm audit --prod --audit-level high` en CI | Hecho |
 | RNF-05 Privacidad | H11, H14 | Revisión del modelo de datos y prueba de purga | Pendiente |
-| RNF-06 Auditoría en 30 s (p95) | H16 | Medición con sitios de fixture | Pendiente |
+| RNF-06 Auditoría en 30 s (p95) | H5, H16 | Portada y verificación de hasta 20 enlaces con presupuesto de 25 s (H5); medición con fixtures y sitios propios (H16). Primera medición: 8 s en un sitio propio | En curso |
 | RNF-07 Respuesta de interfaz en 2 s | H16 | Medición en e2e | Pendiente |
 | RNF-08 Usabilidad y accesibilidad | H8, H16 | Prueba con 2 o 3 personas; contraste AA | Pendiente |
 | RNF-09 Fallos del sitio objetivo | H2, H3 | Errores del scanner → `failed` con mensaje claro (H2); si HTTPS falla, sigue con HTTP y corre los checks posibles (H3); un check que falla queda como "no aplica" | Hecho |

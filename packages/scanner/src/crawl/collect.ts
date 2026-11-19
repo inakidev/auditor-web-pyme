@@ -17,6 +17,8 @@ export const MAX_LINKS = 20;
 /** Presupuesto solo para la fase de enlaces. */
 export const LINK_BUDGET_MS = 25_000;
 const MIN_REMAINING_MS = 1_000;
+/** Tope del GET de respaldo: alcanza para el estado y unas pocas líneas, nunca 2 MB. */
+export const FALLBACK_BODY_BYTES = 8 * 1024;
 const ROBOTS_AGENT = 'AuditorWebPyme';
 
 export interface CollectDeps {
@@ -55,11 +57,13 @@ export async function collectExtras(
     url: string,
     method: 'GET' | 'HEAD',
     signal?: AbortSignal,
+    maxBodyBytes?: number,
   ): Promise<Attempt> => {
     const options: SafeFetchOptions = {
       contactUrl: deps.contactUrl,
       method,
       ...(signal === undefined ? {} : { signal }),
+      ...(maxBodyBytes === undefined ? {} : { maxBodyBytes }),
     };
     try {
       const response = await deps.scheduler.run(base.host, () => deps.fetch(url, options), signal);
@@ -78,7 +82,12 @@ export async function collectExtras(
   return { robots, sitemap, favicon, links };
 }
 
-type Requester = (url: string, method: 'GET' | 'HEAD', signal?: AbortSignal) => Promise<Attempt>;
+type Requester = (
+  url: string,
+  method: 'GET' | 'HEAD',
+  signal?: AbortSignal,
+  maxBodyBytes?: number,
+) => Promise<Attempt>;
 
 async function fetchRobots(base: URL, request: Requester): Promise<RobotsState> {
   const attempt = await request(new URL('/robots.txt', base).href, 'GET');
@@ -159,7 +168,13 @@ function classify(attempt: Attempt, url: URL): LinkResult {
       url: shown,
       outcome: 'not_verified',
       status: null,
-      reason: attempt.code === 'ABORTED' ? 'budget' : 'error',
+      // Un GET de respaldo que supera los pocos KB permitidos no confirma el estado del enlace.
+      reason:
+        attempt.code === 'ABORTED'
+          ? 'budget'
+          : attempt.code === 'BODY_TOO_LARGE'
+            ? 'method'
+            : 'error',
     };
   }
   const { status } = attempt.response;
@@ -211,9 +226,19 @@ async function checkLinks(
       continue;
     }
     // El deadline de cada request se acota a lo que queda del presupuesto.
-    results.push(
-      classify(await request(url.href, 'HEAD', deps.timeoutSignal(Math.floor(remaining))), url),
+    let result = classify(
+      await request(url.href, 'HEAD', deps.timeoutSignal(Math.floor(remaining))),
+      url,
     );
+    // Solo si el servidor no acepta HEAD (405/501): GET de respaldo con un tope de pocos KB.
+    const left = deadline - deps.now();
+    if (result.reason === 'method' && left >= MIN_REMAINING_MS) {
+      result = classify(
+        await request(url.href, 'GET', deps.timeoutSignal(Math.floor(left)), FALLBACK_BODY_BYTES),
+        url,
+      );
+    }
+    results.push(result);
   }
   return { found: all.length, results, budgetExhausted };
 }

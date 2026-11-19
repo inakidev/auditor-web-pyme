@@ -6,6 +6,7 @@ import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
 import {
   MAX_BODY_BYTES,
   createSafeFetch,
+  effectiveMaxBody,
   type Resolver,
   type SafeFetchDeps,
 } from '../src/net/create-safe-fetch.js';
@@ -110,6 +111,8 @@ function routes(req: http.IncomingMessage, res: http.ServerResponse): void {
     res.on('close', () => {
       clearInterval(timer);
     });
+  } else if (path === '/medium') {
+    res.end(Buffer.alloc(10_240, 'm'));
   } else if (path === '/hang') {
     // Nunca responde.
   } else {
@@ -391,5 +394,29 @@ describe('TLS (sin tocar la verificación)', () => {
   it('sin la CA de prueba, el certificado de prueba no es confiable', async () => {
     const fetcher = fetcherTo(() => caSigned);
     expect(await rejectionCode(fetcher('https://fixture.test/ok', OPTIONS))).toBe('TLS_ERROR');
+  });
+});
+
+describe('maxBodyBytes (solo baja el tope)', () => {
+  it('con un tope chico corta una respuesta más grande', async () => {
+    expect(
+      await rejectionCode(local('http://publico.test/medium', { ...OPTIONS, maxBodyBytes: 4096 })),
+    ).toBe('BODY_TOO_LARGE');
+    const res = await local('http://publico.test/ok', { ...OPTIONS, maxBodyBytes: 4096 });
+    expect(res.body.toString()).toBe('hola');
+  });
+
+  it.each([Number.NaN, -1, 0, 1.5, Number.POSITIVE_INFINITY, MAX_BODY_BYTES * 2])(
+    'un valor inválido o mayor a 2 MB (%s) usa el tope normal',
+    async (maxBodyBytes) => {
+      expect(effectiveMaxBody(maxBodyBytes)).toBe(MAX_BODY_BYTES);
+      const res = await local('http://publico.test/medium', { ...OPTIONS, maxBodyBytes });
+      expect(res.body.length).toBe(10_240);
+    },
+  );
+
+  it('nunca supera 2 MB aunque se pida más', async () => {
+    expect(effectiveMaxBody(MAX_BODY_BYTES + 1)).toBe(MAX_BODY_BYTES);
+    expect(effectiveMaxBody(1024)).toBe(1024);
   });
 });

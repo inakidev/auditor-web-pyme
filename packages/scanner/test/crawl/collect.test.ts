@@ -1,22 +1,32 @@
 import { load } from 'cheerio';
 import { describe, expect, it, vi } from 'vitest';
-import { collectExtras, LINK_BUDGET_MS, MAX_LINKS } from '../../src/crawl/collect.js';
+import {
+  collectExtras,
+  FALLBACK_BODY_BYTES,
+  LINK_BUDGET_MS,
+  MAX_LINKS,
+} from '../../src/crawl/collect.js';
 import { HostScheduler } from '../../src/crawl/host-scheduler.js';
 import type { SafeFetch, SafeFetchOptions } from '../../src/net/create-safe-fetch.js';
 import { SafeFetchError } from '../../src/net/errors.js';
 import { response } from '../checks/fixtures.js';
+import { createFakeClock } from '../support/fake-clock.js';
 
 const PRIMARY = response({ url: 'https://ejemplo.com/' });
 
 type Route = { status?: number; body?: string; headers?: Record<string, string> } | Error;
 
+/** Rutas por URL o por "MÉTODO URL". El reloj avanza en fracciones (D-01). */
 function setup(routes: Record<string, Route>, opts: { stepMs?: number } = {}) {
-  let clock = 0;
+  const clock = createFakeClock();
   const calls: string[] = [];
+  const seenOptions: SafeFetchOptions[] = [];
   const fetch = vi.fn<SafeFetch>((url: string, options: SafeFetchOptions) => {
-    calls.push(`${options.method ?? 'GET'} ${url}`);
-    clock += opts.stepMs ?? 0;
-    const route = routes[url];
+    const method = options.method ?? 'GET';
+    calls.push(`${method} ${url}`);
+    seenOptions.push(options);
+    clock.advance(opts.stepMs ?? 0);
+    const route = routes[`${method} ${url}`] ?? routes[url];
     if (route instanceof Error) return Promise.reject(route);
     if (route === undefined) return Promise.resolve(response({ url, status: 200 }));
     const res = response({ url, status: route.status ?? 200, headers: route.headers ?? {} });
@@ -25,20 +35,29 @@ function setup(routes: Record<string, Route>, opts: { stepMs?: number } = {}) {
   const deps = {
     fetch,
     contactUrl: 'https://example.invalid/contacto',
-    now: () => clock,
-    scheduler: new HostScheduler({
-      intervalMs: 0,
-      now: () => clock,
-      sleep: () => Promise.resolve(),
-    }),
-    timeoutSignal: () => new AbortController().signal,
+    now: clock.now,
+    scheduler: new HostScheduler({ intervalMs: 0, now: clock.now, sleep: clock.sleep }),
+    timeoutSignal: (ms: number) => AbortSignal.timeout(ms),
   };
-  return { deps, calls };
+  return { deps, calls, seenOptions };
 }
 
 const ROBOTS = (body: string): Route => ({ body, headers: { 'content-type': 'text/plain' } });
 
 describe('collectExtras', () => {
+  it('el GET de respaldo (solo tras 405/501) baja apenas unos KB', async () => {
+    const { deps, seenOptions } = setup({
+      'https://ejemplo.com/robots.txt': { status: 404 },
+      'HEAD https://ejemplo.com/a': { status: 405 },
+      'GET https://ejemplo.com/a': { status: 404 },
+    });
+    const html = load('<link rel="icon" href="/i.png"><a href="/a">A</a>');
+    const extras = await collectExtras(PRIMARY, html, deps);
+    expect(extras.links.results[0]).toMatchObject({ outcome: 'broken', status: 404 });
+    const capped = seenOptions.filter((o) => o.maxBodyBytes !== undefined);
+    expect(capped.map((o) => [o.method, o.maxBodyBytes])).toEqual([['GET', FALLBACK_BODY_BYTES]]);
+  });
+
   it('robots, sitemap declarado, favicon declarado y enlaces filtrados', async () => {
     const html = load(`
       <link rel="icon" href="/favicon.png">
@@ -46,14 +65,16 @@ describe('collectExtras', () => {
       <a href="/privado/x">Privado</a><a href="mailto:hola@ejemplo.com">Mail</a>
       <a href="tel:+5492800000000">Tel</a><a href="#arriba">Arriba</a>
       <a href="https://otro.com/">Externo</a><a href="javascript:void(0)">JS</a>
-      <a href="/roto">Roto</a><a href="/b?token=secreto">B</a><a href="/metodo">M</a>
+      <a href="/roto">Roto</a><a href="/b?token=secreto">B</a><a href="/metodo">M</a><a href="/nunca">N</a>
       <a href="/">Inicio</a>`);
     const { deps, calls } = setup({
       'https://ejemplo.com/robots.txt': ROBOTS(
         'User-agent: *\nDisallow: /privado\nSitemap: https://ejemplo.com/sitemap.xml',
       ),
       'https://ejemplo.com/roto': { status: 404 },
-      'https://ejemplo.com/metodo': { status: 405 },
+      'HEAD https://ejemplo.com/metodo': { status: 405 },
+      'GET https://ejemplo.com/metodo': { status: 200 },
+      'https://ejemplo.com/nunca': { status: 501 },
     });
     const extras = await collectExtras(PRIMARY, html, deps);
 
@@ -70,8 +91,11 @@ describe('collectExtras', () => {
       'HEAD https://ejemplo.com/roto',
       'HEAD https://ejemplo.com/b?token=secreto',
       'HEAD https://ejemplo.com/metodo',
+      'GET https://ejemplo.com/metodo',
+      'HEAD https://ejemplo.com/nunca',
+      'GET https://ejemplo.com/nunca',
     ]);
-    expect(extras.links.found).toBe(5);
+    expect(extras.links.found).toBe(6);
     expect(extras.links.results).toEqual([
       { url: 'https://ejemplo.com/a', outcome: 'ok', status: 200, reason: null },
       {
@@ -82,7 +106,8 @@ describe('collectExtras', () => {
       },
       { url: 'https://ejemplo.com/roto', outcome: 'broken', status: 404, reason: null },
       { url: 'https://ejemplo.com/b', outcome: 'ok', status: 200, reason: null },
-      { url: 'https://ejemplo.com/metodo', outcome: 'not_verified', status: 405, reason: 'method' },
+      { url: 'https://ejemplo.com/metodo', outcome: 'ok', status: 200, reason: null },
+      { url: 'https://ejemplo.com/nunca', outcome: 'not_verified', status: 501, reason: 'method' },
     ]);
   });
 

@@ -1,17 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { HostScheduler } from '../../src/crawl/host-scheduler.js';
 
-// Reloj falso: sleep avanza el tiempo sin esperar de verdad.
-function fakeClock() {
-  let now = 0;
-  return {
-    now: () => now,
-    sleep: (ms: number) => {
-      now += ms;
-      return Promise.resolve();
-    },
-  };
-}
+import { createFakeClock as fakeClock } from '../support/fake-clock.js';
 
 describe('HostScheduler (1 request por segundo por host, compartido)', () => {
   it('espacia los inicios en el mismo host aunque vengan de trabajos distintos', async () => {
@@ -28,7 +18,10 @@ describe('HostScheduler (1 request por segundo por host, compartido)', () => {
       scheduler.run('ejemplo.com', task),
       scheduler.run('ejemplo.com', task),
     ]);
-    expect(starts).toEqual([0, 1000, 2000]);
+    // Con reloj fraccionario: cada inicio queda al menos 1 s después del anterior.
+    expect(starts[1]! - starts[0]!).toBeGreaterThanOrEqual(1000);
+    expect(starts[2]! - starts[1]!).toBeGreaterThanOrEqual(1000);
+    expect(starts[2]! - starts[0]!).toBeLessThan(2010);
   });
 
   it('no frena hosts distintos', async () => {
@@ -40,7 +33,7 @@ describe('HostScheduler (1 request por segundo por host, compartido)', () => {
       return Promise.resolve();
     };
     await Promise.all([scheduler.run('a.com', task), scheduler.run('b.com', task)]);
-    expect(starts).toEqual([0, 0]);
+    expect(starts[1]! - starts[0]!).toBeLessThan(5);
   });
 
   it('una tarea que falla no bloquea a las siguientes', async () => {

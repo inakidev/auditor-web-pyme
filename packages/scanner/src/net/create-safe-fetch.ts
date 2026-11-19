@@ -37,6 +37,11 @@ export interface SafeFetchOptions {
   readonly method?: 'GET' | 'HEAD';
   readonly acceptEncoding?: AcceptEncoding;
   readonly signal?: AbortSignal;
+  /**
+   * Solo puede bajar el tope de descarga (por ejemplo, el GET de respaldo de los enlaces).
+   * Nunca viene de datos del usuario. Valores inválidos o mayores a 2 MB usan el tope normal.
+   */
+  readonly maxBodyBytes?: number;
 }
 
 export interface SafeFetchResponse {
@@ -118,6 +123,14 @@ interface RequestSettings {
   readonly method: 'GET' | 'HEAD';
   readonly userAgent: string;
   readonly acceptEncoding: string;
+  readonly maxBodyBytes: number;
+}
+
+/** Math.min(pedido, 2 MB) con un entero positivo; cualquier otro valor usa el tope normal. */
+export function effectiveMaxBody(requested: number | undefined): number {
+  return requested !== undefined && Number.isInteger(requested) && requested > 0
+    ? Math.min(requested, MAX_BODY_BYTES)
+    : MAX_BODY_BYTES;
 }
 
 function buildRequestSettings(options: SafeFetchOptions): RequestSettings {
@@ -137,6 +150,7 @@ function buildRequestSettings(options: SafeFetchOptions): RequestSettings {
     method,
     userAgent: `AuditorWebPyme/1.0 (+${contactUrl})`,
     acceptEncoding: ACCEPT_ENCODINGS[encodingKey as AcceptEncoding],
+    maxBodyBytes: effectiveMaxBody(options.maxBodyBytes),
   };
 }
 
@@ -193,7 +207,7 @@ async function fetchHop(
   const tls = url.protocol === 'https:' ? tlsInfoOf(res) : null;
 
   const contentEncoding = res.headers['content-encoding']?.trim().toLowerCase() ?? null;
-  const { body, rawBytes } = await readBody(res, contentEncoding, settings.method, signal);
+  const { body, rawBytes } = await readBody(res, contentEncoding, settings, signal);
   return {
     kind: 'final',
     response: {
@@ -318,7 +332,7 @@ function byteLimit(max: number, counter: { bytes: number } = { bytes: 0 }): Tran
       counter.bytes += chunk.length;
       const seen = counter.bytes;
       if (seen > max) {
-        callback(new SafeFetchError('BODY_TOO_LARGE', 'La respuesta supera los 2 MB'));
+        callback(new SafeFetchError('BODY_TOO_LARGE', 'La respuesta supera el tope de descarga'));
       } else {
         callback(null, chunk);
       }
@@ -348,9 +362,10 @@ function decoderFor(encoding: string | null): Transform | null {
 async function readBody(
   res: IncomingMessage,
   encoding: string | null,
-  method: 'GET' | 'HEAD',
+  settings: Pick<RequestSettings, 'method' | 'maxBodyBytes'>,
   signal: AbortSignal,
 ): Promise<{ body: Buffer; rawBytes: number }> {
+  const { method, maxBodyBytes } = settings;
   if (method === 'HEAD' || res.statusCode === 204 || res.statusCode === 304) {
     res.destroy();
     return { body: Buffer.alloc(0), rawBytes: 0 };
@@ -368,18 +383,11 @@ async function readBody(
     for await (const chunk of source) chunks.push(chunk);
   };
   if (decoder === null) {
-    await pipeline(res, byteLimit(MAX_BODY_BYTES, raw), collect, { signal });
+    await pipeline(res, byteLimit(maxBodyBytes, raw), collect, { signal });
   } else {
-    await pipeline(
-      res,
-      byteLimit(MAX_BODY_BYTES, raw),
-      decoder,
-      byteLimit(MAX_BODY_BYTES),
-      collect,
-      {
-        signal,
-      },
-    );
+    await pipeline(res, byteLimit(maxBodyBytes, raw), decoder, byteLimit(maxBodyBytes), collect, {
+      signal,
+    });
   }
   return { body: Buffer.concat(chunks), rawBytes: raw.bytes };
 }

@@ -1,6 +1,6 @@
 # Requisitos: Auditor Web Pyme
 
-Versión 0.2 (borrador a validar con las técnicas de la sección 4). Todo lo marcado como **[Hipótesis]** o **[Supuesto]** debe confirmarse con usuarios reales antes de darlo por cerrado.
+Versión 0.3 (borrador a validar con las técnicas de la sección 4). Todo lo marcado como **[Hipótesis]** o **[Supuesto]** debe confirmarse con usuarios reales antes de darlo por cerrado.
 
 ## 1. Propósito y contexto
 
@@ -76,7 +76,7 @@ Prioridad según MoSCoW: **M** (debe), **S** (debería), **C** (podría).
 | RNF-03 | Seguridad | Protección frente a XSS: nunca se renderiza contenido del sitio auditado. | Pruebas con fixtures maliciosos; CSP estricta; sin `dangerouslySetInnerHTML`. |
 | RNF-04 | Seguridad | Dependencias sin vulnerabilidades altas o críticas. | `pnpm audit --prod` en CI. |
 | RNF-05 | Privacidad | Datos mínimos: correo solo con consentimiento; IP hasheada; retención de 30 días para informes. | Revisión del modelo de datos; prueba de purga. Alineado con la Ley 25.326 **[validar con asesoramiento]**. |
-| RNF-06 | Rendimiento | Auditoría completa en ≤ 30 s (p95) con hasta 5 páginas. | Prueba de carga liviana con sitios de fixture. |
+| RNF-06 | Rendimiento | Auditoría completa en ≤ 30 s (p95): portada por HTTPS y HTTP, robots.txt, sitemap, favicon y verificación de hasta 20 enlaces internos (con presupuesto de 25 s para los enlaces). | Medición con sitios de fixture y con sitios propios. |
 | RNF-07 | Rendimiento | Respuesta de la interfaz ≤ 2 s en vistas que no esperan una auditoría. | Medición en pruebas e2e. |
 | RNF-08 | Usabilidad | Interfaz en español rioplatense, móvil primero, contraste AA, lenguaje no técnico. | Prueba de usabilidad con 3 personas; revisión de contraste. |
 | RNF-09 | Confiabilidad | Fallos del sitio objetivo (timeout, WAF, caídas) se informan sin romper la auditoría ni penalizar el puntaje. | Pruebas con servidor de fixture que falla a propósito. |
@@ -141,3 +141,4 @@ Se priorizó con MoSCoW. La primera versión entregable incluye todos los **M** 
 
 - 0.1: borrador inicial.
 - 0.2: las entrevistas a pymes pasan a ser opcionales; se agregan técnicas de relevamiento que no dependen de terceros.
+- 0.3 (18/11/2026): RNF-06 refleja el alcance real del rastreo (portada y verificación de enlaces internos, sin analizar páginas internas). Ver ADR 0004.
