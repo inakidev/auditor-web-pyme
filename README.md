@@ -43,27 +43,80 @@ docs/             Requisitos, plan, planificación, trazabilidad, pruebas y mant
 
 ## Cómo ejecutarlo
 
-Requisitos: Node.js 24 LTS y pnpm 12. Copiá `.env.example` como `.env` antes de empezar.
+Requisitos: Node.js 24 LTS, pnpm 12 y Git. Docker es opcional.
+
+### 1. Instalar y probar
 
 ```
-pnpm install
+git clone https://github.com/inakidev/auditor-web-pyme.git
+cd auditor-web-pyme
+pnpm install        # compila argon2 y better-sqlite3 (habilitados en pnpm-workspace.yaml)
+pnpm test           # todas las pruebas; no usan red ni necesitan .env
+```
+
+En Windows, si PowerShell bloquea `pnpm` por la política de ejecución, usá `pnpm.cmd` o corré una vez `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned`.
+
+### 2. Configurar el entorno
+
+```
+cp .env.example .env              # PowerShell: Copy-Item .env.example .env
+```
+
+| Variable | Desarrollo | Producción |
+|---|---|---|
+| `AUDITOR_CONTACT_URL` | Opcional | Obligatoria: URL de contacto que va en el User-Agent |
+| `PUBLIC_ORIGIN` | Si queda el valor de ejemplo, usa `http://localhost:5173` | Obligatoria: origen exacto de la web, con https y sin barra final |
+| `IP_HASH_SALT` | Opcional | Obligatoria: 32 caracteres aleatorios o más |
+| `ADMIN_EMAIL` y `ADMIN_PASSWORD_HASH` | Solo si querés entrar al panel | Obligatorias |
+| `DATABASE_PATH`, `HOST`, `PORT`, `LOG_LEVEL` | Tienen valores por defecto | Tienen valores por defecto |
+
+En producción la API no arranca si falta una variable obligatoria o si quedó el valor de ejemplo de `.env.example`.
+
+Para generar la sal:
+
+```
+node -e "console.log(require('crypto').randomBytes(32).toString('base64url'))"
+```
+
+### 3. Crear el usuario del panel
+
+```
+pnpm --filter @auditor/api user:hash
+```
+
+El comando pide la contraseña dos veces, sin mostrarla en pantalla. Nunca la recibe por argumento, así no queda en el historial de la terminal. Imprime un hash argon2id. Pegalo en `.env` **entre comillas simples**, porque el hash tiene signos `$` y sin comillas Docker Compose los interpreta como variables:
+
+```
+ADMIN_EMAIL=consultor@tu-agencia.com
+ADMIN_PASSWORD_HASH='$argon2id$v=19$m=19456,t=2,p=1$...$...'
+```
+
+Si en cambio lo escribís en la sección `environment:` de `docker-compose.yml`, cada `$` va como `$$`.
+
+El usuario se crea al arrancar la API, solo si no existe ninguno. Una contraseña existente nunca se pisa. Esta versión no permite cambiar la contraseña; ver el [ADR 0007](docs/decisiones/0007-sesiones-csrf-y-bloqueo.md).
+
+### 4. Levantar la aplicación
+
+```
 pnpm dev            # API en http://127.0.0.1:3000 e interfaz en http://localhost:5173
-pnpm test           # todas las pruebas (pnpm test:scanner: solo el scanner)
+```
+
+- Informe: http://localhost:5173
+- Panel: http://localhost:5173/panel
+
+Para el panel usá Chrome, Edge o Firefox. Safari no acepta cookies `Secure` en `http://localhost`.
+
+### Otros comandos
+
+```
+pnpm test:scanner   # solo las pruebas del scanner
+pnpm test:coverage  # pruebas con cobertura (umbrales: 80 % scanner, 70 % resto)
 pnpm lint           # ESLint y Prettier
 pnpm typecheck      # TypeScript estricto
 pnpm build          # compila todos los paquetes
 pnpm check:guides   # verifica a mano que las guías de las recomendaciones respondan
-docker compose up   # API en contenedor (requiere Docker)
+docker compose up   # API en contenedor con la imagen de producción (lee .env)
 ```
-
-### Panel de consultores
-
-El panel está en `/panel` y exige iniciar sesión. El primer usuario se crea al arrancar, solo si no existe ninguno, con dos variables del `.env`:
-
-1. `ADMIN_EMAIL`: el correo del consultor.
-2. `ADMIN_PASSWORD_HASH`: generalo con `pnpm --filter @auditor/api user:hash`. El comando pide la contraseña sin mostrarla, nunca por argumento.
-
-El hash tiene signos `$`: en `.env` va **entre comillas simples** (`ADMIN_PASSWORD_HASH='$argon2id$...'`). Si lo escribís en `environment:` de `docker-compose.yml`, cada `$` va como `$$`. También hacen falta `IP_HASH_SALT` (32 caracteres o más) y `PUBLIC_ORIGIN`. En producción la API no arranca si falta alguna o si quedó el valor de ejemplo. Detalle en [docs/decisiones/0007-sesiones-csrf-y-bloqueo.md](docs/decisiones/0007-sesiones-csrf-y-bloqueo.md).
 
 ## Metodología y planificación
 
