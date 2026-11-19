@@ -61,6 +61,7 @@ Marcar cada caso cuando exista su prueba y pase.
 | 18/11/2026 | Aceptación (sitio propio) | Auditoría real de clinica-chubut.vercel.app con SEO, rendimiento, analítica y puntaje | Verde tras corregir D-01 | 23 hallazgos | | 8 s de duración; 77/100 (B) sobre 4 de 5 áreas |
 | 18/11/2026 | Unitarias e integración | H10: SEC-06 y SEC-10 a 16, TRU-01 a 05, security.txt con GET de 8 KB, respuestas recortadas con maxBodyBytes (incluye bomba de compresión) | Verde | 423/423 | 97 % líneas | |
 | 18/11/2026 | Unitarias | H8: fases en memoria (P2), helmet en la API, informe P3 (nivel, cinco barras, prioridades, detalle plegable sin severidad en lo que cumple) | Verde | 428/428 | 97 % líneas | |
+| 18/11/2026 | Unitarias y manual | H9: guías por check (constantes, https, fuentes permitidas, aviso "en inglés"), includeSubDomains con su escritura oficial; `pnpm check:guides` con safeFetch: 30 de 30 guías responden | Verde | 438/438 | 97 % líneas | 4 guías de MDN solo existen en inglés |
 
 ## 4. Registro de defectos
 

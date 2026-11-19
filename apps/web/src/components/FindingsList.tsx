@@ -65,6 +65,16 @@ function FindingItem({ finding }: { readonly finding: Finding }) {
         </p>
       )}
       <p className="mt-2">{finding.recommendation}</p>
+      {finding.guide?.startsWith('https://') === true && (
+        <a
+          href={finding.guide}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="mt-2 inline-block font-medium text-blue-800 underline"
+        >
+          Ver una guía paso a paso{finding.guide.includes('/en-US/') ? ' (en inglés)' : ''}
+        </a>
+      )}
     </li>
   );
 }

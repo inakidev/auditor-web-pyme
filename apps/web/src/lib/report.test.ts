@@ -46,6 +46,7 @@ const f = (checkId: string, status: Finding['status'], severity: Finding['severi
   evidence: null,
   recommendation: '',
   effort: 'low',
+  guide: null,
 });
 
 describe('orden y resumen del informe', () => {

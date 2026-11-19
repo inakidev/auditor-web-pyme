@@ -52,7 +52,7 @@ Total de la versión entregable: **85 puntos**. Prioridad: M (debe) o S (deberí
 | H6 | Checks de analítica | RF-05 | 3 | M | Hecho |
 | H7 | Puntaje por categoría y global | RF-07 | 3 | M | Hecho |
 | H8 | Informe web legible en móvil | RF-08, RNF-03, 08 | 5 | M | Hecho |
-| H9 | Recomendaciones en español rioplatense | RF-19 | 3 | S | Pendiente |
+| H9 | Recomendaciones en español rioplatense | RF-19 | 3 | S | Hecho |
 | H10 | Checks de confianza y resto de seguridad | RF-03, RF-06 | 5 | S | Hecho |
 | H11 | Captura de contacto con consentimiento | RF-11, RNF-05 | 3 | M | Pendiente |
 | H12 | Inicio de sesión y panel de consultores | RF-12, RNF-02 | 8 | M | Pendiente |

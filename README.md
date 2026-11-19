@@ -24,10 +24,10 @@ El avance se mide en **puntos de historia** sobre el alcance de la versión entr
 
 | Indicador | Valor |
 |---|---|
-| Puntos terminados | 47 de 85 |
-| Avance | 55,3 % |
+| Puntos terminados | 50 de 85 |
+| Avance | 58,8 % |
 | Meta del Avance 3 | 51 puntos (60 %) |
-| Última actualización | 18/11/2026 (H8) |
+| Última actualización | 18/11/2026 (H9) |
 
 > Actualizá esta tabla cada vez que se cierra una historia. Una historia cuenta solo si cumple su definición de hecho (pruebas en verde, revisión hecha y documentación al día).
 
@@ -52,6 +52,7 @@ pnpm test           # todas las pruebas (pnpm test:scanner: solo el scanner)
 pnpm lint           # ESLint y Prettier
 pnpm typecheck      # TypeScript estricto
 pnpm build          # compila todos los paquetes
+pnpm check:guides   # verifica a mano que las guías de las recomendaciones respondan
 docker compose up   # API en contenedor (requiere Docker)
 ```
 

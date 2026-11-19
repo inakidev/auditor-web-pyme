@@ -24,7 +24,7 @@ Estados: Pendiente, En curso, Hecho o Pospuesto (fuera de la versión entregable
 | RF-14 Estados y notas | H18 | Historial con fecha y usuario | | Pendiente |
 | RF-15 Límites de uso | H13 | Respuesta 429 y contadores hasheados | | Pendiente |
 | RF-16 Borrado y purga | H14 | Borrado manual y purga automática | | Pendiente |
-| RF-19 Recomendaciones | H9 | Revisión de textos por check | | Pendiente |
+| RF-19 Recomendaciones | H9 | Textos en rioplatense revisados (sin tuteo); `scanner/test/checks/guides.test.ts` (guías https de fuentes permitidas); `pnpm check:guides` (30 de 30 responden, 18/11/2026) | `feat: agrega guías…` | Hecho |
 
 ## Requisitos no funcionales
 

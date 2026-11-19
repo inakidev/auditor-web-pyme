@@ -13,6 +13,7 @@ const FINDING: Finding = {
   evidence: null,
   recommendation: 'Agregá la cabecera X-Content-Type-Options: nosniff.',
   effort: 'low',
+  guide: null,
 };
 
 let now = new Date('2026-11-18T12:00:00Z');

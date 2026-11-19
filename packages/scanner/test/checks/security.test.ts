@@ -188,12 +188,23 @@ describe('SEC-05 HSTS', () => {
     [{ 'strict-transport-security': 'max-age=300' }, 'warn'],
     [{ 'strict-transport-security': 'max-age=15552000' }, 'pass'],
     [{ 'strict-transport-security': 'MAX-AGE="31536000"; preload' }, 'pass'],
+    [{ 'strict-transport-security': 'max-age=31536000; INCLUDESUBDOMAINS' }, 'pass'],
   ])('%j → %s', async (headers, status) => {
     expect((await run('SEC-05', withHeaders(headers))).status).toBe(status);
   });
 
   it('no aplica sin HTTPS', async () => {
     expect((await run('SEC-05', context({ https: failed('NETWORK_ERROR') }))).status).toBe('na');
+  });
+});
+
+describe('SEC-05 evidencia', () => {
+  it('escribe includeSubDomains y preload con sus mayúsculas', async () => {
+    const f = await run(
+      'SEC-05',
+      withHeaders({ 'strict-transport-security': 'max-age=31536000; includesubdomains; PRELOAD' }),
+    );
+    expect(f.evidence).toContain('(includeSubDomains, preload)');
   });
 });
 

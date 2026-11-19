@@ -24,7 +24,11 @@ export const sec05 = defineCheck(
     const maxAge = directives
       .map((d) => /^max-age\s*=\s*"?(\d+)"?$/.exec(d)?.[1])
       .find((v) => v !== undefined);
-    const flags = directives.filter((d) => d === 'includesubdomains' || d === 'preload');
+    // Se muestran con su escritura oficial, sin copiar el texto crudo.
+    const flags = [
+      ...(directives.includes('includesubdomains') ? ['includeSubDomains'] : []),
+      ...(directives.includes('preload') ? ['preload'] : []),
+    ];
     if (maxAge === undefined) {
       return {
         status: 'fail',

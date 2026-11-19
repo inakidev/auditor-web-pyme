@@ -28,6 +28,8 @@ export interface Finding {
   readonly evidence: string | null;
   readonly recommendation: string;
   readonly effort: Effort;
+  /** Guía externa (constante del código, siempre https). */
+  readonly guide: string | null;
 }
 
 /** Fases de la auditoría (pantalla P2). Lista cerrada: el porcentaje se calcula a partir de la fase. */

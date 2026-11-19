@@ -57,6 +57,7 @@ export const findings = sqliteTable(
     evidence: text('evidence'),
     recommendation: text('recommendation').notNull(),
     effort: text('effort', { enum: EFFORTS }).notNull(),
+    guide: text('guide'),
   },
   (t) => [index('findings_audit_id_idx').on(t.auditId)],
 );

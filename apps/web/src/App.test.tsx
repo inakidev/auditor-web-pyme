@@ -30,6 +30,7 @@ const finding = (over: Partial<Finding>): Finding => ({
   evidence: null,
   recommendation: 'Agregá HSTS.',
   effort: 'low',
+  guide: null,
   ...over,
 });
 
@@ -74,6 +75,39 @@ describe('FindingsList', () => {
     expect(html).toContain('Esfuerzo: bajo');
     expect(html.match(/Severidad:/g)).toHaveLength(1);
     expect(html).toContain('Seguridad');
+  });
+
+  it('enlaza la guía en una pestaña nueva sin compartir el origen', () => {
+    const html = renderToStaticMarkup(
+      <FindingsList
+        findings={[finding({ guide: 'https://developer.mozilla.org/es/docs/Web/HTTP/CSP' })]}
+      />,
+    );
+    expect(html).toContain('href="https://developer.mozilla.org/es/docs/Web/HTTP/CSP"');
+    expect(html).toContain('rel="noopener noreferrer"');
+    expect(html).toContain('target="_blank"');
+  });
+
+  it('avisa cuando la guía está en inglés', () => {
+    const html = plain(
+      renderToStaticMarkup(
+        <FindingsList
+          findings={[
+            finding({
+              guide: 'https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Compression',
+            }),
+          ]}
+        />,
+      ),
+    );
+    expect(html).toContain('Ver una guía paso a paso (en inglés)');
+  });
+
+  it('no enlaza guías que no sean https', () => {
+    const html = renderToStaticMarkup(
+      <FindingsList findings={[finding({ guide: 'javascript:alert(1)' })]} />,
+    );
+    expect(html).not.toContain('javascript:');
   });
 
   it('explica qué significa "No evaluado"', () => {

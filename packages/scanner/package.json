@@ -12,10 +12,14 @@
   },
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "check:guides": "tsx --conditions=development scripts/check-guides.ts"
   },
   "dependencies": {
     "@auditor/shared": "workspace:*",
     "cheerio": "^1.2.0"
+  },
+  "devDependencies": {
+    "tsx": "^4.23.15"
   }
 }

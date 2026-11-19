@@ -18,6 +18,7 @@ const f = (
   evidence: null,
   recommendation: '',
   effort: 'low',
+  guide: null,
 });
 
 describe('scoreFindings', () => {

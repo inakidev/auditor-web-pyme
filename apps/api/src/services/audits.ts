@@ -46,6 +46,7 @@ export function createAuditRepository(db: Db) {
           evidence: findings.evidence,
           recommendation: findings.recommendation,
           effort: findings.effort,
+          guide: findings.guide,
         })
         .from(findings)
         .where(eq(findings.auditId, auditId))

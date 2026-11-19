@@ -14,7 +14,8 @@
     "lint": "eslint . && prettier --check .",
     "format": "prettier --write .",
     "typecheck": "tsc --noEmit -p tsconfig.json && pnpm -r typecheck",
-    "build": "pnpm -r build"
+    "build": "pnpm -r build",
+    "check:guides": "pnpm --filter @auditor/scanner check:guides"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

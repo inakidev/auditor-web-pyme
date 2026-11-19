@@ -1,5 +1,6 @@
 import type { Category, Effort, Finding, FindingStatus, Severity } from '@auditor/shared';
 import type { AuditContext } from '../audit/context.js';
+import { GUIDES } from './guides.js';
 
 /** Interfaz de CLAUDE.md: cada check es independiente y no hace requests. */
 export interface Check {
@@ -40,6 +41,7 @@ export function makeFinding(
         : truncateEvidence(fields.evidence),
     recommendation: fields.recommendation,
     effort: fields.effort ?? 'low',
+    guide: GUIDES[meta.id] ?? null,
   };
 }
 
