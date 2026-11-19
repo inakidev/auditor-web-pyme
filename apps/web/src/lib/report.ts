@@ -1,4 +1,12 @@
-import type { Category, Effort, Finding, FindingStatus, Severity } from '@auditor/shared';
+import {
+  AUDIT_PHASES,
+  type AuditPhase,
+  type Category,
+  type Effort,
+  type Finding,
+  type FindingStatus,
+  type Severity,
+} from '@auditor/shared';
 
 export const STATUS_LABEL: Record<FindingStatus, string> = {
   fail: 'No cumple',
@@ -61,4 +69,40 @@ export function countByStatus(findings: readonly Finding[]): Record<FindingStatu
   };
   for (const finding of findings) counts[finding.status] += 1;
   return counts;
+}
+
+/** Textos de cada fase (pantalla P2). */
+export const PHASE_LABEL: Record<AuditPhase, string> = {
+  validating: 'Validando el destino',
+  downloading: 'Descargando el sitio',
+  security: 'Revisando seguridad',
+  seo: 'Revisando SEO',
+  analytics_trust: 'Revisando analítica y confianza',
+  scoring: 'Calculando el puntaje',
+};
+
+/** Porcentaje de la barra, calculado a partir de la fase. */
+export function phaseProgress(phase: AuditPhase | null): number {
+  return phase === null ? 0 : Math.round((AUDIT_PHASES.indexOf(phase) / AUDIT_PHASES.length) * 100);
+}
+
+/** Etiquetas de prioridad del wireframe P3, con contraste AA (texto blanco sobre fondo oscuro). */
+export const SEVERITY_BADGE: Record<Severity, { label: string; className: string }> = {
+  critical: { label: 'Crítico', className: 'bg-red-700 text-white' },
+  high: { label: 'Alto', className: 'bg-orange-700 text-white' },
+  medium: { label: 'Medio', className: 'bg-yellow-700 text-white' },
+  low: { label: 'Bajo', className: 'bg-green-700 text-white' },
+  info: { label: 'Info', className: 'bg-slate-600 text-white' },
+};
+
+/** Lo que conviene arreglar primero: no cumple y advertencias con peso, por severidad. */
+export function priorityFindings(findings: readonly Finding[], limit = 5): Finding[] {
+  return sortFindings(findings)
+    .filter((f) => (f.status === 'fail' || f.status === 'warn') && f.severity !== 'info')
+    .slice(0, limit);
+}
+
+/** En lo que cumple o no aplica no se muestran severidad ni esfuerzo. */
+export function isActionable(finding: Finding): boolean {
+  return finding.status === 'fail' || finding.status === 'warn';
 }

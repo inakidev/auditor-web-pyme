@@ -17,9 +17,9 @@ export function HomePage() {
   return (
     <div className="space-y-6">
       <div className="space-y-2">
-        <h1 className="text-3xl font-bold">Auditor Web Pyme</h1>
+        <h1 className="text-3xl font-bold text-blue-950">Revisá tu sitio web en un minuto</h1>
         <p className="text-lg">
-          Revisá en minutos la seguridad de tu sitio y recibí acciones concretas para mejorarlo.
+          Seguridad, SEO, medición y confianza, en un informe claro y en español.
         </p>
       </div>
 
@@ -60,13 +60,13 @@ export function HomePage() {
           disabled={mutation.isPending}
           className="w-full rounded-lg bg-blue-800 px-6 py-3 text-lg font-semibold text-white hover:bg-blue-900 disabled:opacity-60 sm:w-auto"
         >
-          {mutation.isPending ? 'Enviando…' : 'Revisar mi sitio'}
+          {mutation.isPending ? 'Enviando…' : 'Auditar mi sitio'}
         </button>
       </form>
 
       <p className="text-sm text-slate-700">
-        La revisión es pasiva: miramos tu sitio como lo haría un navegador. No hacemos pruebas de
-        intrusión ni guardamos el contenido de tus páginas.
+        Solo hacemos un análisis pasivo: miramos tu sitio como lo haría un navegador, sin pruebas de
+        intrusión y sin guardar el contenido de tus páginas.
       </p>
     </div>
   );

@@ -36,6 +36,13 @@ describe('runAudit', () => {
     expect(findings.map((f) => f.checkId)).toContain('SEC-01');
   });
 
+  it('avisa las fases en orden', async () => {
+    const phases: string[] = [];
+    const { runner } = setup((url) => Promise.resolve(response({ url })));
+    await runner('https://ejemplo.com/', { ...OPTIONS, onPhase: (p) => phases.push(p) });
+    expect(phases).toEqual(['validating', 'downloading', 'security', 'seo', 'analytics_trust']);
+  });
+
   it('si HTTPS falla por certificado, sigue con HTTP y arma tls { valid: false, error }', async () => {
     const seen: unknown[] = [];
     const spy: Check = {

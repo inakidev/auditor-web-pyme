@@ -196,6 +196,43 @@ describe('GET /api/audits/:token', () => {
   });
 });
 
+describe('fases (pantalla P2)', () => {
+  it('mientras corre devuelve la fase actual; al terminar, null', async () => {
+    let release!: () => void;
+    const { app } = setup({
+      runAudit: (_url, onPhase) => {
+        onPhase('seo');
+        return new Promise((resolve) => {
+          release = () => {
+            resolve({ findings: [] });
+          };
+        });
+      },
+    });
+    const { token } = (await post(app, { url: 'ejemplo.com' })).json<{ token: string }>();
+    const view = async () =>
+      (await app.inject({ method: 'GET', url: `/api/audits/${token}` })).json<{
+        status: string;
+        phase: string | null;
+      }>();
+    expect(await view()).toMatchObject({ status: 'running', phase: 'seo' });
+    release();
+    await app.auditQueue.idle();
+    expect(await view()).toMatchObject({ status: 'done', phase: null });
+  });
+});
+
+describe('cabeceras de seguridad (helmet)', () => {
+  it('las respuestas de la API llevan CSP estricta, nosniff y no-referrer', async () => {
+    const { app } = setup();
+    const res = await app.inject({ method: 'GET', url: '/api/health' });
+    expect(res.headers['content-security-policy']).toContain("default-src 'none'");
+    expect(res.headers['content-security-policy']).toContain("frame-ancestors 'none'");
+    expect(res.headers['x-content-type-options']).toBe('nosniff');
+    expect(res.headers['referrer-policy']).toBe('no-referrer');
+  });
+});
+
 describe('recuperación al reiniciar', () => {
   it('retoma las auditorías en espera y marca como interrumpidas las que estaban corriendo', async () => {
     const db = openDatabase(':memory:');

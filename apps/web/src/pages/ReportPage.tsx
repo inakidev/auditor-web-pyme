@@ -1,17 +1,67 @@
-import type { AuditView } from '@auditor/shared';
+import { AUDIT_PHASES, type AuditView } from '@auditor/shared';
 import { useQuery } from '@tanstack/react-query';
 import { Link, useParams } from 'react-router';
-import { FindingsList } from '../components/FindingsList.js';
+import { FindingsList, PriorityList } from '../components/FindingsList.js';
 import { ScoreSummary } from '../components/ScoreSummary.js';
 import { getAudit } from '../lib/api-client.js';
 import { pollInterval, retryDelay, shouldRetry } from '../lib/polling.js';
-import { countByStatus } from '../lib/report.js';
+import { PHASE_LABEL, phaseProgress } from '../lib/report.js';
 
 const NEW_AUDIT_LINK = (
   <Link to="/" className="font-medium text-blue-800 underline">
     Pedir otra revisión
   </Link>
 );
+
+const domainOf = (url: string) => new URL(url).hostname;
+
+/** Pantalla P2: progreso por fases. */
+function Progress({ audit }: { readonly audit: AuditView }) {
+  const current = audit.status === 'running' ? audit.phase : null;
+  const currentIndex = current === null ? -1 : AUDIT_PHASES.indexOf(current);
+  const percent = phaseProgress(current);
+  return (
+    <div aria-live="polite" className="space-y-4">
+      <h1 className="text-2xl font-bold text-blue-950">Estamos revisando {domainOf(audit.url)}</h1>
+      <div>
+        <div
+          className="h-4 rounded bg-slate-200"
+          role="progressbar"
+          aria-label="Progreso de la revisión"
+          aria-valuemin={0}
+          aria-valuemax={100}
+          aria-valuenow={percent}
+        >
+          <div className="h-4 rounded bg-blue-700" style={{ width: `${String(percent)}%` }} />
+        </div>
+        <p className="mt-1 text-right text-sm font-medium">{percent} %</p>
+      </div>
+      <ul className="space-y-2">
+        {AUDIT_PHASES.map((phase, index) => {
+          const state =
+            index < currentIndex ? 'done' : index === currentIndex ? 'current' : 'pending';
+          return (
+            <li key={phase} className={state === 'pending' ? 'text-slate-600' : 'text-slate-900'}>
+              <span aria-hidden="true" className="inline-block w-6">
+                {state === 'done' ? '✔' : state === 'current' ? '…' : '○'}
+              </span>
+              {PHASE_LABEL[phase]}
+              <span className="sr-only">
+                {state === 'done'
+                  ? ' (listo)'
+                  : state === 'current'
+                    ? ' (en curso)'
+                    : ' (pendiente)'}
+              </span>
+            </li>
+          );
+        })}
+      </ul>
+      {audit.status === 'queued' && <p>Tu revisión está en la fila y empieza en unos segundos.</p>}
+      <p className="text-sm text-slate-700">Podés guardar este enlace y volver más tarde.</p>
+    </div>
+  );
+}
 
 export function ReportPage() {
   const { token = '' } = useParams();
@@ -38,17 +88,7 @@ export function ReportPage() {
 
   const audit = query.data;
   if (audit.status === 'queued' || audit.status === 'running') {
-    return (
-      <div aria-live="polite" className="space-y-2">
-        <h1 className="text-2xl font-bold">Estamos revisando tu sitio</h1>
-        <p className="break-words">{audit.url}</p>
-        <p>
-          {audit.status === 'queued'
-            ? 'Tu revisión está en la fila y empieza en unos segundos.'
-            : 'La revisión está en curso. Suele tardar menos de un minuto.'}
-        </p>
-      </div>
-    );
+    return <Progress audit={audit} />;
   }
 
   if (audit.status === 'failed') {
@@ -62,25 +102,22 @@ export function ReportPage() {
     );
   }
 
-  const counts = countByStatus(audit.findings);
   return (
     <div className="space-y-6">
       <div className="space-y-1">
-        <h1 className="text-2xl font-bold">Informe de tu sitio</h1>
-        <p className="break-words">{audit.url}</p>
+        <h1 className="text-2xl font-bold text-blue-950">Informe de {domainOf(audit.url)}</h1>
         <p className="text-sm text-slate-700">
           Este enlace vence el {new Date(audit.expiresAt).toLocaleDateString('es-AR')}.
         </p>
       </div>
-      <ul className="flex flex-wrap gap-3 text-sm font-medium">
-        <li className="rounded bg-red-100 px-3 py-1 text-red-900">No cumple: {counts.fail}</li>
-        <li className="rounded bg-amber-100 px-3 py-1 text-amber-900">
-          Advertencias: {counts.warn}
-        </li>
-        <li className="rounded bg-green-100 px-3 py-1 text-green-900">Cumple: {counts.pass}</li>
-      </ul>
       {audit.scores !== null && <ScoreSummary scores={audit.scores} />}
-      <FindingsList findings={audit.findings} />
+      <PriorityList findings={audit.findings} />
+      <section aria-labelledby="detalle" className="space-y-3">
+        <h2 id="detalle" className="text-xl font-semibold text-blue-950">
+          Detalle por área
+        </h2>
+        <FindingsList findings={audit.findings} />
+      </section>
       {NEW_AUDIT_LINK}
     </div>
   );

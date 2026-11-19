@@ -13,6 +13,7 @@ const view = (status: AuditView['status']): AuditView => ({
   error: null,
   findings: [],
   scores: null,
+  phase: null,
 });
 
 describe('consulta periódica', () => {

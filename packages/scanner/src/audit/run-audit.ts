@@ -1,5 +1,5 @@
 import { setTimeout as sleepFor } from 'node:timers/promises';
-import type { Finding } from '@auditor/shared';
+import type { AuditPhase, Finding } from '@auditor/shared';
 import { load, type CheerioAPI } from 'cheerio';
 import type { Check } from '../checks/check.js';
 import { makeFinding } from '../checks/check.js';
@@ -15,6 +15,8 @@ import type { AuditContext, FetchOutcome, TlsState } from './context.js';
 export interface RunAuditOptions {
   /** URL de contacto para el User-Agent (AUDITOR_CONTACT_URL). */
   readonly contactUrl: string;
+  /** Avisa la fase en curso (pantalla P2). */
+  readonly onPhase?: (phase: AuditPhase) => void;
 }
 
 export interface AuditResult {
@@ -53,6 +55,8 @@ export function createAuditRunner(deps: AuditRunnerDeps) {
   const timeoutSignal = deps.timeoutSignal ?? ((ms: number) => AbortSignal.timeout(ms));
 
   return async function runAudit(url: string, options: RunAuditOptions): Promise<AuditResult> {
+    const phase = options.onPhase ?? (() => undefined);
+    phase('validating');
     const target = normalizeTargetUrl(url);
     if (!target.ok) throw new SafeFetchError(target.code, 'La URL no pasó la validación previa');
 
@@ -72,6 +76,7 @@ export function createAuditRunner(deps: AuditRunnerDeps) {
     };
 
     // La página principal se pide con gzip, br: PER-01 lee Content-Encoding de esta respuesta.
+    phase('downloading');
     const https = await home(withScheme(target.url, 'https:'), 'gzip-br');
     const http = await home(withScheme(target.url, 'http:'));
     if (!https.ok && !http.ok) {
@@ -80,8 +85,10 @@ export function createAuditRunner(deps: AuditRunnerDeps) {
       });
     }
 
+    phase('security');
     const primary = https.ok ? https.response : http.ok ? http.response : null;
     const html = parseHtml(primary);
+    phase('seo');
     const extras =
       primary === null
         ? NO_EXTRAS
@@ -103,6 +110,7 @@ export function createAuditRunner(deps: AuditRunnerDeps) {
       html,
       ...extras,
     };
+    phase('analytics_trust');
     const findings = await Promise.all(checks.map((check) => runCheck(check, ctx)));
     return { findings: findings.flat() };
   };

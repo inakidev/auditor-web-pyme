@@ -30,6 +30,17 @@ export interface Finding {
   readonly effort: Effort;
 }
 
+/** Fases de la auditoría (pantalla P2). Lista cerrada: el porcentaje se calcula a partir de la fase. */
+export const AUDIT_PHASES = [
+  'validating',
+  'downloading',
+  'security',
+  'seo',
+  'analytics_trust',
+  'scoring',
+] as const;
+export type AuditPhase = (typeof AUDIT_PHASES)[number];
+
 export const BANDS = ['A', 'B', 'C', 'D', 'E'] as const;
 export type Band = (typeof BANDS)[number];
 
@@ -72,4 +83,6 @@ export interface AuditView {
   readonly findings: readonly Finding[];
   /** Solo cuando la auditoría terminó. */
   readonly scores: Scores | null;
+  /** Fase actual, solo mientras la auditoría corre. */
+  readonly phase: AuditPhase | null;
 }

@@ -13,6 +13,7 @@
   "dependencies": {
     "@auditor/scanner": "workspace:*",
     "@auditor/shared": "workspace:*",
+    "@fastify/helmet": "^13.2.0",
     "better-sqlite3": "^13.2.0",
     "drizzle-orm": "^0.45.4",
     "fastify": "^5.12.8",

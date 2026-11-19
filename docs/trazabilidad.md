@@ -15,7 +15,7 @@ Estados: Pendiente, En curso, Hecho o Pospuesto (fuera de la versión entregable
 | RF-05 Checks de analítica | H6 | `scanner/test/checks/analytics.test.ts` (GA4, GTM, Matomo, Plausible, UA, Meta Pixel, aviso de cookies, sin medición; la evidencia no muestra IDs) | `feat(scanner): agrega los checks de analítica…` | Hecho |
 | RF-06 Checks de confianza | H10 | `scanner/test/checks/trust.test.ts` (contacto, formulario, privacidad, redes, datos del negocio; la evidencia nunca copia datos) | `feat(scanner): agrega los checks de confianza…` | Hecho |
 | RF-07 Puntaje | H7 | `scanner/test/scoring.test.ts` (fórmula, exclusiones, repondera, bandas, determinismo); `api/src/routes/audits.test.ts`; integración con fixtures | `feat: agrega el puntaje…` | Hecho |
-| RF-08 Informe web | H4, H8 | `web/src/App.test.tsx` (estados del informe, orden por severidad); e2e en H16 | `feat(web): agrega la interfaz mínima…` | En curso (H4 hecho; informe completo en H8) |
+| RF-08 Informe web | H4, H8 | `web/src/App.test.tsx` (estados del informe, orden por severidad); e2e en H16; pantallas P2 y P3 de los wireframes | `feat(web): agrega la interfaz mínima…`, `feat(web): arma el informe…` | Hecho (la validación con usuarios es H16) |
 | RF-09 Enlace único con vencimiento | H2, H8 | `api/src/routes/audits.test.ts` (token de 256 bits, hash en la base, 404 y 410) | `feat(api): agrega auditorías…` | Hecho |
 | RF-10 Exportar a PDF | H17 | Generación y contenido | | Pendiente |
 | RF-11 Contacto con consentimiento | H11 | Sin consentimiento no se guarda | | Pendiente |
@@ -32,12 +32,12 @@ Estados: Pendiente, En curso, Hecho o Pospuesto (fuera de la versión entregable
 |---|---|---|---|
 | RNF-01 SSRF y abuso | H1 | Suite SSRF en verde y revisión manual de `safeFetch` aprobada (18/11/2026) | Hecho |
 | RNF-02 Autenticación robusta | H12 | Pruebas de sesión, CSRF y bloqueo | Pendiente |
-| RNF-03 Sin XSS | H4, H8 | Evidencia maliciosa escapada (`web/src/App.test.tsx`); regla ESLint contra dangerouslySetInnerHTML; CSP en H8/H15 | En curso |
+| RNF-03 Sin XSS | H4, H8 | Evidencia maliciosa escapada (`web/src/App.test.tsx`); regla ESLint contra dangerouslySetInnerHTML; helmet con CSP `default-src 'none'` en la API y `no-referrer` (H8); CSP del documento web en H15 | En curso |
 | RNF-04 Dependencias sin vulnerabilidades | H0 | `pnpm audit --prod --audit-level high` en CI | Hecho |
 | RNF-05 Privacidad | H11, H14 | Revisión del modelo de datos y prueba de purga | Pendiente |
 | RNF-06 Auditoría en 30 s (p95) | H5, H16 | Portada y verificación de hasta 20 enlaces con presupuesto de 25 s (H5); medición con fixtures y sitios propios (H16). Primera medición: 8 s en un sitio propio | En curso |
 | RNF-07 Respuesta de interfaz en 2 s | H16 | Medición en e2e | Pendiente |
-| RNF-08 Usabilidad y accesibilidad | H8, H16 | Prueba con 2 o 3 personas; contraste AA | Pendiente |
+| RNF-08 Usabilidad y accesibilidad | H8, H16 | Diseño móvil primero, etiquetas con contraste AA, roles ARIA en barras y progreso (H8); prueba con 2 o 3 personas (H16) | En curso |
 | RNF-09 Fallos del sitio objetivo | H2, H3 | Errores del scanner → `failed` con mensaje claro (H2); si HTTPS falla, sigue con HTTP y corre los checks posibles (H3); un check que falla queda como "no aplica" | Hecho |
 | RNF-10 Mantenibilidad y cobertura | H0 | Umbrales de cobertura en CI; TS estricto; `test/eslint-rules.test.ts` | Hecho |
 | RNF-11 Portabilidad con Docker | H0, H15 | Imagen base construida en CI (H0); despliegue desde cero (H15) | En curso |

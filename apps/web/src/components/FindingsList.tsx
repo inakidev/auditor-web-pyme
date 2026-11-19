@@ -2,14 +2,74 @@ import type { Category, Finding } from '@auditor/shared';
 import {
   CATEGORY_LABEL,
   EFFORT_LABEL,
+  SEVERITY_BADGE,
   SEVERITY_LABEL,
   STATUS_LABEL,
   STATUS_STYLE,
+  isActionable,
+  priorityFindings,
   sortFindings,
 } from '../lib/report.js';
 
 // Todo el texto se muestra como texto (React lo escapa). Nunca HTML del sitio auditado.
 
+/** Pantalla P3: lo que conviene arreglar primero. */
+export function PriorityList({ findings }: { readonly findings: readonly Finding[] }) {
+  const top = priorityFindings(findings);
+  return (
+    <section aria-labelledby="prioridades" className="space-y-3">
+      <h2 id="prioridades" className="text-xl font-semibold text-blue-950">
+        Qué conviene arreglar primero
+      </h2>
+      {top.length === 0 ? (
+        <p>No encontramos problemas importantes. ¡Bien!</p>
+      ) : (
+        <ol className="space-y-2">
+          {top.map((finding) => (
+            <li key={finding.checkId} className="flex items-start gap-3">
+              <span
+                className={`w-20 shrink-0 rounded px-2 py-1 text-center text-sm font-semibold ${SEVERITY_BADGE[finding.severity].className}`}
+              >
+                {SEVERITY_BADGE[finding.severity].label}
+              </span>
+              <span>{finding.title}</span>
+            </li>
+          ))}
+        </ol>
+      )}
+    </section>
+  );
+}
+
+function FindingItem({ finding }: { readonly finding: Finding }) {
+  return (
+    <li className={`rounded-lg border p-4 ${STATUS_STYLE[finding.status]}`}>
+      <div className="mb-1 flex flex-wrap items-center gap-2 text-sm font-medium">
+        <span>{STATUS_LABEL[finding.status]}</span>
+        {isActionable(finding) && (
+          <>
+            <span aria-hidden="true">·</span>
+            <span>Severidad: {SEVERITY_LABEL[finding.severity]}</span>
+            <span aria-hidden="true">·</span>
+            <span>Esfuerzo: {EFFORT_LABEL[finding.effort]}</span>
+          </>
+        )}
+      </div>
+      <h4 className="text-base font-semibold">{finding.title}</h4>
+      {finding.evidence !== null && (
+        <p className="mt-1 font-mono text-sm break-words">{finding.evidence}</p>
+      )}
+      {finding.status === 'not_evaluated' && (
+        <p className="mt-1 text-sm">
+          No pudimos completar este control, así que no cuenta para el puntaje.
+        </p>
+      )}
+      <p className="mt-2">{finding.recommendation}</p>
+    </li>
+  );
+}
+
+/** Detalle por área: plegable, abierto si hay algo para resolver. */
 export function FindingsList({ findings }: { readonly findings: readonly Finding[] }) {
   const byCategory = new Map<Category, Finding[]>();
   for (const finding of sortFindings(findings)) {
@@ -17,35 +77,29 @@ export function FindingsList({ findings }: { readonly findings: readonly Finding
   }
 
   return (
-    <div className="space-y-8">
-      {[...byCategory].map(([category, items]) => (
-        <section key={category} aria-labelledby={`cat-${category}`}>
-          <h2 id={`cat-${category}`} className="mb-3 text-xl font-semibold">
-            {CATEGORY_LABEL[category]}
-          </h2>
-          <ul className="space-y-3">
-            {items.map((finding) => (
-              <li
-                key={finding.checkId}
-                className={`rounded-lg border p-4 ${STATUS_STYLE[finding.status]}`}
-              >
-                <div className="mb-1 flex flex-wrap items-center gap-2 text-sm font-medium">
-                  <span>{STATUS_LABEL[finding.status]}</span>
-                  <span aria-hidden="true">·</span>
-                  <span>Severidad: {SEVERITY_LABEL[finding.severity]}</span>
-                  <span aria-hidden="true">·</span>
-                  <span>Esfuerzo: {EFFORT_LABEL[finding.effort]}</span>
-                </div>
-                <h3 className="text-base font-semibold">{finding.title}</h3>
-                {finding.evidence !== null && (
-                  <p className="mt-1 font-mono text-sm break-words">{finding.evidence}</p>
-                )}
-                <p className="mt-2">{finding.recommendation}</p>
-              </li>
-            ))}
-          </ul>
-        </section>
-      ))}
+    <div className="space-y-4">
+      {[...byCategory].map(([category, items]) => {
+        const pending = items.filter(isActionable).length;
+        return (
+          <details
+            key={category}
+            open={pending > 0}
+            className="rounded-lg border border-slate-300 p-3"
+          >
+            <summary className="cursor-pointer text-lg font-semibold">
+              <h3 className="inline">{CATEGORY_LABEL[category]}</h3>{' '}
+              <span className="text-sm font-normal text-slate-700">
+                ({pending === 0 ? 'todo en orden' : `${String(pending)} para revisar`})
+              </span>
+            </summary>
+            <ul className="mt-3 space-y-3">
+              {items.map((finding) => (
+                <FindingItem key={finding.checkId} finding={finding} />
+              ))}
+            </ul>
+          </details>
+        );
+      })}
     </div>
   );
 }

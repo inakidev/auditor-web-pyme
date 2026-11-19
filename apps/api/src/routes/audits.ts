@@ -2,6 +2,7 @@ import { normalizeTargetUrl } from '@auditor/scanner';
 import {
   AUDIT_TOKEN_PATTERN,
   createAuditRequestSchema,
+  type AuditPhase,
   type AuditView,
   type CreateAuditResponse,
 } from '@auditor/shared';
@@ -17,10 +18,11 @@ export interface AuditRoutesDeps {
   readonly repo: AuditRepository;
   readonly queue: JobQueue<number>;
   readonly now: () => Date;
+  readonly phaseOf: (id: number) => AuditPhase | null;
 }
 
 export function registerAuditRoutes(app: FastifyInstance, deps: AuditRoutesDeps): void {
-  const { repo, queue, now } = deps;
+  const { repo, queue, now, phaseOf } = deps;
 
   app.post('/api/audits', { bodyLimit: MAX_BODY_BYTES }, (req, reply) => {
     const parsed = createAuditRequestSchema.safeParse(req.body);
@@ -65,6 +67,7 @@ export function registerAuditRoutes(app: FastifyInstance, deps: AuditRoutesDeps)
           : { code: audit.errorCode, message: messageFor(audit.errorCode) },
       findings: audit.status === 'done' ? repo.findingsOf(audit.id) : [],
       scores: audit.status === 'done' ? scoresOf(audit) : null,
+      phase: audit.status === 'running' ? phaseOf(audit.id) : null,
     };
     return reply.send(view);
   });

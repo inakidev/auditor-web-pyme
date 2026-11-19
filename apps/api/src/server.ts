@@ -8,7 +8,7 @@ const db = openDatabase(config.databasePath);
 const app = buildApp({
   db,
   logger: { level: config.logLevel },
-  runAudit: (url) => runAudit(url, { contactUrl: config.contactUrl }),
+  runAudit: (url, onPhase) => runAudit(url, { contactUrl: config.contactUrl, onPhase }),
 });
 
 for (const signal of ['SIGINT', 'SIGTERM'] as const) {
