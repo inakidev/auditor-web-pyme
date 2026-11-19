@@ -19,9 +19,10 @@ describe('HostScheduler (1 request por segundo por host, compartido)', () => {
       scheduler.run('ejemplo.com', task),
     ]);
     // Con reloj fraccionario: cada inicio queda al menos 1 s después del anterior.
-    expect(starts[1]! - starts[0]!).toBeGreaterThanOrEqual(1000);
-    expect(starts[2]! - starts[1]!).toBeGreaterThanOrEqual(1000);
-    expect(starts[2]! - starts[0]!).toBeLessThan(2010);
+    const [first = 0, second = 0, third = 0] = starts;
+    expect(second - first).toBeGreaterThanOrEqual(1000);
+    expect(third - second).toBeGreaterThanOrEqual(1000);
+    expect(third - first).toBeLessThan(2010);
   });
 
   it('no frena hosts distintos', async () => {
@@ -33,7 +34,8 @@ describe('HostScheduler (1 request por segundo por host, compartido)', () => {
       return Promise.resolve();
     };
     await Promise.all([scheduler.run('a.com', task), scheduler.run('b.com', task)]);
-    expect(starts[1]! - starts[0]!).toBeLessThan(5);
+    const [a = 0, b = 0] = starts;
+    expect(b - a).toBeLessThan(5);
   });
 
   it('una tarea que falla no bloquea a las siguientes', async () => {

@@ -415,7 +415,7 @@ describe('maxBodyBytes (solo baja el tope)', () => {
     },
   );
 
-  it('nunca supera 2 MB aunque se pida más', async () => {
+  it('nunca supera 2 MB aunque se pida más', () => {
     expect(effectiveMaxBody(MAX_BODY_BYTES + 1)).toBe(MAX_BODY_BYTES);
     expect(effectiveMaxBody(1024)).toBe(1024);
   });
