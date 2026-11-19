@@ -77,3 +77,37 @@ export const findings = sqliteTable(
   },
   (t) => [index('findings_audit_id_idx').on(t.auditId)],
 );
+
+// --- Panel de consultores (RF-12, RNF-02) ---
+
+export const users = sqliteTable('users', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  email: text('email').notNull().unique(),
+  /** argon2id; la contraseña en claro nunca se guarda. */
+  passwordHash: text('password_hash').notNull(),
+  createdAt: integer('created_at', { mode: 'timestamp_ms' }).notNull(),
+});
+
+export const sessions = sqliteTable(
+  'sessions',
+  {
+    /** SHA-256 del id de sesión: el id en claro solo viaja en la cookie. */
+    idHash: text('id_hash').primaryKey(),
+    userId: integer('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    createdAt: integer('created_at', { mode: 'timestamp_ms' }).notNull(),
+    lastSeenAt: integer('last_seen_at', { mode: 'timestamp_ms' }).notNull(),
+    /** Vencimiento absoluto (8 h desde el ingreso). */
+    expiresAt: integer('expires_at', { mode: 'timestamp_ms' }).notNull(),
+  },
+  (t) => [index('sessions_expires_at_idx').on(t.expiresAt)],
+);
+
+/** Contadores de intentos fallidos. La clave es un HMAC: ni correo ni IP en claro. */
+export const loginCounters = sqliteTable('login_counters', {
+  key: text('key').primaryKey(),
+  failures: integer('failures').notNull(),
+  lastFailureAt: integer('last_failure_at').notNull(),
+  lockedUntil: integer('locked_until').notNull(),
+});

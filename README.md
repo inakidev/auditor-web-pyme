@@ -24,10 +24,10 @@ El avance se mide en **puntos de historia** sobre el alcance de la versión entr
 
 | Indicador | Valor |
 |---|---|
-| Puntos terminados | 53 de 85 |
-| Avance | 62,4 % |
+| Puntos terminados | 61 de 85 |
+| Avance | 71,8 % |
 | Meta del Avance 3 | 51 puntos (60 %) |
-| Última actualización | 18/11/2026 (H11) |
+| Última actualización | 18/11/2026 (H12, cierre de la etapa 5) |
 
 > Actualizá esta tabla cada vez que se cierra una historia. Una historia cuenta solo si cumple su definición de hecho (pruebas en verde, revisión hecha y documentación al día).
 
@@ -55,6 +55,15 @@ pnpm build          # compila todos los paquetes
 pnpm check:guides   # verifica a mano que las guías de las recomendaciones respondan
 docker compose up   # API en contenedor (requiere Docker)
 ```
+
+### Panel de consultores
+
+El panel está en `/panel` y exige iniciar sesión. El primer usuario se crea al arrancar, solo si no existe ninguno, con dos variables del `.env`:
+
+1. `ADMIN_EMAIL`: el correo del consultor.
+2. `ADMIN_PASSWORD_HASH`: generalo con `pnpm --filter @auditor/api user:hash`. El comando pide la contraseña sin mostrarla, nunca por argumento.
+
+El hash tiene signos `$`: en `.env` va **entre comillas simples** (`ADMIN_PASSWORD_HASH='$argon2id$...'`). Si lo escribís en `environment:` de `docker-compose.yml`, cada `$` va como `$$`. También hacen falta `IP_HASH_SALT` (32 caracteres o más) y `PUBLIC_ORIGIN`. En producción la API no arranca si falta alguna o si quedó el valor de ejemplo. Detalle en [docs/decisiones/0007-sesiones-csrf-y-bloqueo.md](docs/decisiones/0007-sesiones-csrf-y-bloqueo.md).
 
 ## Metodología y planificación
 

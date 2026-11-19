@@ -29,6 +29,8 @@ export default defineConfig({
         '**/*.test.{ts,tsx}',
         '**/*.d.ts',
         'apps/api/src/server.ts',
+        'apps/api/src/cli/**',
+        'apps/api/src/testing/**',
         'apps/web/src/main.tsx',
       ],
       thresholds: {

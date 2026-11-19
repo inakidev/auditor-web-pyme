@@ -9,6 +9,7 @@ const app = buildApp({
   db,
   logger: { level: config.logLevel },
   runAudit: (url, onPhase) => runAudit(url, { contactUrl: config.contactUrl, onPhase }),
+  auth: config.auth,
 });
 
 for (const signal of ['SIGINT', 'SIGTERM'] as const) {

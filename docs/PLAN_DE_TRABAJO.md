@@ -63,8 +63,8 @@ Cada etapa empieza con un pedido en **modo plan**: se aprueba el plan y recién 
 
 ### Etapa 6: seguridad operativa y despliegue (H13, H14 y H15)
 - Límites de uso: por IP hasheada, por dominio y diario; respuesta 429 con mensaje claro.
-- Retención: vencimiento a 30 días, purga diaria automática y borrado manual.
-- Despliegue: Dockerfile multi-stage, `docker-compose`, HTTPS y variables de entorno; términos de uso y aviso de privacidad en borrador.
+- Retención: vencimiento a 30 días, purga diaria automática y borrado manual. La purga incluye las sesiones y los contadores de intentos vencidos (pendiente de H12).
+- Despliegue: Dockerfile multi-stage, `docker-compose`, HTTPS y variables de entorno; términos de uso y aviso de privacidad en borrador. Detrás del proxy, configurar `trustProxy` para que el bloqueo de ingresos y los límites de uso vean la IP real (pendiente de H12).
 - **Revisás vos:** que no queden secretos en el repositorio y que las variables de entorno estén fuera del código.
 - **Pedido:** "Ahora hacemos H13, H14 y H15. El despliegue debe poder repetirse desde cero con `docker compose up`. Los términos y el aviso de privacidad son borradores que yo voy a revisar."
 

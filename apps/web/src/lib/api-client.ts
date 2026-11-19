@@ -1,5 +1,15 @@
 // Único lugar de la web que usa fetch: habla solo con nuestra propia API (mismo origen).
-import type { ApiError, AuditView, CreateAuditResponse } from '@auditor/shared';
+import type {
+  AdminAuditDetail,
+  AdminAuditItem,
+  AdminLeadItem,
+  ApiError,
+  AuditView,
+  CreateAuditResponse,
+  CsrfView,
+  Page,
+  SessionView,
+} from '@auditor/shared';
 
 export class ApiRequestError extends Error {
   override readonly name = 'ApiRequestError';
@@ -30,7 +40,7 @@ function isApiError(body: unknown): body is ApiError {
   );
 }
 
-async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
+async function request<T>(path: string, init: RequestInit = {}, csrfToken?: string): Promise<T> {
   let res: Response;
   try {
     res = await fetch(path, {
@@ -39,6 +49,7 @@ async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
       headers: {
         accept: 'application/json',
         ...(init.body === undefined ? {} : { 'content-type': 'application/json' }),
+        ...(csrfToken === undefined ? {} : { 'x-csrf-token': csrfToken }),
       },
     });
   } catch {
@@ -66,4 +77,50 @@ export function createAudit(
 
 export function getAudit(token: string): Promise<AuditView> {
   return request(`/api/audits/${encodeURIComponent(token)}`);
+}
+
+// --- Panel de consultores ---
+
+/** Token del doble envío previo al login (la cookie la pone la API). */
+export function getCsrfToken(): Promise<CsrfView> {
+  return request('/api/auth/csrf');
+}
+
+export function login(email: string, password: string, csrfToken: string): Promise<SessionView> {
+  return request(
+    '/api/auth/login',
+    { method: 'POST', body: JSON.stringify({ email, password }) },
+    csrfToken,
+  );
+}
+
+export function getSession(): Promise<SessionView> {
+  return request('/api/auth/session');
+}
+
+export async function logout(csrfToken: string): Promise<void> {
+  await request('/api/auth/logout', { method: 'POST' }, csrfToken);
+}
+
+/** Solo viajan los filtros con valor. */
+export function toQueryString(filters: Readonly<Record<string, string>>): string {
+  const params = new URLSearchParams(Object.entries(filters).filter(([, value]) => value !== ''));
+  const query = params.toString();
+  return query === '' ? '' : `?${query}`;
+}
+
+export function listAdminAudits(
+  filters: Readonly<Record<string, string>>,
+): Promise<Page<AdminAuditItem>> {
+  return request(`/api/admin/audits${toQueryString(filters)}`);
+}
+
+export function getAdminAudit(id: string): Promise<AdminAuditDetail> {
+  return request(`/api/admin/audits/${encodeURIComponent(id)}`);
+}
+
+export function listAdminLeads(
+  filters: Readonly<Record<string, string>>,
+): Promise<Page<AdminLeadItem>> {
+  return request(`/api/admin/leads${toQueryString(filters)}`);
 }

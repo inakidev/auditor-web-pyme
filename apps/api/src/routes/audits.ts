@@ -9,10 +9,32 @@ import {
 import type { FastifyInstance } from 'fastify';
 import { isErrorCode, messageFor, sendError } from '../errors.js';
 import type { JobQueue } from '../jobs/queue.js';
-import { scoresOf, type AuditRepository } from '../services/audits.js';
+import { scoresOf, type AuditRepository, type AuditRow } from '../services/audits.js';
 import { generateToken, hashToken } from '../tokens.js';
 
 export const MAX_BODY_BYTES = 2 * 1024;
+
+/** Vista pública de una auditoría (también la usa el panel). */
+export function toAuditView(
+  audit: AuditRow,
+  repo: AuditRepository,
+  phaseOf: (id: number) => AuditPhase | null,
+): AuditView {
+  return {
+    status: audit.status,
+    url: audit.url,
+    createdAt: audit.createdAt.toISOString(),
+    finishedAt: audit.finishedAt?.toISOString() ?? null,
+    expiresAt: audit.expiresAt.toISOString(),
+    error:
+      audit.errorCode === null
+        ? null
+        : { code: audit.errorCode, message: messageFor(audit.errorCode) },
+    findings: audit.status === 'done' ? repo.findingsOf(audit.id) : [],
+    scores: audit.status === 'done' ? scoresOf(audit) : null,
+    phase: audit.status === 'running' ? phaseOf(audit.id) : null,
+  };
+}
 
 export interface AuditRoutesDeps {
   readonly repo: AuditRepository;
@@ -60,20 +82,6 @@ export function registerAuditRoutes(app: FastifyInstance, deps: AuditRoutesDeps)
     if (audit === undefined) return sendError(reply, 404, 'NOT_FOUND');
     if (audit.expiresAt.getTime() <= now().getTime()) return sendError(reply, 410, 'EXPIRED');
 
-    const view: AuditView = {
-      status: audit.status,
-      url: audit.url,
-      createdAt: audit.createdAt.toISOString(),
-      finishedAt: audit.finishedAt?.toISOString() ?? null,
-      expiresAt: audit.expiresAt.toISOString(),
-      error:
-        audit.errorCode === null
-          ? null
-          : { code: audit.errorCode, message: messageFor(audit.errorCode) },
-      findings: audit.status === 'done' ? repo.findingsOf(audit.id) : [],
-      scores: audit.status === 'done' ? scoresOf(audit) : null,
-      phase: audit.status === 'running' ? phaseOf(audit.id) : null,
-    };
-    return reply.send(view);
+    return reply.send(toAuditView(audit, repo, phaseOf));
   });
 }

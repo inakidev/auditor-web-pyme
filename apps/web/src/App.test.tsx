@@ -1,10 +1,19 @@
-import type { AuditView, Finding } from '@auditor/shared';
+import type {
+  AdminAuditDetail,
+  AdminAuditItem,
+  AdminLeadItem,
+  AuditView,
+  Finding,
+  Page,
+} from '@auditor/shared';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { createMemoryRouter, RouterProvider } from 'react-router';
 import { describe, expect, it } from 'vitest';
 import { routes } from './App.js';
 import { FindingsList } from './components/FindingsList.js';
+import { ApiRequestError } from './lib/api-client.js';
+import { SESSION_KEY, auditDetailKey, auditsKey, leadsKey, needsLogin } from './lib/panel.js';
 import { phaseProgress } from './lib/report.js';
 
 // renderToStaticMarkup no agrega separadores de texto: se comparan cadenas planas.
@@ -215,5 +224,120 @@ describe('phaseProgress', () => {
     expect(phaseProgress('validating')).toBe(0);
     expect(phaseProgress('scoring')).toBeGreaterThan(phaseProgress('seo'));
     expect(phaseProgress('scoring')).toBeLessThan(100);
+  });
+});
+
+describe('P4: panel de consultores', () => {
+  const session = { email: 'consultor@agencia.example.test', csrfToken: 's' };
+  const withSession = () => {
+    const client = new QueryClient();
+    client.setQueryData(SESSION_KEY, session);
+    return client;
+  };
+  const page = <T,>(items: T[]): Page<T> => ({ items, total: items.length, page: 1, pageSize: 20 });
+
+  it('el ingreso pide correo y contraseña con autocompletado correcto', () => {
+    const html = renderAt('/panel/ingresar');
+    expect(html).toContain('Panel de consultores');
+    expect(html).toMatch(
+      /<input[^>]*type="email"[^>]*autoComplete="username"|autocomplete="username"/,
+    );
+    expect(html).toMatch(/<input[^>]*type="password"/);
+    expect(html).toMatch(/autocomplete="current-password"/i);
+    expect(html).toContain('Ingresar');
+  });
+
+  it('sin datos de sesión todavía muestra que está cargando (nunca el contenido)', () => {
+    const html = renderAt('/panel');
+    expect(html).toContain('Cargando');
+    expect(html).not.toContain('Auditorías');
+  });
+
+  it('un 401 manda de vuelta al ingreso', () => {
+    expect(needsLogin(new ApiRequestError(401, 'UNAUTHENTICATED', 'x'))).toBe(true);
+    expect(needsLogin(new ApiRequestError(500, 'INTERNAL_ERROR', 'x'))).toBe(false);
+    expect(needsLogin(new Error('x'))).toBe(false);
+  });
+
+  it('lista las auditorías con filtros, puntaje, contacto y paginación', () => {
+    const client = withSession();
+    const item: AdminAuditItem = {
+      id: 7,
+      url: 'https://uno.example.com/',
+      domain: 'uno.example.com',
+      status: 'done',
+      createdAt: '2026-11-18T12:00:00.000Z',
+      scoreTotal: 72,
+      scoreBand: 'C',
+      hasLead: true,
+    };
+    client.setQueryData(auditsKey(''), page([item]));
+    const html = renderAt('/panel', client);
+    expect(html).toContain(session.email);
+    expect(html).toContain('Salir');
+    for (const label of ['Dominio', 'Desde', 'Hasta', 'Puntaje mín.', 'Puntaje máx.', 'Estado']) {
+      expect(html).toContain(label);
+    }
+    expect(html).toContain('href="/panel/auditorias/7"');
+    expect(html).toContain('72 (Nivel C)');
+    expect(html).toContain('Terminada');
+    expect(html).toContain('Página 1 de 1 (1 en total)');
+  });
+
+  it('lista los contactos con su consentimiento y el enlace al informe', () => {
+    const client = withSession();
+    const lead: AdminLeadItem = {
+      id: 1,
+      email: 'dueno@uno.example.com',
+      domain: 'uno.example.com',
+      status: 'new',
+      consentAt: '2026-11-18T12:00:00.000Z',
+      consentTextVersion: '2026-11-18',
+      createdAt: '2026-11-18T12:00:00.000Z',
+      lastAuditId: 7,
+    };
+    client.setQueryData(leadsKey(''), page([lead]));
+    const html = renderAt('/panel/contactos', client);
+    expect(html).toContain('dueno@uno.example.com');
+    expect(html).toContain('Nuevo');
+    expect(html).toContain('texto 2026-11-18');
+    expect(html).toContain('href="/panel/auditorias/7"');
+  });
+
+  it('el detalle muestra el contacto y el informe escapado', () => {
+    const client = withSession();
+    const detail: AdminAuditDetail = {
+      id: 7,
+      domain: 'uno.example.com',
+      audit: {
+        status: 'done',
+        url: 'https://uno.example.com/',
+        createdAt: '2026-11-18T12:00:00.000Z',
+        finishedAt: '2026-11-18T12:00:09.000Z',
+        expiresAt: '2026-12-18T12:00:00.000Z',
+        error: null,
+        findings: [finding({ evidence: '<script>alert(1)</script>' })],
+        scores: {
+          total: 72,
+          band: 'C',
+          categories: { security: 60, seo: 80, analytics: 50, trust: null, performance: 100 },
+          categoriesUsed: 4,
+          categoriesTotal: 5,
+        },
+        phase: null,
+      },
+      lead: {
+        email: 'dueno@uno.example.com',
+        consentAt: '2026-11-18T12:00:00.000Z',
+        consentTextVersion: '2026-11-18',
+      },
+    };
+    client.setQueryData(auditDetailKey('7'), detail);
+    const html = renderAt('/panel/auditorias/7', client);
+    expect(html).toContain('uno.example.com');
+    expect(html).toContain('dueno@uno.example.com');
+    expect(html).toContain('Nivel C');
+    expect(html).not.toContain('<script>alert(1)</script>');
+    expect(html).toContain('&lt;script&gt;');
   });
 });

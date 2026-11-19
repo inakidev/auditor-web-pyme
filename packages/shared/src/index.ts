@@ -101,3 +101,98 @@ export interface AuditView {
   /** Fase actual, solo mientras la auditoría corre. */
   readonly phase: AuditPhase | null;
 }
+
+// --- Panel de consultores (RF-12, RNF-02) ---
+
+/** Tope de largo de la contraseña: acota el trabajo de argon2 ante entradas enormes. */
+export const MAX_PASSWORD_LENGTH = 256;
+
+export const loginRequestSchema = z
+  .object({
+    email: z.string().trim().toLowerCase().max(MAX_EMAIL_LENGTH).pipe(z.email()),
+    password: z.string().min(1).max(MAX_PASSWORD_LENGTH),
+  })
+  .strict();
+export type LoginRequest = z.infer<typeof loginRequestSchema>;
+
+export interface CsrfView {
+  readonly csrfToken: string;
+}
+
+export interface SessionView {
+  readonly email: string;
+  readonly csrfToken: string;
+}
+
+export const MAX_PAGE_SIZE = 100;
+export const MAX_PAGE = 1000;
+
+const pageFields = {
+  page: z.coerce.number().int().min(1).max(MAX_PAGE).default(1),
+  pageSize: z.coerce.number().int().min(1).max(MAX_PAGE_SIZE).default(20),
+  /** Solo caracteres de dominio: sin comodines de LIKE que escapar. */
+  domain: z
+    .string()
+    .trim()
+    .toLowerCase()
+    .regex(/^[a-z0-9.-]{1,253}$/)
+    .optional(),
+  from: z.iso.date().optional(),
+  to: z.iso.date().optional(),
+};
+
+export const adminAuditsQuerySchema = z
+  .object({
+    ...pageFields,
+    status: z.enum(AUDIT_STATUSES).optional(),
+    minScore: z.coerce.number().int().min(0).max(100).optional(),
+    maxScore: z.coerce.number().int().min(0).max(100).optional(),
+  })
+  .strict();
+export type AdminAuditsQuery = z.infer<typeof adminAuditsQuerySchema>;
+
+export const adminLeadsQuerySchema = z
+  .object({ ...pageFields, status: z.enum(LEAD_STATUSES).optional() })
+  .strict();
+export type AdminLeadsQuery = z.infer<typeof adminLeadsQuerySchema>;
+
+export interface Page<T> {
+  readonly items: readonly T[];
+  readonly total: number;
+  readonly page: number;
+  readonly pageSize: number;
+}
+
+export interface AdminAuditItem {
+  readonly id: number;
+  readonly url: string;
+  readonly domain: string;
+  readonly status: AuditStatus;
+  readonly createdAt: string;
+  readonly scoreTotal: number | null;
+  readonly scoreBand: Band | null;
+  readonly hasLead: boolean;
+}
+
+export interface AdminLeadItem {
+  readonly id: number;
+  readonly email: string;
+  readonly domain: string;
+  readonly status: LeadStatus;
+  readonly consentAt: string;
+  readonly consentTextVersion: string;
+  readonly createdAt: string;
+  /** Última auditoría pedida con este contacto, para abrir el detalle. */
+  readonly lastAuditId: number | null;
+}
+
+export interface AdminAuditDetail {
+  readonly id: number;
+  readonly domain: string;
+  readonly audit: AuditView;
+  readonly lead: {
+    readonly email: string;
+    readonly consentAt: string;
+    readonly consentTextVersion: string;
+  } | null;
+}

@@ -1,5 +1,13 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { ApiRequestError, createAudit, getAudit } from './api-client.js';
+import {
+  ApiRequestError,
+  createAudit,
+  getAudit,
+  listAdminAudits,
+  login,
+  logout,
+  toQueryString,
+} from './api-client.js';
 
 const json = (status: number, body: unknown) =>
   Promise.resolve(new Response(JSON.stringify(body), { status }));
@@ -66,5 +74,32 @@ describe('api-client', () => {
   it('informa un error de red sin detalles técnicos', async () => {
     vi.stubGlobal('fetch', () => Promise.reject(new TypeError('Failed to fetch')));
     await expect(getAudit('x')).rejects.toMatchObject({ status: 0, code: 'NETWORK' });
+  });
+
+  it('login manda el token CSRF en la cabecera, nunca en la URL', async () => {
+    const fetchMock = vi.fn(() => json(200, { email: 'c@agencia.com', csrfToken: 's' }));
+    vi.stubGlobal('fetch', fetchMock);
+    await login('c@agencia.com', 'secreta', 'tok');
+    const [path, init] = (fetchMock.mock.calls as unknown as [string, RequestInit][])[0] ?? [];
+    expect(path).toBe('/api/auth/login');
+    expect(init?.method).toBe('POST');
+    expect(init?.headers).toMatchObject({ 'x-csrf-token': 'tok' });
+  });
+
+  it('logout tolera la respuesta 204 sin cuerpo', async () => {
+    const fetchMock = vi.fn(() => Promise.resolve(new Response(null, { status: 204 })));
+    vi.stubGlobal('fetch', fetchMock);
+    await expect(logout('s')).resolves.toBeUndefined();
+  });
+
+  it('los listados del panel mandan solo los filtros con valor', async () => {
+    const fetchMock = vi.fn(() => json(200, { items: [], total: 0, page: 1, pageSize: 20 }));
+    vi.stubGlobal('fetch', fetchMock);
+    await listAdminAudits({ domain: 'ejemplo', status: '', page: '2' });
+    expect(fetchMock).toHaveBeenCalledWith(
+      '/api/admin/audits?domain=ejemplo&page=2',
+      expect.anything(),
+    );
+    expect(toQueryString({ a: '' })).toBe('');
   });
 });

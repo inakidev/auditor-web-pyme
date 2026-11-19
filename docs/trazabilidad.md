@@ -19,7 +19,7 @@ Estados: Pendiente, En curso, Hecho o Pospuesto (fuera de la versión entregable
 | RF-09 Enlace único con vencimiento | H2, H8 | `api/src/routes/audits.test.ts` (token de 256 bits, hash en la base, 404 y 410) | `feat(api): agrega auditorías…` | Hecho |
 | RF-10 Exportar a PDF | H17 | Generación y contenido | | Pendiente |
 | RF-11 Contacto con consentimiento | H11 | `api/src/routes/audits.test.ts` (sin consentimiento no se guarda nada; fecha y versión del texto; el correo no sale en el informe ni en los logs) | `feat: agrega el contacto con consentimiento…` | Hecho |
-| RF-12 Panel de consultores | H12 | Acceso con y sin sesión; filtros | | Pendiente |
+| RF-12 Panel de consultores | H12 | `api/src/routes/admin.test.ts` (lista explícita de rutas públicas y del panel; sin sesión, 401; paginado de hasta 100; filtros por dominio, fecha, puntaje y estado con límites); `web/src/App.test.tsx` (P4: ingreso, listados y detalle) | `feat: agrega el panel de consultores con sesión…` | Hecho |
 | RF-13 Comparar auditorías | | | | Pospuesto |
 | RF-14 Estados y notas | H18 | Historial con fecha y usuario | | Pendiente |
 | RF-15 Límites de uso | H13 | Respuesta 429 y contadores hasheados | | Pendiente |
@@ -31,7 +31,7 @@ Estados: Pendiente, En curso, Hecho o Pospuesto (fuera de la versión entregable
 | Requisito | Historia | Verificación | Estado |
 |---|---|---|---|
 | RNF-01 SSRF y abuso | H1 | Suite SSRF en verde y revisión manual de `safeFetch` aprobada (18/11/2026) | Hecho |
-| RNF-02 Autenticación robusta | H12 | Pruebas de sesión, CSRF y bloqueo | Pendiente |
+| RNF-02 Autenticación robusta | H12 | `api/src/routes/auth.test.ts` (cookies `__Host-`, doble envío y token sincronizado, Origin estricto, sesión nueva al ingresar, vencimiento a 30 min y 8 h, bloqueo por correo + IP y tope por IP, /64 en IPv6, 503 con argon2 ocupado, logs sin correo, cookies ni IP); `api/src/config.test.ts` (variables obligatorias y hash argon2id válido); lista ASVS nivel 1 en el ADR 0007 | Hecho |
 | RNF-03 Sin XSS | H4, H8 | Evidencia maliciosa escapada (`web/src/App.test.tsx`); regla ESLint contra dangerouslySetInnerHTML; helmet con CSP `default-src 'none'` en la API y `no-referrer` (H8); CSP del documento web en H15 | En curso |
 | RNF-04 Dependencias sin vulnerabilidades | H0 | `pnpm audit --prod --audit-level high` en CI | Hecho |
 | RNF-05 Privacidad | H11, H14 | Correo solo con consentimiento y sin logs (H11); prueba de purga (H14); aviso de privacidad antes de exponer (etapa 6) | En curso |

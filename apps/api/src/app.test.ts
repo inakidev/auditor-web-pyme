@@ -1,10 +1,12 @@
 import { describe, expect, it } from 'vitest';
 import { buildApp } from './app.js';
 import { openDatabase } from './db/client.js';
+import { TEST_AUTH } from './testing/support.js';
 
 const deps = () => ({
   db: openDatabase(':memory:'),
   runAudit: () => Promise.resolve({ findings: [] }),
+  auth: TEST_AUTH,
 });
 
 describe('GET /api/health', () => {

@@ -36,6 +36,11 @@ jobs:
         env:
           NODE_ENV: production
           AUDITOR_CONTACT_URL: https://auditor.example.com/contacto
+          # Valores descartables solo para la prueba de humo (el hash es el de las pruebas).
+          PUBLIC_ORIGIN: https://auditor.example.com
+          ADMIN_EMAIL: humo@auditor.example.com
+          ADMIN_PASSWORD_HASH: '$argon2id$v=19$m=19456,t=2,p=1$mjTw+dr2Sn7or4vymPkqiA$yTTupNIC30QzeCeZOSXZ9lIvAE5dnIuN2qOLYJ8hmIM'
+          IP_HASH_SALT: sal-descartable-de-la-prueba-de-humo-0123
           DATABASE_PATH: ${{ runner.temp }}/smoke.db
           PORT: '3999'
         run: |
@@ -51,7 +56,14 @@ jobs:
           persist-credentials: false
       - run: docker build -t auditor-web-pyme:ci .
       - name: Prueba de humo de la imagen
+        # Valores descartables solo para la prueba de humo (el hash es el de las pruebas).
+        env:
+          AUDITOR_CONTACT_URL: https://auditor.example.com/contacto
+          PUBLIC_ORIGIN: https://auditor.example.com
+          ADMIN_EMAIL: humo@auditor.example.com
+          ADMIN_PASSWORD_HASH: '$argon2id$v=19$m=19456,t=2,p=1$mjTw+dr2Sn7or4vymPkqiA$yTTupNIC30QzeCeZOSXZ9lIvAE5dnIuN2qOLYJ8hmIM'
+          IP_HASH_SALT: sal-descartable-de-la-prueba-de-humo-0123
         run: |
-          docker run -d --name smoke -p 3000:3000 -e AUDITOR_CONTACT_URL=https://auditor.example.com/contacto auditor-web-pyme:ci
+          docker run -d --name smoke -p 3000:3000 -e AUDITOR_CONTACT_URL -e PUBLIC_ORIGIN -e ADMIN_EMAIL -e ADMIN_PASSWORD_HASH -e IP_HASH_SALT auditor-web-pyme:ci
           curl --retry 20 --retry-all-errors --retry-delay 1 -fsS http://127.0.0.1:3000/api/health || { docker logs smoke; exit 1; }
           docker rm -f smoke

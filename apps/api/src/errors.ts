@@ -30,6 +30,12 @@ const MESSAGES = {
   UNSUPPORTED_MEDIA_TYPE: 'El pedido tiene un formato que no aceptamos.',
   NOT_FOUND: 'No encontramos ese informe. Revisá el enlace.',
   EXPIRED: 'Este informe venció (duran 30 días). Pedí una nueva revisión.',
+  FORBIDDEN_ORIGIN: 'No pudimos validar el origen del pedido. Entrá desde la página del panel.',
+  CSRF_FAILED: 'El formulario venció. Recargá la página y probá de nuevo.',
+  INVALID_CREDENTIALS: 'El correo o la contraseña no son correctos.',
+  LOGIN_LOCKED: 'Hubo demasiados intentos fallidos. Esperá unos minutos y probá de nuevo.',
+  LOGIN_BUSY: 'Hay muchos ingresos en curso. Probá de nuevo en unos segundos.',
+  UNAUTHENTICATED: 'Tu sesión venció o no iniciaste sesión. Ingresá de nuevo.',
 } as const;
 
 export type ErrorCode = keyof typeof MESSAGES;

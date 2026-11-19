@@ -3,6 +3,7 @@ import { afterEach, describe, expect, it } from 'vitest';
 import { buildApp, type AppDeps } from '../app.js';
 import { openDatabase } from '../db/client.js';
 import { redactUrl } from '../logging.js';
+import { TEST_AUTH } from '../testing/support.js';
 import { Writable } from 'node:stream';
 import { CONSENT_TEXT_VERSION } from '@auditor/shared';
 
@@ -27,6 +28,7 @@ function setup(overrides: Partial<AppDeps> = {}) {
     db,
     runAudit: () => Promise.resolve({ findings: [FINDING] }),
     now: () => now,
+    auth: TEST_AUTH,
     ...overrides,
   });
   apps.push(app);
@@ -320,6 +322,7 @@ describe('recuperación al reiniciar', () => {
       db,
       runAudit: () => new Promise(() => undefined),
       now: () => now,
+      auth: TEST_AUTH,
       queue: { concurrency: 1, maxPending: 5 },
     });
     const running = (await post(first, { url: 'uno.com' })).json<{ token: string }>().token;
@@ -329,6 +332,7 @@ describe('recuperación al reiniciar', () => {
       db,
       runAudit: () => Promise.resolve({ findings: [] }),
       now: () => now,
+      auth: TEST_AUTH,
     });
     apps.push(second);
     await second.ready();

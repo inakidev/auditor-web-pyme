@@ -64,6 +64,8 @@ Marcar cada caso cuando exista su prueba y pase.
 | 18/11/2026 | Unitarias y manual | H9: guías por check (constantes, https, fuentes permitidas, aviso "en inglés"), includeSubDomains con su escritura oficial; `pnpm check:guides` con safeFetch: 30 de 30 guías responden | Verde | 436/436 | 97 % líneas | 4 guías de MDN solo existen en inglés |
 | 18/11/2026 | Aceptación (sitio propio) | Auditoría real de clinica-chubut.vercel.app con los 44 checks, fases y guías | Verde | 44 hallazgos (30 con guía) | | 9 s; 77/100 (B) sobre 5 de 5 áreas; fases visibles durante la revisión |
 | 18/11/2026 | Unitarias e integración | H11: consentimiento obligatorio con correo, sin guardar nada sin él, versión del texto, errores sin repetir el valor, redacción del correo en logs; formulario con correo y casilla | Verde | 445/445 | | |
+| 18/11/2026 | Unitarias e integración | H12: configuración obligatoria y hash argon2id válido; doble envío CSRF, token de sesión y Origin estricto (con prueba de mutación: sin la verificación de Origin fallan 5 pruebas); sesión nueva, vencimiento a 30 min y 8 h; bloqueo por correo + IP, tope por IP y /64; 503 con argon2 ocupado; logs sin correo, cookies, token ni IP; lista explícita de rutas; listados paginados y filtros con límites; P4 en la web | Verde | 580/580 | 95 % líneas | |
+| 18/11/2026 | Manual (HTTP real) | Flujo completo con curl contra la API en desarrollo: csrf, ingreso, listado del panel, cierre y acceso posterior | Verde | 200, 200, 204 y 401 | | Git Bash cambia la codificación de los argumentos de curl con ñ: se mandó el cuerpo desde un archivo UTF-8 |
 
 ## 4. Registro de defectos
 

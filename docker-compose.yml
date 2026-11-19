@@ -2,6 +2,8 @@
 services:
   api:
     build: .
+    # Las variables van en .env. ADMIN_PASSWORD_HASH entre comillas simples (ver .env.example);
+    # si en cambio lo escribís acá abajo en environment:, cada $ va como $$.
     env_file: .env
     environment:
       HOST: 0.0.0.0
