@@ -19,6 +19,19 @@ function Layout() {
   );
 }
 
+/** Borrador: el aviso real se publica en H15, antes de exponer el sistema. */
+function PrivacyPage() {
+  return (
+    <div className="space-y-3">
+      <h1 className="text-2xl font-bold">Aviso de privacidad</h1>
+      <p>
+        El aviso de privacidad está en preparación. Mientras tanto, no dejes tu correo: esta versión
+        es solo de prueba.
+      </p>
+    </div>
+  );
+}
+
 function NotFound() {
   return (
     <div className="space-y-3">
@@ -37,6 +50,7 @@ export const routes: RouteObject[] = [
     children: [
       { index: true, element: <HomePage /> },
       { path: 'informe/:token', element: <ReportPage /> },
+      { path: 'privacidad', element: <PrivacyPage /> },
       { path: '*', element: <NotFound /> },
     ],
   },

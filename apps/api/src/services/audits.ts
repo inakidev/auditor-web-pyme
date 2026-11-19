@@ -1,8 +1,14 @@
 import { scoreFindings } from '@auditor/scanner';
-import { CATEGORIES, type Category, type Finding, type Scores } from '@auditor/shared';
+import {
+  CATEGORIES,
+  CONSENT_TEXT_VERSION,
+  type Category,
+  type Finding,
+  type Scores,
+} from '@auditor/shared';
 import { asc, eq } from 'drizzle-orm';
 import type { Db } from '../db/client.js';
-import { audits, findings } from '../db/schema.js';
+import { audits, findings, leads } from '../db/schema.js';
 
 /** Los informes vencen a los 30 días (RF-09). */
 export const RETENTION_MS = 30 * 24 * 60 * 60 * 1000;
@@ -11,20 +17,44 @@ export type AuditRow = typeof audits.$inferSelect;
 
 export function createAuditRepository(db: Db) {
   return {
-    create(input: { tokenHash: string; url: string; domain: string; now: Date }): number {
-      const row = db
-        .insert(audits)
-        .values({
-          tokenHash: input.tokenHash,
-          url: input.url,
-          domain: input.domain,
-          status: 'queued',
-          createdAt: input.now,
-          expiresAt: new Date(input.now.getTime() + RETENTION_MS),
-        })
-        .returning({ id: audits.id })
-        .get();
-      return row.id;
+    /** Crea la auditoría y, si hay correo con consentimiento, el contacto (en una transacción). */
+    create(input: {
+      tokenHash: string;
+      url: string;
+      domain: string;
+      now: Date;
+      lead?: { email: string };
+    }): number {
+      return db.transaction((tx) => {
+        const leadId =
+          input.lead === undefined
+            ? null
+            : tx
+                .insert(leads)
+                .values({
+                  email: input.lead.email,
+                  consentAt: input.now,
+                  consentTextVersion: CONSENT_TEXT_VERSION,
+                  domain: input.domain,
+                  status: 'new',
+                  createdAt: input.now,
+                })
+                .returning({ id: leads.id })
+                .get().id;
+        return tx
+          .insert(audits)
+          .values({
+            tokenHash: input.tokenHash,
+            url: input.url,
+            domain: input.domain,
+            status: 'queued',
+            createdAt: input.now,
+            expiresAt: new Date(input.now.getTime() + RETENTION_MS),
+            leadId,
+          })
+          .returning({ id: audits.id })
+          .get().id;
+      });
     },
 
     findById(id: number): AuditRow | undefined {

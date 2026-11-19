@@ -23,6 +23,20 @@ describe('api-client', () => {
     );
   });
 
+  it('createAudit manda correo y consentimiento solo si hay correo', async () => {
+    const fetchMock = vi.fn(() => json(202, { token: 't' }));
+    vi.stubGlobal('fetch', fetchMock);
+    await createAudit('ejemplo.com', { email: 'a@b.com', consent: true });
+    await createAudit('ejemplo.com', { email: '  ', consent: true });
+    const bodies = (fetchMock.mock.calls as unknown as [string, RequestInit][]).map(
+      ([, init]) => init.body,
+    );
+    expect(bodies).toEqual([
+      JSON.stringify({ url: 'ejemplo.com', email: 'a@b.com', consent: true }),
+      JSON.stringify({ url: 'ejemplo.com' }),
+    ]);
+  });
+
   it('getAudit codifica el token en la ruta', async () => {
     const fetchMock = vi.fn(() => json(200, { status: 'queued' }));
     vi.stubGlobal('fetch', fetchMock);

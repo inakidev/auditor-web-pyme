@@ -32,6 +32,10 @@ export function registerAuditRoutes(app: FastifyInstance, deps: AuditRoutesDeps)
     if (!target.ok)
       return sendError(reply, 400, isErrorCode(target.code) ? target.code : 'INVALID_URL');
 
+    // Sin consentimiento expreso no se guarda el correo (RF-11).
+    const { email, consent } = parsed.data;
+    if (email !== undefined && consent !== true) return sendError(reply, 400, 'CONSENT_REQUIRED');
+
     if (!queue.canAccept()) return sendError(reply, 503, 'QUEUE_FULL');
 
     const token = generateToken();
@@ -40,6 +44,7 @@ export function registerAuditRoutes(app: FastifyInstance, deps: AuditRoutesDeps)
       url: target.url,
       domain: target.domain,
       now: now(),
+      ...(email === undefined ? {} : { lead: { email } }),
     });
     queue.enqueue(id);
     const body: CreateAuditResponse = { token };

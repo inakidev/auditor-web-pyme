@@ -3,6 +3,8 @@ import { afterEach, describe, expect, it } from 'vitest';
 import { buildApp, type AppDeps } from '../app.js';
 import { openDatabase } from '../db/client.js';
 import { redactUrl } from '../logging.js';
+import { Writable } from 'node:stream';
+import { CONSENT_TEXT_VERSION } from '@auditor/shared';
 
 const FINDING: Finding = {
   checkId: 'SEC-07',
@@ -194,6 +196,83 @@ describe('GET /api/audits/:token', () => {
     const { token } = (await post(app, { url: 'ejemplo.com' })).json<{ token: string }>();
     const rows = db.$client.prepare('select * from audits').all();
     expect(JSON.stringify(rows)).not.toContain(token);
+  });
+});
+
+describe('contacto con consentimiento (H11)', () => {
+  const EMAIL = 'persona@empresa.com.ar';
+  const count = (db: ReturnType<typeof openDatabase>, table: string) =>
+    (db.$client.prepare(`select count(*) as n from ${table}`).get() as { n: number }).n;
+
+  it('sin consentimiento no guarda el correo ni crea la auditoría', async () => {
+    const { app, db } = setup();
+    for (const payload of [
+      { url: 'ejemplo.com', email: EMAIL },
+      { url: 'ejemplo.com', email: EMAIL, consent: false },
+    ]) {
+      const res = await post(app, payload);
+      expect(res.statusCode).toBe(400);
+      expect(res.json<{ error: { code: string } }>().error.code).toBe('CONSENT_REQUIRED');
+      expect(res.body).not.toContain(EMAIL);
+    }
+    expect(count(db, 'leads')).toBe(0);
+    expect(count(db, 'audits')).toBe(0);
+  });
+
+  it('con consentimiento guarda el contacto con fecha y versión del texto aceptado', async () => {
+    const { app, db } = setup();
+    const res = await post(app, {
+      url: 'ejemplo.com',
+      email: '  Persona@Empresa.com.AR ',
+      consent: true,
+    });
+    expect(res.statusCode).toBe(202);
+    expect(res.body).not.toContain('empresa');
+    const lead = db.$client.prepare('select * from leads').get() as Record<string, unknown>;
+    expect(lead).toMatchObject({
+      email: EMAIL,
+      domain: 'ejemplo.com',
+      status: 'new',
+      consent_text_version: CONSENT_TEXT_VERSION,
+      consent_at: now.getTime(),
+    });
+    const audit = db.$client.prepare('select lead_id from audits').get() as { lead_id: number };
+    expect(audit.lead_id).toBe(lead['id']);
+    const { token } = res.json<{ token: string }>();
+    const view = await app.inject({ method: 'GET', url: `/api/audits/${token}` });
+    expect(view.body).not.toContain(EMAIL);
+  });
+
+  it('el consentimiento sin correo se ignora (no crea contacto)', async () => {
+    const { app, db } = setup();
+    expect((await post(app, { url: 'ejemplo.com', consent: true })).statusCode).toBe(202);
+    expect(count(db, 'leads')).toBe(0);
+  });
+
+  it('un correo inválido da 400 sin repetir el valor recibido', async () => {
+    const { app } = setup();
+    for (const email of ['no-es-correo', `${'a'.repeat(250)}@x.com`, '<script>@x.com']) {
+      const res = await post(app, { url: 'ejemplo.com', email, consent: true });
+      expect(res.statusCode).toBe(400);
+      expect(res.json<{ error: { code: string } }>().error.code).toBe('INVALID_INPUT');
+      expect(res.body).not.toContain(email.slice(0, 10));
+    }
+  });
+
+  it('los logs nunca muestran el correo', async () => {
+    const lines: string[] = [];
+    const stream = new Writable({
+      write(chunk: Buffer, _enc, cb) {
+        lines.push(chunk.toString());
+        cb();
+      },
+    });
+    const { app } = setup({ logger: { level: 'trace', stream } });
+    await post(app, { url: 'ejemplo.com', email: EMAIL, consent: true });
+    await app.auditQueue.idle();
+    app.log.info({ req: { body: { email: EMAIL } } }, 'prueba de redacción');
+    expect(lines.length).toBeGreaterThan(0);
+    expect(lines.join('\n')).not.toContain(EMAIL);
   });
 });
 

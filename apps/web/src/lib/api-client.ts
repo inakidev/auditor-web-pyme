@@ -54,8 +54,14 @@ async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
   return body as T;
 }
 
-export function createAudit(url: string): Promise<CreateAuditResponse> {
-  return request('/api/audits', { method: 'POST', body: JSON.stringify({ url }) });
+/** El correo y el consentimiento solo viajan si la persona escribió un correo. */
+export function createAudit(
+  url: string,
+  contact?: { readonly email: string; readonly consent: boolean },
+): Promise<CreateAuditResponse> {
+  const email = contact?.email.trim() ?? '';
+  const body = email === '' ? { url } : { url, email, consent: contact?.consent === true };
+  return request('/api/audits', { method: 'POST', body: JSON.stringify(body) });
 }
 
 export function getAudit(token: string): Promise<AuditView> {

@@ -32,7 +32,15 @@ export function buildApp(deps: AppDeps): FastifyInstance {
   const logger =
     deps.logger === undefined || deps.logger === false
       ? false
-      : { ...(deps.logger === true ? {} : deps.logger), serializers: safeSerializers };
+      : {
+          ...(deps.logger === true ? {} : deps.logger),
+          serializers: safeSerializers,
+          // Defensa extra: los correos nunca llegan a los logs (regla 8).
+          redact: {
+            paths: ['req.body.email', 'body.email', 'email', '*.email'],
+            censor: '[oculto]',
+          },
+        };
   const app = Fastify({ logger });
   const now = deps.now ?? (() => new Date());
   const repo = createAuditRepository(deps.db);

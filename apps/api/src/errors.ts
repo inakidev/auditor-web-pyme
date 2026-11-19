@@ -24,6 +24,8 @@ const MESSAGES = {
   INTERRUPTED: 'La revisión se interrumpió por un reinicio del servicio. Pedí una nueva.',
   INTERNAL_ERROR: 'Tuvimos un problema al revisar el sitio. Probá de nuevo más tarde.',
   QUEUE_FULL: 'Hay muchas revisiones en curso. Probá de nuevo en unos minutos.',
+  CONSENT_REQUIRED:
+    'Para guardar tu correo necesitamos que marques la casilla de consentimiento. Si no querés dejarlo, borralo.',
   PAYLOAD_TOO_LARGE: 'El pedido es demasiado grande.',
   UNSUPPORTED_MEDIA_TYPE: 'El pedido tiene un formato que no aceptamos.',
   NOT_FOUND: 'No encontramos ese informe. Revisá el enlace.',

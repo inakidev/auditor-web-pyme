@@ -43,6 +43,19 @@ describe('P1: portada', () => {
     expect(html).toContain('Solo hacemos un análisis pasivo');
   });
 
+  it('ofrece el correo opcional con la casilla de consentimiento y el aviso de privacidad', () => {
+    const html = renderAt('/');
+    expect(html).toMatch(/<input[^>]*type="email"/);
+    expect(html).toContain('Tu correo (opcional)');
+    expect(html).toMatch(/<input[^>]*type="checkbox"/);
+    expect(html).toContain('Acepto que me contacten con el informe');
+    expect(html).toContain('href="/privacidad"');
+  });
+
+  it('el aviso de privacidad todavía está en preparación', () => {
+    expect(renderAt('/privacidad')).toContain('en preparación');
+  });
+
   it('una ruta desconocida muestra un mensaje en español', () => {
     expect(renderAt('/no-existe')).toContain('No encontramos esta página');
   });

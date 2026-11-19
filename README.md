@@ -24,10 +24,10 @@ El avance se mide en **puntos de historia** sobre el alcance de la versión entr
 
 | Indicador | Valor |
 |---|---|
-| Puntos terminados | 50 de 85 |
-| Avance | 58,8 % |
+| Puntos terminados | 53 de 85 |
+| Avance | 62,4 % |
 | Meta del Avance 3 | 51 puntos (60 %) |
-| Última actualización | 18/11/2026 (cierre de la etapa 4: H8, H9 y H10) |
+| Última actualización | 18/11/2026 (H11) |
 
 > Actualizá esta tabla cada vez que se cierra una historia. Una historia cuenta solo si cumple su definición de hecho (pruebas en verde, revisión hecha y documentación al día).
 

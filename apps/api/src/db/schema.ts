@@ -4,12 +4,27 @@ import {
   CATEGORIES,
   EFFORTS,
   FINDING_STATUSES,
+  LEAD_STATUSES,
   SEVERITIES,
 } from '@auditor/shared';
 import { index, integer, sqliteTable, text } from 'drizzle-orm/sqlite-core';
 
-// Modelo de datos del plan (sección 3). El lead (H11) y la IP hasheada (H13) se agregan con
-// migraciones en sus historias.
+// Modelo de datos del plan (sección 3). La IP hasheada (H13) se agrega con una migración en su historia.
+
+/** Contactos con consentimiento expreso (RF-11). Nunca se guarda un correo sin consentimiento. */
+export const leads = sqliteTable(
+  'leads',
+  {
+    id: integer('id').primaryKey({ autoIncrement: true }),
+    email: text('email').notNull(),
+    consentAt: integer('consent_at', { mode: 'timestamp_ms' }).notNull(),
+    consentTextVersion: text('consent_text_version').notNull(),
+    domain: text('domain').notNull(),
+    status: text('status', { enum: LEAD_STATUSES }).notNull(),
+    createdAt: integer('created_at', { mode: 'timestamp_ms' }).notNull(),
+  },
+  (t) => [index('leads_domain_idx').on(t.domain), index('leads_created_at_idx').on(t.createdAt)],
+);
 
 export const audits = sqliteTable(
   'audits',
@@ -33,6 +48,7 @@ export const audits = sqliteTable(
     scoreAnalytics: integer('score_analytics'),
     scoreTrust: integer('score_trust'),
     scorePerf: integer('score_perf'),
+    leadId: integer('lead_id').references(() => leads.id, { onDelete: 'set null' }),
   },
   (t) => [
     index('audits_domain_idx').on(t.domain),

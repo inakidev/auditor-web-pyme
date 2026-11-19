@@ -63,6 +63,7 @@ Marcar cada caso cuando exista su prueba y pase.
 | 18/11/2026 | Unitarias | H8: fases en memoria (P2), helmet en la API, informe P3 (nivel, cinco barras, prioridades, detalle plegable sin severidad en lo que cumple) | Verde | 428/428 | 97 % líneas | |
 | 18/11/2026 | Unitarias y manual | H9: guías por check (constantes, https, fuentes permitidas, aviso "en inglés"), includeSubDomains con su escritura oficial; `pnpm check:guides` con safeFetch: 30 de 30 guías responden | Verde | 436/436 | 97 % líneas | 4 guías de MDN solo existen en inglés |
 | 18/11/2026 | Aceptación (sitio propio) | Auditoría real de clinica-chubut.vercel.app con los 44 checks, fases y guías | Verde | 44 hallazgos (30 con guía) | | 9 s; 77/100 (B) sobre 5 de 5 áreas; fases visibles durante la revisión |
+| 18/11/2026 | Unitarias e integración | H11: consentimiento obligatorio con correo, sin guardar nada sin él, versión del texto, errores sin repetir el valor, redacción del correo en logs; formulario con correo y casilla | Verde | 445/445 | | |
 
 ## 4. Registro de defectos
 

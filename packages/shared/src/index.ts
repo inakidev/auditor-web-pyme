@@ -58,9 +58,22 @@ export interface Scores {
 
 export const MAX_URL_LENGTH = 2048;
 
+export const MAX_EMAIL_LENGTH = 254;
+
+/** Texto de la casilla de consentimiento (RF-11). Si cambia, se sube la versión. */
+export const CONSENT_TEXT = 'Acepto que me contacten con el informe';
+export const CONSENT_TEXT_VERSION = '2026-11-18';
+
+export const LEAD_STATUSES = ['new', 'contacted', 'proposal', 'closed'] as const;
+export type LeadStatus = (typeof LEAD_STATUSES)[number];
+
 /** Cuerpo de POST /api/audits. strict(): rechaza campos desconocidos. */
 export const createAuditRequestSchema = z
-  .object({ url: z.string().trim().min(1).max(MAX_URL_LENGTH) })
+  .object({
+    url: z.string().trim().min(1).max(MAX_URL_LENGTH),
+    email: z.string().trim().toLowerCase().max(MAX_EMAIL_LENGTH).pipe(z.email()).optional(),
+    consent: z.boolean().optional(),
+  })
   .strict();
 export type CreateAuditRequest = z.infer<typeof createAuditRequestSchema>;
 
