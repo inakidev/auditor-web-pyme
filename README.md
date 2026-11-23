@@ -26,10 +26,10 @@ El avance se mide en **puntos de historia** sobre el alcance de la versión entr
 
 | Indicador | Valor |
 |---|---|
-| Puntos terminados | 74 de 85 |
-| Avance | 87,1 % |
+| Puntos terminados | 80 de 85 |
+| Avance | 94,1 % |
 | Meta del Avance 3 | 51 puntos (60 %) |
-| Última actualización | 23/11/2026 (H13, H14 y H15, cierre de la etapa 6) |
+| Última actualización | 23/11/2026 (H17 y H18; H16 en revisión hasta cargar la prueba de usabilidad) |
 
 > Actualizá esta tabla cada vez que se cierra una historia. Una historia cuenta solo si cumple su definición de hecho (pruebas en verde, revisión hecha y documentación al día).
 
@@ -122,8 +122,21 @@ pnpm lint           # ESLint y Prettier
 pnpm typecheck      # TypeScript estricto
 pnpm build          # compila todos los paquetes
 pnpm check:guides   # verifica a mano que las guías de las recomendaciones respondan
+pnpm test:e2e       # e2e en Chromium (la primera vez: pnpm exec playwright install chromium)
 docker compose up   # API en contenedor con la imagen de producción (lee .env)
 ```
+
+## Cómo se usa
+
+**Para una pyme:**
+1. En la portada, escribí la dirección de tu sitio y, si querés que te contactemos, tu correo con la casilla de consentimiento.
+2. Esperá unos segundos mientras se ven las fases de la revisión.
+3. El informe muestra el puntaje con su nivel, lo que conviene arreglar primero y el detalle por área, con guías.
+4. Con **Descargar PDF** lo guardás o lo imprimís. El enlace del informe dura 30 días.
+
+**Para el consultor** (en `/panel`, con usuario y contraseña):
+- **Auditorías:** listado con filtros por dominio, fecha, puntaje y estado; detalle de cada informe y borrado.
+- **Contactos:** quienes dejaron su correo. En el detalle de cada contacto se cambia el estado (nuevo, contactado, propuesta o cerrado), se agregan notas y queda el historial con fecha y usuario.
 
 ## Despliegue en Render
 

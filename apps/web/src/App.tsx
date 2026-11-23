@@ -6,6 +6,7 @@ import { PrivacyPage } from './pages/legal/PrivacyPage.js';
 import { TermsPage } from './pages/legal/TermsPage.js';
 import { AuditDetailPage } from './pages/panel/AuditDetailPage.js';
 import { AuditsPanel } from './pages/panel/AuditsPanel.js';
+import { LeadDetailPage } from './pages/panel/LeadDetailPage.js';
 import { LeadsPanel } from './pages/panel/LeadsPanel.js';
 import { LoginPage } from './pages/panel/LoginPage.js';
 import { PanelLayout } from './pages/panel/PanelLayout.js';
@@ -75,6 +76,7 @@ export const routes: RouteObject[] = [
         children: [
           { index: true, element: <AuditsPanel /> },
           { path: 'contactos', element: <LeadsPanel /> },
+          { path: 'contactos/:id', element: <LeadDetailPage /> },
           { path: 'auditorias/:id', element: <AuditDetailPage /> },
         ],
       },

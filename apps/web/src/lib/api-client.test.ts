@@ -4,8 +4,11 @@ import {
   createAudit,
   deleteAdminAudit,
   deleteAdminLead,
+  addLeadNote,
+  getAdminLead,
   getAudit,
   getPublicConfig,
+  updateLeadStatus,
   listAdminAudits,
   login,
   logout,
@@ -124,5 +127,21 @@ describe('api-client', () => {
       expect(init.method).toBe('DELETE');
       expect(init.headers).toMatchObject({ 'x-csrf-token': 'tok' });
     }
+  });
+
+  it('el seguimiento de contactos usa GET, PATCH y POST con CSRF en las mutaciones', async () => {
+    const fetchMock = vi.fn(() => json(200, { lead: {}, events: [] }));
+    vi.stubGlobal('fetch', fetchMock);
+    await getAdminLead('3');
+    await updateLeadStatus(3, 'closed', 'tok');
+    await addLeadNote(3, 'hola', 'tok');
+    const calls = fetchMock.mock.calls as unknown as [string, RequestInit][];
+    expect(calls.map(([path, init]) => `${init.method ?? 'GET'} ${path}`)).toEqual([
+      'GET /api/admin/leads/3',
+      'PATCH /api/admin/leads/3',
+      'POST /api/admin/leads/3/notes',
+    ]);
+    expect(calls[1]?.[1].body).toBe(JSON.stringify({ status: 'closed' }));
+    expect(calls[2]?.[1].headers).toMatchObject({ 'x-csrf-token': 'tok' });
   });
 });

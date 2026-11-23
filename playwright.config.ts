@@ -13,7 +13,7 @@ export default defineConfig({
   projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
   webServer: {
     command:
-      'pnpm --filter @auditor/web build && pnpm --filter @auditor/api exec tsx --conditions=development src/testing/e2e-server.ts',
+      'pnpm --filter "@auditor/web..." build && pnpm --filter @auditor/api exec tsx --conditions=development src/testing/e2e-server.ts',
     url: 'http://localhost:4173/api/health',
     reuseExistingServer: !process.env['CI'],
     timeout: 180_000,

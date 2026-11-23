@@ -1,6 +1,7 @@
 import type {
   AdminAuditDetail,
   AdminAuditItem,
+  AdminLeadDetail,
   AdminLeadItem,
   AuditView,
   Finding,
@@ -15,7 +16,14 @@ import { describe, expect, it } from 'vitest';
 import { routes } from './App.js';
 import { FindingsList } from './components/FindingsList.js';
 import { ApiRequestError } from './lib/api-client.js';
-import { SESSION_KEY, auditDetailKey, auditsKey, leadsKey, needsLogin } from './lib/panel.js';
+import {
+  SESSION_KEY,
+  auditDetailKey,
+  auditsKey,
+  leadDetailKey,
+  leadsKey,
+  needsLogin,
+} from './lib/panel.js';
 import { phaseProgress } from './lib/report.js';
 import { PUBLIC_CONFIG_KEY } from './pages/HomePage.js';
 
@@ -495,5 +503,54 @@ describe('textos legales', () => {
     const html = renderAt('/panel/auditorias/7', client);
     expect(html).toContain('Borrar auditoría');
     expect(html).toContain('Borrar contacto');
+  });
+});
+
+describe('seguimiento de contactos (RF-14)', () => {
+  it('el detalle muestra estado, formulario de notas e historial escapado', () => {
+    const client = new QueryClient();
+    client.setQueryData(SESSION_KEY, { email: 'c@agencia.example.test', csrfToken: 's' });
+    client.setQueryData(leadDetailKey('3'), {
+      lead: {
+        id: 3,
+        email: 'd@uno.example.com',
+        domain: 'uno.example.com',
+        status: 'contacted',
+        consentAt: '2026-11-18T12:00:00.000Z',
+        consentTextVersion: 'v',
+        createdAt: '2026-11-18T12:00:00.000Z',
+        lastAuditId: 7,
+      },
+      events: [
+        {
+          id: 2,
+          type: 'note',
+          status: null,
+          note: '<b>pidió presupuesto</b>',
+          createdAt: '2026-11-19T12:00:00.000Z',
+          userEmail: 'c@agencia.example.test',
+        },
+        {
+          id: 1,
+          type: 'status',
+          status: 'contacted',
+          note: null,
+          createdAt: '2026-11-18T13:00:00.000Z',
+          userEmail: 'c@agencia.example.test',
+        },
+      ],
+    } satisfies AdminLeadDetail);
+    const html = renderAt('/panel/contactos/3', client);
+    expect(html).toContain('d@uno.example.com');
+    expect(html).toContain('Guardar estado');
+    expect(html).toContain('Agregar nota');
+    expect(html).toContain('Cambió el estado a Contactado.');
+    expect(html).toContain('&lt;b&gt;pidió presupuesto&lt;/b&gt;');
+    expect(html).not.toContain('<b>pidió');
+    expect(html).toContain('href="/panel/auditorias/7"');
+  });
+
+  it('el aviso de privacidad menciona las notas del consultor', () => {
+    expect(renderAt('/privacidad')).toContain('anotar lo que hablaron');
   });
 });

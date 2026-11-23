@@ -212,3 +212,30 @@ export interface PublicConfig {
   /** Aviso de demo: base efímera y arranque en frío. */
   readonly demoNotice: boolean;
 }
+
+// --- Seguimiento de contactos (H18, RF-14) ---
+
+export const MAX_NOTE_LENGTH = 2000;
+export const LEAD_EVENT_TYPES = ['status', 'note'] as const;
+export type LeadEventType = (typeof LEAD_EVENT_TYPES)[number];
+
+export const updateLeadStatusSchema = z.object({ status: z.enum(LEAD_STATUSES) }).strict();
+export const addLeadNoteSchema = z
+  .object({ note: z.string().trim().min(1).max(MAX_NOTE_LENGTH) })
+  .strict();
+
+/** Un cambio de estado o una nota, con fecha y usuario (RF-14). */
+export interface LeadEvent {
+  readonly id: number;
+  readonly type: LeadEventType;
+  readonly status: LeadStatus | null;
+  readonly note: string | null;
+  readonly createdAt: string;
+  readonly userEmail: string;
+}
+
+export interface AdminLeadDetail {
+  readonly lead: AdminLeadItem;
+  /** Más reciente primero. */
+  readonly events: readonly LeadEvent[];
+}

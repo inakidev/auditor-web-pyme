@@ -1,5 +1,7 @@
 // Único lugar de la web que usa fetch: habla solo con nuestra propia API (mismo origen).
 import type {
+  AdminLeadDetail,
+  LeadStatus,
   AdminAuditDetail,
   AdminAuditItem,
   AdminLeadItem,
@@ -138,4 +140,29 @@ export async function deleteAdminAudit(id: number, csrfToken: string): Promise<v
 
 export async function deleteAdminLead(id: number, csrfToken: string): Promise<void> {
   await request(`/api/admin/leads/${String(id)}`, { method: 'DELETE' }, csrfToken);
+}
+
+/** Seguimiento de contactos (RF-14). */
+export function getAdminLead(id: string): Promise<AdminLeadDetail> {
+  return request(`/api/admin/leads/${encodeURIComponent(id)}`);
+}
+
+export function updateLeadStatus(
+  id: number,
+  status: LeadStatus,
+  csrfToken: string,
+): Promise<AdminLeadDetail> {
+  return request(
+    `/api/admin/leads/${String(id)}`,
+    { method: 'PATCH', body: JSON.stringify({ status }) },
+    csrfToken,
+  );
+}
+
+export function addLeadNote(id: number, note: string, csrfToken: string): Promise<AdminLeadDetail> {
+  return request(
+    `/api/admin/leads/${String(id)}/notes`,
+    { method: 'POST', body: JSON.stringify({ note }) },
+    csrfToken,
+  );
 }

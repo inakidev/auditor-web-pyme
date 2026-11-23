@@ -22,6 +22,9 @@ const ADMIN_ROUTES = [
   'GET /api/admin/leads',
   'DELETE /api/admin/audits/:id',
   'DELETE /api/admin/leads/:id',
+  'GET /api/admin/leads/:id',
+  'PATCH /api/admin/leads/:id',
+  'POST /api/admin/leads/:id/notes',
 ];
 
 const FINDING: Finding = {

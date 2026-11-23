@@ -1,4 +1,7 @@
 import type {
+  AdminLeadDetail,
+  LeadEvent,
+  LeadStatus,
   AdminAuditItem,
   AdminAuditsQuery,
   AdminLeadItem,
@@ -8,7 +11,7 @@ import type {
 import { and, count, desc, eq, gte, isNotNull, like, lt, lte, sql, type SQL } from 'drizzle-orm';
 import type { SQLiteColumn } from 'drizzle-orm/sqlite-core';
 import type { Db } from '../db/client.js';
-import { audits, leads } from '../db/schema.js';
+import { audits, leadEvents, leads, users } from '../db/schema.js';
 
 /** Las fechas del panel se interpretan en la hora de Argentina (UTC-3, sin horario de verano). */
 const PANEL_UTC_OFFSET = '-03:00';
@@ -110,6 +113,82 @@ export function createAdminRepository(db: Db) {
     },
 
     /** Borrado manual (RF-16). Las auditorías quedan sin contacto (D-02: sin SET NULL en la base). */
+    /** Detalle de un contacto con su historial, más reciente primero (RF-14). */
+    leadDetail(id: number): AdminLeadDetail | undefined {
+      const row = db
+        .select({
+          id: leads.id,
+          email: leads.email,
+          domain: leads.domain,
+          status: leads.status,
+          consentAt: leads.consentAt,
+          consentTextVersion: leads.consentTextVersion,
+          createdAt: leads.createdAt,
+          lastAuditId: sql<
+            number | null
+          >`(select max(${audits.id}) from ${audits} where ${audits.leadId} = ${leads.id})`,
+        })
+        .from(leads)
+        .where(eq(leads.id, id))
+        .get();
+      if (row === undefined) return undefined;
+      const events: LeadEvent[] = db
+        .select({
+          id: leadEvents.id,
+          type: leadEvents.type,
+          status: leadEvents.status,
+          note: leadEvents.note,
+          createdAt: leadEvents.createdAt,
+          userEmail: users.email,
+        })
+        .from(leadEvents)
+        .innerJoin(users, eq(users.id, leadEvents.userId))
+        .where(eq(leadEvents.leadId, id))
+        .orderBy(desc(leadEvents.createdAt), desc(leadEvents.id))
+        .all()
+        .map((e) => ({ ...e, createdAt: e.createdAt.toISOString() }));
+      return {
+        lead: {
+          ...row,
+          consentAt: row.consentAt.toISOString(),
+          createdAt: row.createdAt.toISOString(),
+        },
+        events,
+      };
+    },
+
+    /** Cambia el estado y lo deja en el historial; el mismo estado no agrega nada. */
+    setLeadStatus(
+      id: number,
+      status: LeadStatus,
+      userId: number,
+      now: Date,
+    ): 'not_found' | 'unchanged' | 'changed' {
+      return db.transaction((tx) => {
+        const current = tx
+          .select({ status: leads.status })
+          .from(leads)
+          .where(eq(leads.id, id))
+          .get();
+        if (current === undefined) return 'not_found';
+        if (current.status === status) return 'unchanged';
+        tx.update(leads).set({ status }).where(eq(leads.id, id)).run();
+        tx.insert(leadEvents)
+          .values({ leadId: id, userId, type: 'status', status, createdAt: now })
+          .run();
+        return 'changed';
+      });
+    },
+
+    addLeadNote(id: number, note: string, userId: number, now: Date): boolean {
+      const exists = db.select({ id: leads.id }).from(leads).where(eq(leads.id, id)).get();
+      if (exists === undefined) return false;
+      db.insert(leadEvents)
+        .values({ leadId: id, userId, type: 'note', note, createdAt: now })
+        .run();
+      return true;
+    },
+
     deleteLead(id: number): boolean {
       return db.transaction((tx) => {
         tx.update(audits).set({ leadId: null }).where(eq(audits.leadId, id)).run();

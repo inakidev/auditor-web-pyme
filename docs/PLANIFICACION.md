@@ -59,9 +59,9 @@ Total de la versión entregable: **85 puntos**. Prioridad: M (debe) o S (deberí
 | H13 | Límites de uso por IP, dominio y día | RF-15 | 5 | M | Hecho |
 | H14 | Retención, purga y borrado de datos | RF-16, RNF-05 | 3 | M | Hecho |
 | H15 | Despliegue con Docker, HTTPS, términos y privacidad | RNF-11 | 5 | M | Hecho |
-| H16 | Pruebas e2e y prueba de usabilidad | RNF-06, 07, 08 | 5 | M | Pendiente |
-| H17 | Exportar el informe a PDF | RF-10 | 3 | S | Pendiente |
-| H18 | Estados y notas de contactos | RF-14 | 3 | S | Pendiente |
+| H16 | Pruebas e2e y prueba de usabilidad | RNF-06, 07, 08 | 5 | M | En revisión |
+| H17 | Exportar el informe a PDF | RF-10 | 3 | S | Hecho |
+| H18 | Estados y notas de contactos | RF-14 | 3 | S | Hecho |
 | | **Total** | | **85** | | |
 
 Quedan fuera de la versión entregable: comparación de auditorías (RF-13), TOTP, verificación de dominio y monitoreo programado.

@@ -30,6 +30,11 @@ export function PrivacyPage() {
             cuando el servicio se reinicia.
           </li>
           <li>
+            Si dejaste tu correo, el consultor puede registrar en qué estado está el contacto
+            (nuevo, contactado, propuesta o cerrado) y anotar lo que hablaron. Esas notas se borran
+            junto con tu correo.
+          </li>
+          <li>
             Si sos consultor y entrás al panel: tu correo y tu contraseña, que se guarda protegida
             (nunca en texto legible).
           </li>

@@ -36,6 +36,13 @@
       "when": 1795051938761,
       "tag": "0004_auth",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "6",
+      "when": 1795474248210,
+      "tag": "0005_lead_events",
+      "breakpoints": true
     }
   ]
 }

@@ -54,7 +54,14 @@ export function LeadsPanel() {
             {query.data.items.map((l) => (
               <tr key={l.id} className="border-b border-slate-200">
                 <td className="px-2 py-2">{formatDate(l.createdAt)}</td>
-                <td className="px-2 py-2">{l.email}</td>
+                <td className="px-2 py-2">
+                  <Link
+                    to={`/panel/contactos/${String(l.id)}`}
+                    className="font-medium text-blue-800 underline"
+                  >
+                    {l.email}
+                  </Link>
+                </td>
                 <td className="px-2 py-2">{l.domain}</td>
                 <td className="px-2 py-2">{LEAD_STATUS_LABEL[l.status]}</td>
                 <td className="px-2 py-2">

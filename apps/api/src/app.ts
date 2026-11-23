@@ -216,6 +216,7 @@ export function buildApp(deps: AppDeps): FastifyInstance {
     audits: repo,
     guards,
     phaseOf,
+    now,
   });
 
   return app;

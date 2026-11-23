@@ -64,5 +64,21 @@ test.describe('del inicio de sesión al panel', () => {
     await login(page);
     await page.getByRole('link', { name: 'Contactos' }).click();
     await expect(page.getByRole('cell', { name: 'duenia@contacto-e2e.example.com' })).toBeVisible();
+
+    // Seguimiento (RF-14): estado y nota quedan en el historial con el usuario.
+    await page.getByRole('link', { name: 'duenia@contacto-e2e.example.com' }).click();
+    // Esperar el detalle: en el listado también hay un selector "Estado" (el filtro).
+    await expect(
+      page.getByRole('heading', { name: 'duenia@contacto-e2e.example.com' }),
+    ).toBeVisible();
+    await page.getByLabel('Estado').selectOption({ label: 'Contactado' });
+    await page.getByRole('button', { name: 'Guardar estado' }).click();
+    await expect(page.getByText('Cambió el estado a Contactado.')).toBeVisible();
+    await page.getByLabel('Nueva nota').fill('Pidió presupuesto por WhatsApp.');
+    await page.getByRole('button', { name: 'Agregar nota' }).click();
+    await expect(page.getByText('Pidió presupuesto por WhatsApp.')).toBeVisible();
+    await expect(page.getByText('consultor@agencia.example.test').first()).toBeVisible();
+    await page.getByRole('link', { name: 'Volver a los contactos' }).click();
+    await expect(page.getByRole('cell', { name: 'Contactado' })).toBeVisible();
   });
 });

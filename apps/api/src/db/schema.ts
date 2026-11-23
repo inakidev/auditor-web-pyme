@@ -4,6 +4,7 @@ import {
   CATEGORIES,
   EFFORTS,
   FINDING_STATUSES,
+  LEAD_EVENT_TYPES,
   LEAD_STATUSES,
   SEVERITIES,
 } from '@auditor/shared';
@@ -111,3 +112,22 @@ export const loginCounters = sqliteTable('login_counters', {
   lastFailureAt: integer('last_failure_at').notNull(),
   lockedUntil: integer('locked_until').notNull(),
 });
+
+/** Historial de cada contacto: cambios de estado y notas, con fecha y usuario (RF-14). */
+export const leadEvents = sqliteTable(
+  'lead_events',
+  {
+    id: integer('id').primaryKey({ autoIncrement: true }),
+    leadId: integer('lead_id')
+      .notNull()
+      .references(() => leads.id, { onDelete: 'cascade' }),
+    userId: integer('user_id')
+      .notNull()
+      .references(() => users.id),
+    type: text('type', { enum: LEAD_EVENT_TYPES }).notNull(),
+    status: text('status', { enum: LEAD_STATUSES }),
+    note: text('note'),
+    createdAt: integer('created_at', { mode: 'timestamp_ms' }).notNull(),
+  },
+  (t) => [index('lead_events_lead_id_idx').on(t.leadId)],
+);

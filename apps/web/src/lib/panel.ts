@@ -5,6 +5,7 @@ export const SESSION_KEY = ['session'] as const;
 export const auditsKey = (query: string) => ['admin', 'audits', query] as const;
 export const leadsKey = (query: string) => ['admin', 'leads', query] as const;
 export const auditDetailKey = (id: string) => ['admin', 'audit', id] as const;
+export const leadDetailKey = (id: string) => ['admin', 'lead', id] as const;
 
 export const AUDIT_STATUS_LABEL: Record<AuditStatus, string> = {
   queued: 'En fila',
