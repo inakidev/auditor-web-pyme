@@ -98,7 +98,7 @@ Al cerrar cada etapa se anotan la fecha y las horas dedicadas, y se compara el a
 | 2 | 18/11/2026 | 1,5 | 26 | 26 | 0 | Sin desvío. Demo en el navegador contra clinica-chubut.vercel.app (sitio propio): 8 de 8 checks de seguridad cumplen |
 | 3 | 18/11/2026 | 1 | 37 | 37 | 0 | Sin desvío. Se encontró y corrigió el defecto D-01 al auditar un sitio propio; se sumó el GET de respaldo con tope reducido |
 | 4 | 18/11/2026 | 0,75 | 50 | 50 | 0 | Sin desvío. Auditoría real con los 44 checks (5 de 5 áreas); 6 guías corregidas con `pnpm check:guides`; GET de respaldo ampliado a 404/410 |
-| 5 | 18/11/2026 | — | 61 | 61 | 0 | Sin desvío. Contactos con consentimiento (H11) y panel con sesión, CSRF y bloqueo (H12). Horas a confirmar |
+| 5 | 18/11/2026 | 2 (estimadas) | 61 | 61 | 0 | Sin desvío. Contactos con consentimiento (H11) y panel con sesión, CSRF y bloqueo (H12). Las horas son una estimación posterior: no se registraron al cerrar |
 | 6 | | | 74 | | | |
 | 7 | | | 85 | | | |
 
