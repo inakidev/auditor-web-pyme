@@ -100,7 +100,7 @@ Al cerrar cada etapa se anotan la fecha y las horas dedicadas, y se compara el a
 | 4 | 18/11/2026 | 0,75 | 50 | 50 | 0 | Sin desvío. Auditoría real con los 44 checks (5 de 5 áreas); 6 guías corregidas con `pnpm check:guides`; GET de respaldo ampliado a 404/410 |
 | 5 | 18/11/2026 | 2 (estimadas) | 61 | 61 | 0 | Sin desvío. Contactos con consentimiento (H11) y panel con sesión, CSRF y bloqueo (H12). Las horas son una estimación posterior: no se registraron al cerrar |
 | 6 | 23/11/2026 | 3 | 74 | 74 | 0 | Sin desvío. Demo publicada en Render (plan gratuito). En producción se midió la cadena de proxies y se ajustó `TRUST_PROXY_HOPS` a 3: con el valor inicial el bloqueo de ingresos no funcionaba. Fastify 5.12 ignora el `trustProxy` numérico (se usa una función propia). Se encontró y corrigió D-02. Un bloqueo de facturación de GitHub Actions (ajeno al proyecto) frenó CI unas horas |
-| 7 | | | 85 | | | |
+| 7 | En curso | 2,5 | 85 | 80 (parcial) | — | H17 y H18 hechas; H16 con e2e, accesibilidad y RNF-06/07 medidos, pero falta cargar la prueba de usabilidad. Se cierra con esos resultados |
 
 Commits en los que se cerró cada etapa (los que completan su fila en esta tabla):
 
