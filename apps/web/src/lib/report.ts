@@ -88,18 +88,30 @@ export function phaseProgress(phase: AuditPhase | null): number {
 
 /** Etiquetas de prioridad del wireframe P3, con contraste AA (texto blanco sobre fondo oscuro). */
 export const SEVERITY_BADGE: Record<Severity, { label: string; className: string }> = {
-  critical: { label: 'Crítico', className: 'bg-red-700 text-white' },
-  high: { label: 'Alto', className: 'bg-orange-700 text-white' },
-  medium: { label: 'Medio', className: 'bg-yellow-700 text-white' },
-  low: { label: 'Bajo', className: 'bg-green-700 text-white' },
+  critical: { label: 'Crítica', className: 'bg-red-700 text-white' },
+  high: { label: 'Alta', className: 'bg-orange-700 text-white' },
+  medium: { label: 'Media', className: 'bg-yellow-700 text-white' },
+  // Azul y no verde: el verde se reserva para "Cumple".
+  low: { label: 'Baja', className: 'bg-blue-700 text-white' },
   info: { label: 'Info', className: 'bg-slate-600 text-white' },
 };
 
 /** Lo que conviene arreglar primero: no cumple y advertencias con peso, por severidad. */
+/** Lo que conviene arreglar primero: por prioridad y, a igual prioridad, "no cumple" antes. */
 export function priorityFindings(findings: readonly Finding[], limit = 5): Finding[] {
-  return sortFindings(findings)
-    .filter((f) => (f.status === 'fail' || f.status === 'warn') && f.severity !== 'info')
+  return findings
+    .filter(isPending)
+    .sort(
+      (a, b) =>
+        SEVERITY_ORDER.indexOf(a.severity) - SEVERITY_ORDER.indexOf(b.severity) ||
+        STATUS_ORDER.indexOf(a.status) - STATUS_ORDER.indexOf(b.status),
+    )
     .slice(0, limit);
+}
+
+/** Algo para resolver que pesa en el puntaje (las sugerencias informativas no restan). */
+export function isPending(finding: Finding): boolean {
+  return isActionable(finding) && finding.severity !== 'info';
 }
 
 /** En lo que cumple o no aplica no se muestran severidad ni esfuerzo. */

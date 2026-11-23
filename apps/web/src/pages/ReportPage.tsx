@@ -153,7 +153,7 @@ export function ReportPage() {
         <div className="space-y-1">
           <h1 className="text-2xl font-bold text-blue-950">Informe de {domainOf(audit.url)}</h1>
           <p className="text-sm text-slate-700">
-            Revisado el {formatDateTime(audit.finishedAt ?? audit.createdAt)}.
+            Revisado el {formatDateTime(audit.finishedAt ?? audit.createdAt)}
           </p>
           <p className="break-all text-sm text-slate-700">Dirección revisada: {audit.url}</p>
           <p className="text-sm text-slate-700 print:hidden">

@@ -7,6 +7,7 @@ import {
   STATUS_LABEL,
   STATUS_STYLE,
   isActionable,
+  isPending,
   priorityFindings,
   sortFindings,
 } from '../lib/report.js';
@@ -49,7 +50,7 @@ function FindingItem({ finding }: { readonly finding: Finding }) {
         {isActionable(finding) && (
           <>
             <span aria-hidden="true">·</span>
-            <span>Severidad: {SEVERITY_LABEL[finding.severity]}</span>
+            <span>Prioridad: {SEVERITY_LABEL[finding.severity]}</span>
             <span aria-hidden="true">·</span>
             <span>Esfuerzo: {EFFORT_LABEL[finding.effort]}</span>
           </>
@@ -89,7 +90,9 @@ export function FindingsList({ findings }: { readonly findings: readonly Finding
   return (
     <div className="space-y-4">
       {[...byCategory].map(([category, items]) => {
-        const pending = items.filter(isActionable).length;
+        const pending = items.filter(isPending).length;
+        const toFix = items.filter(isActionable);
+        const fine = items.filter((f) => !isActionable(f));
         return (
           <details
             key={category}
@@ -102,11 +105,26 @@ export function FindingsList({ findings }: { readonly findings: readonly Finding
                 ({pending === 0 ? 'todo en orden' : `${String(pending)} para revisar`})
               </span>
             </summary>
-            <ul className="mt-3 space-y-3">
-              {items.map((finding) => (
-                <FindingItem key={finding.checkId} finding={finding} />
-              ))}
-            </ul>
+            {toFix.length > 0 && (
+              <ul className="mt-3 space-y-3">
+                {toFix.map((finding) => (
+                  <FindingItem key={finding.checkId} finding={finding} />
+                ))}
+              </ul>
+            )}
+            {/* Lo que cumple o no aplica va plegado: así el informe no se hace eterno. */}
+            {fine.length > 0 && (
+              <details className="mt-3">
+                <summary className="cursor-pointer font-medium text-slate-700">
+                  Lo que ya está bien o no aplica ({fine.length})
+                </summary>
+                <ul className="mt-3 space-y-3">
+                  {fine.map((finding) => (
+                    <FindingItem key={finding.checkId} finding={finding} />
+                  ))}
+                </ul>
+              </details>
+            )}
           </details>
         );
       })}

@@ -108,7 +108,7 @@ describe('FindingsList', () => {
     );
     expect(html).toContain('No cumple');
     expect(html).toContain('Esfuerzo: bajo');
-    expect(html.match(/Severidad:/g)).toHaveLength(1);
+    expect(html.match(/Prioridad:/g)).toHaveLength(1);
     expect(html).toContain('Seguridad');
   });
 
@@ -226,7 +226,7 @@ describe('estados del informe', () => {
     expect(html).toContain('sin datos');
     expect(html).toContain('Calculado sobre 4 de 5 áreas');
     expect(html).toContain('Qué conviene arreglar primero');
-    expect(html.indexOf('Crítico')).toBeLessThan(html.indexOf('Alto'));
+    expect(html.indexOf('Crítica')).toBeLessThan(html.indexOf('Alta'));
     // RF-10: botón de PDF y encabezado de impresión con logo, fecha y URL.
     expect(html).toContain('Descargar PDF');
     expect(html).toContain('aria-label="Logo de Auditor Web Pyme"');

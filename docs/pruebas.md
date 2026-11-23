@@ -82,6 +82,7 @@ Marcar cada caso cuando exista su prueba y pase.
 | D-01 | 18/11/2026 | Con el reloj monotónico (fracciones de ms), `AbortSignal.timeout` recibía un deadline no entero y la auditoría real fallaba con INTERNAL_ERROR. Los fixtures no lo detectaban porque el reloj falso no avanzaba entre lecturas. Se encontró al auditar un sitio propio; se agregó una prueba de regresión con un reloj que avanza en fracciones. | Alta | RF-04 | Corregido | `fix(scanner): redondea el deadline…` |
 | D-02 | 23/11/2026 | La migración 0003 creó `audits.lead_id` sin `ON DELETE SET NULL`, aunque el schema lo declara: borrar un contacto con auditorías habría fallado por la clave foránea. Se detectó al diseñar el borrado manual (H14), antes de que existiera esa función. Se desvincula a mano en la misma transacción, en el borrado y en la purga, con prueba. | Media | RF-16 | Corregido | `feat: agrega límites de uso, purga, borrado y despliegue en Render…` |
 | D-03 | 23/11/2026 | Al borrar una auditoría desde su detalle, el botón quedaba en "Borrando…" varios segundos: la mutación esperaba recargar el detalle recién borrado, que daba 404 con reintentos. Lo detectó la prueba e2e del panel. Ahora se navega primero y los datos solo se marcan como desactualizados. | Baja | RF-16 | Corregido | `test: agrega pruebas e2e con Playwright y axe…` |
+| D-04 | 23/11/2026 | "Qué conviene arreglar primero" se ordenaba por estado (no cumple antes que advertencia) y recién después por prioridad: un "no cumple" de prioridad baja quedaba antes que una advertencia alta. Lo señalaron los tres perfiles de la evaluación simulada. Ahora se ordena por prioridad, con prueba de regresión. | Media | RF-08 | Corregido | `fix(web): ordena las prioridades por gravedad…` |
 
 ## 5. Prueba de usabilidad (cuando haya un prototipo funcional)
 
@@ -93,6 +94,28 @@ Cada persona lee un informe real y responde, de 1 a 5:
 4. El tiempo de espera fue razonable.
 5. Lo recomendaría a otra persona.
 
-| Persona (anónima) | P1 | P2 | P3 | P4 | P5 | Comentarios y cambios resultantes |
+> **Desvío declarado (23/11/2026):** por falta de tiempo antes de la entrega, **no se hizo la prueba con personas**. En su lugar se hizo una **evaluación de usabilidad simulada con agentes de IA**: tres perfiles distintos recorrieron capturas reales de la demo en producción (portada, progreso e informe de un sitio propio, en celular y escritorio), respondieron el cuestionario y señalaron problemas según las heurísticas de Nielsen. **No son personas y sus puntajes no reemplazan una prueba con usuarios reales**, que queda pendiente para una versión siguiente. Su valor está en los problemas concretos que encontraron, que se verificaron en el código y en parte se corrigieron.
+
+| Perfil simulado (IA) | P1 | P2 | P3 | P4 | P5 | Comentarios principales |
 |---|---|---|---|---|---|---|
-| | | | | | | |
+| Comerciante de 56 años, sin conocimientos técnicos, desde el celular | 2 | 2 | 2 | 5 | 3 | Términos técnicos sin explicar y "Nivel B" sin leyenda; prioridades desordenadas; tarjetas que cumplen ocupan casi todo el informe |
+| Dueño de un consultorio de 32 años que maneja su WordPress, desde la computadora | 3 | 2 | 2 | 5 | 3 | Prioridades desordenadas; estado y severidad que no cuadran; Confianza 100 con "2 para revisar"; recomendación de redes que pide etiquetas que ya están |
+| Consultora de una agencia, de 41 años, que usaría el informe con un cliente | 3 | 2 | 3 | 5 | 3 | Prioridades desordenadas y "Bajo" en verde; quiere plegar lo que cumple y separar una vista técnica; doble punto en la fecha |
+| **Promedio** | **2,7** | **2,0** | **2,3** | **5,0** | **3,0** | |
+
+**Cambios resultantes (23/11/2026):**
+- **D-04:** "Qué conviene arreglar primero" se ordenaba por estado y después por prioridad. Ahora se ordena por prioridad, con prueba de regresión.
+- Una sola escala, "Prioridad: Crítica, Alta, Media, Baja", en las etiquetas y en el detalle. "Baja" pasa de verde a azul, porque el verde queda solo para "Cumple".
+- "Para revisar" ya no cuenta las sugerencias informativas, que no restan puntaje. Así se corrige "Confianza 100 con 2 para revisar".
+- Lo que cumple o no aplica queda plegado dentro de cada área ("Lo que ya está bien o no aplica").
+- Leyenda del nivel ("de A (mejor) a E").
+- SEO-07 recomienda solo las etiquetas que faltan, con prueba.
+- Se quitó el doble punto de la fecha.
+
+**Pendientes para una versión siguiente** (requieren rediseño o decisión de producto):
+- traducir o explicar los términos técnicos y separar una vista técnica;
+- revisar la severidad de algunos checks, por ejemplo robots.txt como "Alta";
+- explicar mejor las tarjetas "No aplica" de analítica;
+- guías en castellano;
+- un contacto con la agencia al final del informe;
+- **la prueba con personas reales**.

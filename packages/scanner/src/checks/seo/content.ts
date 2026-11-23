@@ -184,8 +184,8 @@ export const seo07 = htmlCheck('SEO-07', 'medium', ($) => {
     (k) => meta($, 'property', k) !== '',
   );
   const twitter = meta($, 'name', 'twitter:card') !== '';
-  const recommendation =
-    'Agregá og:title, og:description y og:image para que tu sitio se vea bien al compartirlo en WhatsApp y redes.';
+  const missing = ['og:title', 'og:description', 'og:image'].filter((k) => !present.includes(k));
+  const recommendation = `Agregá ${missing.join(', ').replace(/, ([^,]*)$/, ' y $1')} para que tu sitio se vea bien al compartirlo en WhatsApp y redes.`;
   const evidence = `Encontradas: ${[...present, ...(twitter ? ['twitter:card'] : [])].join(', ') || 'ninguna'}`;
   if (present.length === 0) {
     return {

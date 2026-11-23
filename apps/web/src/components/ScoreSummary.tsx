@@ -18,6 +18,7 @@ export function ScoreSummary({ scores }: { readonly scores: Scores }) {
         <span className="text-sm font-medium">
           {scores.band === null ? 'Sin datos' : `Nivel ${scores.band}`}
         </span>
+        <span className="text-xs">de A (mejor) a E</span>
       </div>
       <div className="flex-1 space-y-2">
         <ul className="space-y-2">

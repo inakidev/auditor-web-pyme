@@ -2,7 +2,7 @@ import type { AuditView, Finding } from '@auditor/shared';
 import { describe, expect, it } from 'vitest';
 import { ApiRequestError } from './api-client.js';
 import { POLL_INTERVAL_MS, pollInterval, retryDelay, shouldRetry } from './polling.js';
-import { countByStatus, sortFindings, widthClass } from './report.js';
+import { countByStatus, priorityFindings, sortFindings, widthClass } from './report.js';
 
 const view = (status: AuditView['status']): AuditView => ({
   status,
@@ -93,5 +93,42 @@ describe('widthClass', () => {
     [150, 'w-full'],
   ])('%i %% -> %s', (percent, cls) => {
     expect(widthClass(percent)).toBe(cls);
+  });
+});
+
+describe('priorityFindings (D-04)', () => {
+  const f = (
+    checkId: string,
+    status: Finding['status'],
+    severity: Finding['severity'],
+  ): Finding => ({
+    checkId,
+    category: 'security',
+    status,
+    severity,
+    title: checkId,
+    evidence: null,
+    recommendation: '',
+    effort: 'low',
+    guide: null,
+  });
+
+  it('ordena por prioridad y, a igual prioridad, lo que no cumple va antes', () => {
+    const ordered = priorityFindings([
+      f('fail-baja', 'fail', 'low'),
+      f('warn-alta', 'warn', 'high'),
+      f('fail-alta', 'fail', 'high'),
+      f('warn-media', 'warn', 'medium'),
+      f('fail-critica', 'fail', 'critical'),
+      f('warn-info', 'warn', 'info'),
+      f('pass-critica', 'pass', 'critical'),
+    ]);
+    expect(ordered.map((x) => x.checkId)).toEqual([
+      'fail-critica',
+      'fail-alta',
+      'warn-alta',
+      'warn-media',
+      'fail-baja',
+    ]);
   });
 });

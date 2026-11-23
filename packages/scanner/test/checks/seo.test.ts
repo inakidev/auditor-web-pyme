@@ -128,6 +128,17 @@ describe('contenido de la portada', () => {
     expect((await run('SEO-07', page(head))).status).toBe(status);
   });
 
+  it('SEO-07 recomienda agregar solo las etiquetas que faltan', async () => {
+    const parcial = await run(
+      'SEO-07',
+      page('<meta property="og:title" content="x"><meta property="og:description" content="y">'),
+    );
+    expect(parcial.recommendation).toMatch(/^Agregá og:image para/);
+    expect((await run('SEO-07', page(''))).recommendation).toMatch(
+      /^Agregá og:title, og:description y og:image para/,
+    );
+  });
+
   it.each([
     ['', 'na'],
     ['<img src="a"><img src="b" alt="">', 'warn'],
