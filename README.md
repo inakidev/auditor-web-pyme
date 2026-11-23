@@ -8,7 +8,7 @@ Aplicación web que revisa de forma **pasiva** el sitio público de una pyme y d
 |---|---|
 | Nombre y apellido | Iñaki Nicolás Antonena |
 | Mail | iantonena@alumnos.kennedy.edu.ar |
-| Fecha de entrega | [completar el día de la entrega] |
+| Fecha de entrega | 23/11/2026 |
 | Carrera | Tecnicatura Universitaria en Tecnologías de la Información, orientada a Desarrollo Web |
 | Materia | Taller de Proyectos II |
 | Nombre del informe | Avance 3: Repositorio y avance del proyecto (Auditor Web Pyme) |
