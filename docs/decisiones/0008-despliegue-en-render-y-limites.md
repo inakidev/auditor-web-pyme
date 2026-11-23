@@ -86,4 +86,4 @@ La demo tiene que estar publicada sin costo. Se eligió Render, en su plan gratu
   | En reposo, después del recolector de basura | 86 MB |
   | Pico con 2 auditorías simultáneas | 197 MB |
 
-  El plan gratuito de Render ofrecería 512 MB, pero ese dato no se verificó en su documentación: hay que confirmarlo al crear el servicio. Falta medir la memoria en el contenedor Linux de Render.
+  El panel de Render confirma los límites del plan gratuito: 512 MB de memoria y 0,15 de CPU. Las métricas de memoria y CPU solo están disponibles en planes pagos, así que el consumo dentro del contenedor no se puede medir en la demo. La medición local deja un margen amplio.
