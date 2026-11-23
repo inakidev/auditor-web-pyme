@@ -55,7 +55,7 @@ Total de la versión entregable: **85 puntos**. Prioridad: M (debe) o S (deberí
 | H9 | Recomendaciones en español rioplatense | RF-19 | 3 | S | Hecho |
 | H10 | Checks de confianza y resto de seguridad | RF-03, RF-06 | 5 | S | Hecho |
 | H11 | Captura de contacto con consentimiento | RF-11, RNF-05 | 3 | M | Hecho |
-| H12 | Inicio de sesión y panel de consultores | RF-12, RNF-02 | 8 | M | Pendiente |
+| H12 | Inicio de sesión y panel de consultores | RF-12, RNF-02 | 8 | M | Hecho |
 | H13 | Límites de uso por IP, dominio y día | RF-15 | 5 | M | Pendiente |
 | H14 | Retención, purga y borrado de datos | RF-16, RNF-05 | 3 | M | Pendiente |
 | H15 | Despliegue con Docker, HTTPS, términos y privacidad | RNF-11 | 5 | M | Pendiente |
@@ -101,6 +101,16 @@ Al cerrar cada etapa se anotan la fecha y las horas dedicadas, y se compara el a
 | 5 | 18/11/2026 | — | 61 | 61 | 0 | Sin desvío. Contactos con consentimiento (H11) y panel con sesión, CSRF y bloqueo (H12). Horas a confirmar |
 | 6 | | | 74 | | | |
 | 7 | | | 85 | | | |
+
+Commits en los que se cerró cada etapa (los que completan su fila en esta tabla):
+
+| Etapa | Commit | Nota |
+|---|---|---|
+| 1 | `ba84e40` | Commit de cierre propio |
+| 2 | `4e0b592` | Commit de cierre propio |
+| 3 | `ecb31b6` | Commit de cierre propio |
+| 4 | `3876bc9` | La fila se completó junto con el último cambio de la etapa (GET de respaldo ampliado a 404/410), sin commit de cierre aparte |
+| 5 | `2a393db` | La fila se completó junto con H12; la documentación de instalación siguió en `4a305c6` |
 
 ## 7. Riesgos
 
