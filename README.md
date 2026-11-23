@@ -26,10 +26,10 @@ El avance se mide en **puntos de historia** sobre el alcance de la versión entr
 
 | Indicador | Valor |
 |---|---|
-| Puntos terminados | 80 de 85 |
-| Avance | 94,1 % |
+| Puntos terminados | 85 de 85 |
+| Avance | 100 % |
 | Meta del Avance 3 | 51 puntos (60 %) |
-| Última actualización | 23/11/2026 (H17 y H18; H16 en revisión hasta cargar la prueba de usabilidad) |
+| Última actualización | 23/11/2026 (cierre de la etapa 7; H16 con desvío declarado: usabilidad simulada con IA, prueba con personas pendiente) |
 
 > Actualizá esta tabla cada vez que se cierra una historia. Una historia cuenta solo si cumple su definición de hecho (pruebas en verde, revisión hecha y documentación al día).
 

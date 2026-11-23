@@ -59,7 +59,7 @@ Total de la versión entregable: **85 puntos**. Prioridad: M (debe) o S (deberí
 | H13 | Límites de uso por IP, dominio y día | RF-15 | 5 | M | Hecho |
 | H14 | Retención, purga y borrado de datos | RF-16, RNF-05 | 3 | M | Hecho |
 | H15 | Despliegue con Docker, HTTPS, términos y privacidad | RNF-11 | 5 | M | Hecho |
-| H16 | Pruebas e2e y prueba de usabilidad | RNF-06, 07, 08 | 5 | M | En revisión |
+| H16 | Pruebas e2e y prueba de usabilidad | RNF-06, 07, 08 | 5 | M | Hecho (con desvío) |
 | H17 | Exportar el informe a PDF | RF-10 | 3 | S | Hecho |
 | H18 | Estados y notas de contactos | RF-14 | 3 | S | Hecho |
 | | **Total** | | **85** | | |
@@ -100,7 +100,7 @@ Al cerrar cada etapa se anotan la fecha y las horas dedicadas, y se compara el a
 | 4 | 18/11/2026 | 0,75 | 50 | 50 | 0 | Sin desvío. Auditoría real con los 44 checks (5 de 5 áreas); 6 guías corregidas con `pnpm check:guides`; GET de respaldo ampliado a 404/410 |
 | 5 | 18/11/2026 | 2 (estimadas) | 61 | 61 | 0 | Sin desvío. Contactos con consentimiento (H11) y panel con sesión, CSRF y bloqueo (H12). Las horas son una estimación posterior: no se registraron al cerrar |
 | 6 | 23/11/2026 | 3 | 74 | 74 | 0 | Sin desvío. Demo publicada en Render (plan gratuito). En producción se midió la cadena de proxies y se ajustó `TRUST_PROXY_HOPS` a 3: con el valor inicial el bloqueo de ingresos no funcionaba. Fastify 5.12 ignora el `trustProxy` numérico (se usa una función propia). Se encontró y corrigió D-02. Un bloqueo de facturación de GitHub Actions (ajeno al proyecto) frenó CI unas horas |
-| 7 | En curso | 2,5 | 85 | 80 (parcial) | — | H17 y H18 hechas; H16 con e2e, accesibilidad y RNF-06/07 medidos, pero falta cargar la prueba de usabilidad. Se cierra con esos resultados |
+| 7 | 23/11/2026 | 2,5 | 85 | 85 | 0 | Desvío de alcance declarado en H16: la prueba de usabilidad con personas se reemplazó por una evaluación simulada con IA (3 perfiles, declarados como tales en `pruebas.md`), por falta de tiempo antes de la entrega; la prueba con personas queda pendiente. De la evaluación salieron D-04 y otras correcciones. Las e2e detectaron D-03 |
 
 Commits en los que se cerró cada etapa (los que completan su fila en esta tabla):
 
