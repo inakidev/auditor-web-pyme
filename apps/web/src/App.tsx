@@ -1,4 +1,5 @@
 import { Link, Outlet, type RouteObject } from 'react-router';
+import { Logo } from './components/Logo.js';
 import { HomePage } from './pages/HomePage.js';
 import { ReportPage } from './pages/ReportPage.js';
 import { PrivacyPage } from './pages/legal/PrivacyPage.js';
@@ -13,9 +14,10 @@ function Layout({ wide = false }: { readonly wide?: boolean }) {
   const width = wide ? 'max-w-6xl' : 'max-w-3xl';
   return (
     <div className="min-h-screen bg-white text-slate-900">
-      <header className="border-b border-slate-200">
+      <header className="border-b border-slate-200 print:hidden">
         <div className={`mx-auto ${width} px-4 py-3`}>
-          <Link to="/" className="font-semibold">
+          <Link to="/" className="inline-flex items-center gap-2 font-semibold text-blue-950">
+            <Logo />
             Auditor Web Pyme
           </Link>
         </div>
@@ -23,7 +25,7 @@ function Layout({ wide = false }: { readonly wide?: boolean }) {
       <main className={`mx-auto ${width} px-4 py-8`}>
         <Outlet />
       </main>
-      <footer className="border-t border-slate-200">
+      <footer className="border-t border-slate-200 print:hidden">
         <nav
           aria-label="Textos legales"
           className={`mx-auto flex ${width} gap-4 px-4 py-4 text-sm text-slate-700`}

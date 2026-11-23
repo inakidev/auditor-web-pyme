@@ -1,14 +1,16 @@
 import { AUDIT_PHASES, type AuditView } from '@auditor/shared';
 import { useQuery } from '@tanstack/react-query';
+import { useEffect } from 'react';
 import { Link, useParams } from 'react-router';
 import { FindingsList, PriorityList } from '../components/FindingsList.js';
+import { Logo } from '../components/Logo.js';
 import { ScoreSummary } from '../components/ScoreSummary.js';
 import { getAudit } from '../lib/api-client.js';
 import { pollInterval, retryDelay, shouldRetry } from '../lib/polling.js';
 import { PHASE_LABEL, phaseProgress, widthClass } from '../lib/report.js';
 
 const NEW_AUDIT_LINK = (
-  <Link to="/" className="font-medium text-blue-800 underline">
+  <Link to="/" className="font-medium text-blue-800 underline print:hidden">
     Pedir otra revisión
   </Link>
 );
@@ -63,7 +65,39 @@ function Progress({ audit }: { readonly audit: AuditView }) {
   );
 }
 
+/**
+ * Al imprimir (botón o Ctrl+P) se abren todas las secciones para que el PDF tenga todos los
+ * hallazgos, y al terminar vuelven como estaban.
+ */
+function useOpenDetailsWhilePrinting(): void {
+  useEffect(() => {
+    let closed: HTMLDetailsElement[] = [];
+    const before = () => {
+      closed = [...document.querySelectorAll('details')].filter((d) => !d.open);
+      for (const details of closed) details.open = true;
+    };
+    const after = () => {
+      for (const details of closed) details.open = false;
+      closed = [];
+    };
+    window.addEventListener('beforeprint', before);
+    window.addEventListener('afterprint', after);
+    return () => {
+      window.removeEventListener('beforeprint', before);
+      window.removeEventListener('afterprint', after);
+    };
+  }, []);
+}
+
+const formatDateTime = (iso: string) =>
+  new Date(iso).toLocaleString('es-AR', {
+    timeZone: 'America/Argentina/Buenos_Aires',
+    dateStyle: 'long',
+    timeStyle: 'short',
+  });
+
 export function ReportPage() {
+  useOpenDetailsWhilePrinting();
   const { token = '' } = useParams();
   const query = useQuery<AuditView>({
     queryKey: ['audit', token],
@@ -104,11 +138,34 @@ export function ReportPage() {
 
   return (
     <div className="space-y-6">
-      <div className="space-y-1">
-        <h1 className="text-2xl font-bold text-blue-950">Informe de {domainOf(audit.url)}</h1>
-        <p className="text-sm text-slate-700">
-          Este enlace vence el {new Date(audit.expiresAt).toLocaleDateString('es-AR')}.
-        </p>
+      {/* Encabezado del PDF (RF-10): logo, fecha y URL. Solo se ve al imprimir. */}
+      <div className="hidden items-center gap-3 border-b border-slate-300 pb-3 print:flex">
+        <Logo className="h-10 w-10 text-blue-950" />
+        <div>
+          <p className="text-lg font-semibold text-blue-950">Auditor Web Pyme</p>
+          <p className="text-sm">Informe del sitio {audit.url}</p>
+        </div>
+      </div>
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div className="space-y-1">
+          <h1 className="text-2xl font-bold text-blue-950">Informe de {domainOf(audit.url)}</h1>
+          <p className="text-sm text-slate-700">
+            Revisado el {formatDateTime(audit.finishedAt ?? audit.createdAt)}.
+          </p>
+          <p className="break-all text-sm text-slate-700">Dirección revisada: {audit.url}</p>
+          <p className="text-sm text-slate-700 print:hidden">
+            Este enlace vence el {new Date(audit.expiresAt).toLocaleDateString('es-AR')}.
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={() => {
+            window.print();
+          }}
+          className="rounded-lg border border-blue-800 px-4 py-2 font-semibold text-blue-800 hover:bg-blue-50 print:hidden"
+        >
+          Descargar PDF
+        </button>
       </div>
       {audit.scores !== null && <ScoreSummary scores={audit.scores} />}
       <PriorityList findings={audit.findings} />

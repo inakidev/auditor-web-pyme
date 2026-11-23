@@ -62,3 +62,36 @@ test.describe('errores claros', () => {
     await expect(page.getByRole('alert')).toContainText('se acaba de revisar');
   });
 });
+
+test.describe('exportar a PDF (RF-10)', () => {
+  test('el botón imprime con logo, fecha, URL y todos los hallazgos visibles', async ({ page }) => {
+    await page.addInitScript(() => {
+      window.print = () => {
+        (window as unknown as { __printed: boolean }).__printed = true;
+      };
+    });
+    await auditFromHome(page, 'pdf-e2e.example.com');
+    await page.getByRole('button', { name: 'Descargar PDF' }).click();
+    expect(
+      await page.evaluate(() => (window as unknown as { __printed?: boolean }).__printed),
+    ).toBe(true);
+
+    // Al imprimir: se abren todas las secciones y se ve el encabezado del PDF, no la navegación.
+    await page.evaluate(() => window.dispatchEvent(new Event('beforeprint')));
+    expect(
+      await page.evaluate(() => [...document.querySelectorAll('details')].every((d) => d.open)),
+    ).toBe(true);
+    await page.emulateMedia({ media: 'print' });
+    await expect(page.getByText('Informe del sitio https://pdf-e2e.example.com/')).toBeVisible();
+    await expect(page.getByRole('img', { name: 'Logo de Auditor Web Pyme' }).last()).toBeVisible();
+    await expect(page.getByText(/Revisado el/)).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Descargar PDF' })).toBeHidden();
+    await expect(page.getByRole('navigation', { name: 'Textos legales' })).toBeHidden();
+
+    const pdf = await page.pdf({ format: 'A4' });
+    expect(pdf.subarray(0, 5).toString()).toBe('%PDF-');
+    expect(pdf.length).toBeGreaterThan(10_000);
+
+    await page.evaluate(() => window.dispatchEvent(new Event('afterprint')));
+  });
+});

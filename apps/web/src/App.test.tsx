@@ -219,7 +219,11 @@ describe('estados del informe', () => {
     expect(html).toContain('Calculado sobre 4 de 5 áreas');
     expect(html).toContain('Qué conviene arreglar primero');
     expect(html.indexOf('Crítico')).toBeLessThan(html.indexOf('Alto'));
-    expect(html).not.toContain('Descargar PDF');
+    // RF-10: botón de PDF y encabezado de impresión con logo, fecha y URL.
+    expect(html).toContain('Descargar PDF');
+    expect(html).toContain('aria-label="Logo de Auditor Web Pyme"');
+    expect(html).toContain('Informe del sitio https://ejemplo.com/');
+    expect(html).toContain('Revisado el');
   });
 });
 
