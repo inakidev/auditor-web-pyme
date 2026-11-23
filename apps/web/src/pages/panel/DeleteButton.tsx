@@ -13,9 +13,15 @@ export function DeleteButton(props: {
   const session = useQuery({ queryKey: SESSION_KEY, queryFn: getSession, retry: false });
   const mutation = useMutation({
     mutationFn: props.onDelete,
-    onSuccess: async () => {
-      await client.invalidateQueries({ queryKey: ['admin'] });
+    onSuccess: () => {
+      // Sin esperar la recarga: si la vista actual es lo que se borró (el detalle), recargarla
+      // daría 404 con reintentos y el botón quedaría trabado. Con onDone se navega primero y
+      // los datos solo se marcan como desactualizados; se recargan al volver a mostrarse.
       props.onDone?.();
+      void client.invalidateQueries({
+        queryKey: ['admin'],
+        refetchType: props.onDone === undefined ? 'active' : 'none',
+      });
     },
   });
   return (
