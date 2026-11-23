@@ -139,3 +139,5 @@ Proyecto individual. Todo el trabajo, con su fecha y autor, queda registrado en 
 ## Uso académico
 
 Proyecto desarrollado para Taller de Proyectos II (Universidad Kennedy). Solo realiza análisis pasivos de sitios públicos y no debe usarse para fines ofensivos.
+
+**Licencia:** todos los derechos reservados (ver [LICENSE](LICENSE)). El repositorio es público solo para la evaluación académica. Que sea visible no autoriza a copiarlo ni a usarlo con fines comerciales.

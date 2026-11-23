@@ -106,11 +106,11 @@ Commits en los que se cerró cada etapa (los que completan su fila en esta tabla
 
 | Etapa | Commit | Nota |
 |---|---|---|
-| 1 | `ba84e40` | Commit de cierre propio |
-| 2 | `4e0b592` | Commit de cierre propio |
-| 3 | `ecb31b6` | Commit de cierre propio |
-| 4 | `3876bc9` | La fila se completó junto con el último cambio de la etapa (GET de respaldo ampliado a 404/410), sin commit de cierre aparte |
-| 5 | `2a393db` | La fila se completó junto con H12; la documentación de instalación siguió en `4a305c6` |
+| 1 | `595d29e` | Commit de cierre propio |
+| 2 | `9404713` | Commit de cierre propio |
+| 3 | `779d2c2` | Commit de cierre propio |
+| 4 | `0d443a0` | La fila se completó junto con el último cambio de la etapa (GET de respaldo ampliado a 404/410), sin commit de cierre aparte |
+| 5 | `ea74819` | La fila se completó junto con H12; la documentación de instalación siguió en `e2fff76` |
 
 ## 7. Riesgos
 
