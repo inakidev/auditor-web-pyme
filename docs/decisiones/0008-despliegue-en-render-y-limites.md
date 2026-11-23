@@ -35,7 +35,14 @@ La demo tiene que estar publicada sin costo. Se eligió Render, en su plan gratu
 
 ### IP del cliente detrás del proxy
 - La documentación de Render no dice qué cabecera usa ni cuántos saltos hay delante de la app; solo menciona Cloudflare y un balanceador que termina TLS.
-- `TRUST_PROXY_HOPS` es configurable (1 en `render.yaml`). Se verifica en el primer despliegue con `LOG_PROXY_CHAIN`, que registra solo la cantidad de entradas de `X-Forwarded-For`.
+- `TRUST_PROXY_HOPS` es configurable. **Medición en producción (23/11/2026)** con `LOG_PROXY_CHAIN`, que registra solo la cantidad de entradas de `X-Forwarded-For`:
+  - un pedido normal llega con 3 entradas: el cliente y dos proxies;
+  - un pedido con una cabecera falsa llega con 4, porque la falsa queda a la izquierda.
+- **Valor elegido: 3.** Con 1 o 2, la clave del bloqueo cambiaba en cada pedido, porque la app tomaba la IP de un proxy que rota; el sexto intento fallido seguía dando 401. Con 3:
+  - tras 5 fallos, los intentos siguientes dan 429;
+  - un `X-Forwarded-For` falsificado, con una o dos entradas, no esquiva el bloqueo.
+
+  `render.yaml` queda en 3.
 - **Hallazgo:** Fastify 5.12 ignora el `trustProxy` numérico, porque decidió fallar cerrado. Se pasa una función que confía en los primeros N saltos. Es seguro solo porque al servicio de Render se llega únicamente a través de su proxy. Ejecutado fuera de un proxy, `TRUST_PROXY_HOPS` tiene que quedar en 0.
 - Las pruebas verifican que un `X-Forwarded-For` falsificado por el cliente no esquiva el límite.
 

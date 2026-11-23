@@ -15,8 +15,10 @@ services:
     envVars:
       - key: NODE_ENV
         value: production
+      # Medido el 23/11/2026: X-Forwarded-For llega con 3 entradas (cliente y dos proxies de
+      # Render/Cloudflare). Con 3 la app toma al cliente y una IP falsa enviada por él queda afuera.
       - key: TRUST_PROXY_HOPS
-        value: '1'
+        value: '3'
       - key: LOG_PROXY_CHAIN
         value: 'false'
       - key: DEMO_NOTICE

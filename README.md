@@ -71,7 +71,7 @@ cp .env.example .env              # PowerShell: Copy-Item .env.example .env
 | `IP_HASH_SALT` | Opcional | Obligatoria: 32 caracteres aleatorios o más |
 | `ADMIN_EMAIL` y `ADMIN_PASSWORD_HASH` | Solo si querés entrar al panel | Obligatorias |
 | `PORT` | 3000 por defecto | Obligatoria (Render la define sola) |
-| `TRUST_PROXY_HOPS` | 0 (conexión directa) | 1 detrás del proxy de Render |
+| `TRUST_PROXY_HOPS` | 0 (conexión directa) | 3 detrás del proxy de Render (medido) |
 | `CONTACT_CAPTURE_ENABLED` | `true` | `false` hasta publicar los textos legales |
 | `DEMO_NOTICE` | `true` | `true` en la demo |
 | `AUDIT_LIMIT_PER_IP`, `AUDIT_LIMIT_WINDOW_MINUTES`, `DOMAIN_COOLDOWN_SECONDS`, `DAILY_AUDIT_CAP`, `AUDIT_CONCURRENCY`, `AUDIT_MAX_PENDING` | 20 por hora, 30 s, 300 por día, 2 y 20 | Igual (ver `.env.example`) |
@@ -143,7 +143,7 @@ La demo corre en el plan gratuito de Render: un solo servicio web con Docker que
    - `AUDITOR_CONTACT_URL`: por ahora, `https://github.com/inakidev/auditor-web-pyme`.
 3. `IP_HASH_SALT` se genera sola una única vez. Cambiarla reinicia los contadores de uso, que de todas formas viven en memoria y se pierden con cada reinicio.
 4. La región es `virginia`, la más cercana a la Argentina de la lista de Render. No se puede cambiar después.
-5. En el primer despliegue, poné `LOG_PROXY_CHAIN=true` un rato y fijate en el log cuántas entradas trae `X-Forwarded-For` (el log nunca muestra las IP). Si son 2 o más, ajustá `TRUST_PROXY_HOPS`. Después volvé a `false`.
+5. `TRUST_PROXY_HOPS` va en 3: se midió el 23/11/2026 con `LOG_PROXY_CHAIN=true`, que muestra cuántas entradas trae `X-Forwarded-For` sin mostrar las IP. Con 3 el bloqueo de ingresos responde 429 tras 5 fallos y una cabecera falsa no lo esquiva; con 1 o 2 la app tomaba la IP de un proxy que rota. Si Render cambia su red, repetí la medición y la prueba.
 
 Si falta alguna variable obligatoria, la API no arranca y el log las lista todas juntas.
 
