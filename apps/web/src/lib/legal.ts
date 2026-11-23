@@ -1,5 +1,5 @@
 /** Datos de los textos legales, en un solo lugar. Son borradores pendientes de revisión. */
 export const LEGAL_OWNER = 'Iñaki Nicolás Antonena';
-/** Pendiente: lo pasa el responsable. Hasta entonces se muestra este texto. */
-export const LEGAL_CONTACT_EMAIL = '[correo de contacto a completar]';
+/** Correo institucional del responsable, ya publicado en el README del repositorio. */
+export const LEGAL_CONTACT_EMAIL = 'iantonena@alumnos.kennedy.edu.ar';
 export const LEGAL_UPDATED = '23/11/2026';

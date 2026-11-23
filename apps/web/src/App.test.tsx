@@ -426,6 +426,7 @@ describe('textos legales (borradores)', () => {
       'Borrador',
       'Última actualización',
       'Iñaki Nicolás Antonena',
+      'iantonena@alumnos.kennedy.edu.ar',
       'Ley 25.326',
       'AGENCIA DE ACCESO A LA INFORMACIÓN PÚBLICA',
       'fuera de la Argentina',
@@ -451,6 +452,7 @@ describe('textos legales (borradores)', () => {
       'tal cual',
       'no querés que lo revisemos',
       'medianoche (hora de Buenos Aires)',
+      'iantonena@alumnos.kennedy.edu.ar',
     ]) {
       expect(html).toContain(text);
     }
