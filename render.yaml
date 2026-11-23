@@ -1,0 +1,38 @@
+# Blueprint de Render (https://render.com/docs/blueprint-spec). Un servicio web gratuito con Docker
+# que sirve la API y la web compilada. Ver la sección "Despliegue" del README antes de usarlo.
+services:
+  - type: web
+    # Tiene que ser único en Render. Si Render le agrega un sufijo a la URL, corregí PUBLIC_ORIGIN.
+    name: auditor-web-pyme
+    runtime: docker
+    plan: free
+    # La región de la lista vigente más cercana a la Argentina. No se puede cambiar después.
+    region: virginia
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /api/health
+    # Antes de la entrega pasarlo a 'off': cada deploy borra la base y reinicia en frío.
+    autoDeployTrigger: checksPass
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: TRUST_PROXY_HOPS
+        value: '1'
+      - key: LOG_PROXY_CHAIN
+        value: 'false'
+      - key: DEMO_NOTICE
+        value: 'true'
+      # Apagado hasta publicar los textos legales revisados.
+      - key: CONTACT_CAPTURE_ENABLED
+        value: 'false'
+      # Se genera una sola vez al crear el servicio. Cambiarla reinicia los contadores de uso.
+      - key: IP_HASH_SALT
+        generateValue: true
+      # Secretos o valores propios: Render los pide al crear el Blueprint (sync: false).
+      - key: PUBLIC_ORIGIN
+        sync: false
+      - key: ADMIN_EMAIL
+        sync: false
+      - key: ADMIN_PASSWORD_HASH
+        sync: false
+      - key: AUDITOR_CONTACT_URL
+        sync: false

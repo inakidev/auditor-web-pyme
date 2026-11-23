@@ -66,12 +66,17 @@ Marcar cada caso cuando exista su prueba y pase.
 | 18/11/2026 | Unitarias e integración | H11: consentimiento obligatorio con correo, sin guardar nada sin él, versión del texto, errores sin repetir el valor, redacción del correo en logs; formulario con correo y casilla | Verde | 445/445 | | |
 | 18/11/2026 | Unitarias e integración | H12: configuración obligatoria y hash argon2id válido; doble envío CSRF, token de sesión y Origin estricto (con prueba de mutación: sin la verificación de Origin fallan 5 pruebas); sesión nueva, vencimiento a 30 min y 8 h; bloqueo por correo + IP, tope por IP y /64; 503 con argon2 ocupado; logs sin correo, cookies, token ni IP; lista explícita de rutas; listados paginados y filtros con límites; P4 en la web | Verde | 580/580 | 95 % líneas | |
 | 18/11/2026 | Manual (HTTP real) | Flujo completo con curl contra la API en desarrollo: csrf, ingreso, listado del panel, cierre y acceso posterior | Verde | 200, 200, 204 y 401 | | Git Bash cambia la codificación de los argumentos de curl con ñ: se mandó el cuerpo desde un archivo UTF-8 |
+| 23/11/2026 | Unitarias e integración | H13 a H15: configuración de producción (variables juntas, hash PHC con pista de comillas o `$` perdidos), límites (tope, reinicio, cooldown, tope diario, mapa lleno, proxy), purga con reloj simulado, borrado manual, estáticos (lista blanca contra 14 intentos de salirse de `dist`), arranque con base vacía, health sin log, legales y CSP sin estilos inline | Verde | 683/683 | | |
+| 23/11/2026 | Manual (navegador real) | Dist en Chrome headless con la consola capturada: portada, informe con barras, privacidad, términos e ingreso. Control positivo con CSP estricta y estilo y script inline | Verde | 0 violaciones en 5 páginas; 2 en el control | | El método detecta violaciones; la web no tiene ninguna |
+| 23/11/2026 | Manual (dist en producción) | Arranque, health, portada con CSP, asset inexistente 404, ruta de la SPA 200; dos ciclos borrando la base; arranque sin variables | Verde | | | El primer usuario se recrea en cada ciclo; sin variables lista todas las faltantes y sale con 1 |
+| 23/11/2026 | Rendimiento (memoria) | RSS del dist en Windows: reposo y pico con 2 auditorías simultáneas del sitio propio (cooldown en 0 para la medición) | Medido | | | Reposo 182 MB (86 MB después del recolector); pico 197 MB; 2 auditorías en 15,8 s. Falta medirlo en el contenedor de Render |
 
 ## 4. Registro de defectos
 
 | ID | Fecha | Descripción | Severidad | Requisito afectado | Estado | Commit de la corrección |
 |---|---|---|---|---|---|---|
 | D-01 | 18/11/2026 | Con el reloj monotónico (fracciones de ms), `AbortSignal.timeout` recibía un deadline no entero y la auditoría real fallaba con INTERNAL_ERROR. Los fixtures no lo detectaban porque el reloj falso no avanzaba entre lecturas. Se encontró al auditar un sitio propio; se agregó una prueba de regresión con un reloj que avanza en fracciones. | Alta | RF-04 | Corregido | `fix(scanner): redondea el deadline…` |
+| D-02 | 23/11/2026 | La migración 0003 creó `audits.lead_id` sin `ON DELETE SET NULL`, aunque el schema lo declara: borrar un contacto con auditorías habría fallado por la clave foránea. Se detectó al diseñar el borrado manual (H14), antes de que existiera esa función. Se desvincula a mano en la misma transacción, en el borrado y en la purga, con prueba. | Media | RF-16 | Corregido | `feat: agrega límites de uso, purga, borrado y despliegue en Render…` |
 
 ## 5. Prueba de usabilidad (cuando haya un prototipo funcional)
 

@@ -44,8 +44,16 @@ jobs:
           DATABASE_PATH: ${{ runner.temp }}/smoke.db
           PORT: '3999'
         run: |
-          node apps/api/dist/server.js &
+          node apps/api/dist/server.js > "$RUNNER_TEMP/server.log" 2>&1 &
+          PID=$!
           curl --retry 15 --retry-connrefused --retry-delay 1 -fsS http://127.0.0.1:3999/api/health
+          # La portada la sirve la misma API, con la CSP del documento.
+          curl -fsS -D "$RUNNER_TEMP/headers.txt" http://127.0.0.1:3999/ | grep -q '<div id="root">'
+          grep -qi "content-security-policy: default-src 'self'" "$RUNNER_TEMP/headers.txt"
+          # Cierre limpio: SIGTERM y código de salida 0.
+          kill -TERM "$PID"
+          wait "$PID" || { echo "salida distinta de 0"; cat "$RUNNER_TEMP/server.log"; exit 1; }
+          grep -q '"msg":"cerrado"' "$RUNNER_TEMP/server.log"
 
   docker:
     name: Build de la imagen Docker
@@ -63,7 +71,15 @@ jobs:
           ADMIN_EMAIL: humo@auditor.example.com
           ADMIN_PASSWORD_HASH: '$argon2id$v=19$m=19456,t=2,p=1$mjTw+dr2Sn7or4vymPkqiA$yTTupNIC30QzeCeZOSXZ9lIvAE5dnIuN2qOLYJ8hmIM'
           IP_HASH_SALT: sal-descartable-de-la-prueba-de-humo-0123
+          PORT: '10000'
         run: |
-          docker run -d --name smoke -p 3000:3000 -e AUDITOR_CONTACT_URL -e PUBLIC_ORIGIN -e ADMIN_EMAIL -e ADMIN_PASSWORD_HASH -e IP_HASH_SALT auditor-web-pyme:ci
+          docker run -d --name smoke -p 3000:10000 -e PORT -e AUDITOR_CONTACT_URL -e PUBLIC_ORIGIN -e ADMIN_EMAIL -e ADMIN_PASSWORD_HASH -e IP_HASH_SALT auditor-web-pyme:ci
           curl --retry 20 --retry-all-errors --retry-delay 1 -fsS http://127.0.0.1:3000/api/health || { docker logs smoke; exit 1; }
-          docker rm -f smoke
+          curl -fsS http://127.0.0.1:3000/ | grep -q '<div id="root">' || { docker logs smoke; exit 1; }
+          # Corre como usuario no root y puede escribir la base (fallo típico del primer despliegue).
+          test "$(docker exec smoke id -u)" != "0"
+          docker exec smoke sh -c 'test -w /app/data && test -f /app/data/auditor.db'
+          # Cierre limpio: docker stop manda SIGTERM; el proceso tiene que salir con 0.
+          docker stop smoke
+          test "$(docker inspect -f '{{.State.ExitCode}}' smoke)" = "0" || { docker logs smoke; exit 1; }
+          docker rm smoke

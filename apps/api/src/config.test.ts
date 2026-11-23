@@ -4,6 +4,7 @@ import {
   DEV_PUBLIC_ORIGIN,
   PLACEHOLDERS,
   PLACEHOLDER_CONTACT_URL,
+  DEFAULT_LIMITS,
   loadConfig,
 } from './config.js';
 
@@ -18,6 +19,7 @@ const PROD = {
   ADMIN_PASSWORD_HASH: TEST_HASH,
   IP_HASH_SALT: 'x'.repeat(32),
   PUBLIC_ORIGIN: 'https://auditor.agencia.example.com',
+  PORT: '10000',
 };
 
 describe('loadConfig', () => {
@@ -34,6 +36,11 @@ describe('loadConfig', () => {
         ipHashSalt: PLACEHOLDERS.IP_HASH_SALT,
         publicOrigin: DEV_PUBLIC_ORIGIN,
       },
+      trustProxyHops: 0,
+      logProxyChain: false,
+      contactCaptureEnabled: true,
+      demoNotice: true,
+      limits: DEFAULT_LIMITS,
     });
   });
 
@@ -54,6 +61,7 @@ describe('loadConfig', () => {
   });
 
   it.each([
+    'PORT',
     'AUDITOR_CONTACT_URL',
     'ADMIN_EMAIL',
     'ADMIN_PASSWORD_HASH',
@@ -137,5 +145,89 @@ describe('loadConfig', () => {
 
   it('rechaza un NODE_ENV desconocido', () => {
     expect(() => loadConfig({ NODE_ENV: 'staging' })).toThrow(ConfigError);
+  });
+
+  it('en producción junta todas las variables que faltan en un solo mensaje', () => {
+    const error = (() => {
+      try {
+        loadConfig({ NODE_ENV: 'production' });
+      } catch (e) {
+        return e;
+      }
+      return null;
+    })();
+    expect(error).toBeInstanceOf(ConfigError);
+    const message = (error as ConfigError).message;
+    for (const name of [
+      'PORT',
+      'PUBLIC_ORIGIN',
+      'ADMIN_EMAIL',
+      'ADMIN_PASSWORD_HASH',
+      'IP_HASH_SALT',
+      'AUDITOR_CONTACT_URL',
+    ]) {
+      expect(message).toContain(name);
+    }
+  });
+
+  it('explica si el hash trae comillas', () => {
+    expect(() => loadConfig({ ...PROD, ADMIN_PASSWORD_HASH: `'${TEST_HASH}'` })).toThrow(
+      /comillas/,
+    );
+  });
+
+  it('explica si el hash parece haber perdido los $', () => {
+    expect(() =>
+      loadConfig({ ...PROD, ADMIN_PASSWORD_HASH: TEST_HASH.replaceAll('$', '') }),
+    ).toThrow(/perdió los signos/);
+    // Lo que deja un shell que expandió $argon2id, $v, etc. como variables vacías.
+    expect(() => loadConfig({ ...PROD, ADMIN_PASSWORD_HASH: '=19=19456,t=2,p=1' })).toThrow(
+      /perdió los signos/,
+    );
+  });
+
+  it('en producción la captura de correos arranca apagada', () => {
+    expect(loadConfig(PROD).contactCaptureEnabled).toBe(false);
+    expect(loadConfig({ ...PROD, CONTACT_CAPTURE_ENABLED: 'true' }).contactCaptureEnabled).toBe(
+      true,
+    );
+  });
+
+  it('lee los límites, el proxy y el aviso de demo', () => {
+    const config = loadConfig({
+      ...PROD,
+      TRUST_PROXY_HOPS: '1',
+      LOG_PROXY_CHAIN: 'true',
+      DEMO_NOTICE: 'false',
+      AUDIT_LIMIT_PER_IP: '5',
+      AUDIT_LIMIT_WINDOW_MINUTES: '10',
+      DOMAIN_COOLDOWN_SECONDS: '0',
+      DAILY_AUDIT_CAP: '50',
+      AUDIT_CONCURRENCY: '1',
+      AUDIT_MAX_PENDING: '3',
+    });
+    expect(config.trustProxyHops).toBe(1);
+    expect(config.logProxyChain).toBe(true);
+    expect(config.demoNotice).toBe(false);
+    expect(config.limits).toEqual({
+      perIp: 5,
+      windowMinutes: 10,
+      domainCooldownSeconds: 0,
+      dailyCap: 50,
+      concurrency: 1,
+      maxPending: 3,
+    });
+  });
+
+  it.each([
+    ['TRUST_PROXY_HOPS', '4'],
+    ['TRUST_PROXY_HOPS', '-1'],
+    ['AUDIT_LIMIT_PER_IP', '0'],
+    ['AUDIT_LIMIT_PER_IP', 'muchos'],
+    ['AUDIT_CONCURRENCY', '9'],
+    ['DAILY_AUDIT_CAP', '1.5'],
+    ['CONTACT_CAPTURE_ENABLED', 'si'],
+  ])('rechaza %s=%s', (name, value) => {
+    expect(() => loadConfig({ [name]: value })).toThrow(ConfigError);
   });
 });

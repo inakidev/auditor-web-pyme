@@ -8,6 +8,7 @@ import type {
   CreateAuditResponse,
   CsrfView,
   Page,
+  PublicConfig,
   SessionView,
 } from '@auditor/shared';
 
@@ -79,6 +80,11 @@ export function getAudit(token: string): Promise<AuditView> {
   return request(`/api/audits/${encodeURIComponent(token)}`);
 }
 
+/** Qué muestra la portada: aviso de demo y si se puede dejar el correo. */
+export function getPublicConfig(): Promise<PublicConfig> {
+  return request('/api/config');
+}
+
 // --- Panel de consultores ---
 
 /** Token del doble envío previo al login (la cookie la pone la API). */
@@ -123,4 +129,13 @@ export function listAdminLeads(
   filters: Readonly<Record<string, string>>,
 ): Promise<Page<AdminLeadItem>> {
   return request(`/api/admin/leads${toQueryString(filters)}`);
+}
+
+/** Borrado manual (RF-16): exige el token CSRF de la sesión. */
+export async function deleteAdminAudit(id: number, csrfToken: string): Promise<void> {
+  await request(`/api/admin/audits/${String(id)}`, { method: 'DELETE' }, csrfToken);
+}
+
+export async function deleteAdminLead(id: number, csrfToken: string): Promise<void> {
+  await request(`/api/admin/leads/${String(id)}`, { method: 'DELETE' }, csrfToken);
 }

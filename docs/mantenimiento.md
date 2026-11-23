@@ -25,7 +25,7 @@ Las consignas piden ir tomando nota de cualquier mantenimiento o prueba que se r
 | Renovación del certificado HTTPS | Automática | El servidor web la renueva sola; se verifica en la revisión mensual |
 | Revisión de registros y errores | Semanal | Buscar errores repetidos, picos de uso y rechazos del cliente HTTP seguro |
 | Purga de informes vencidos | Diaria | Tarea automática; se verifica que corra |
-| Copia de seguridad de la base | Diaria | Copia del archivo de la base fuera del servidor y prueba de restauración mensual |
+| Copia de seguridad de la base | Diaria | Copia del archivo de la base fuera del servidor y prueba de restauración mensual. No aplica a la demo en Render: su disco es efímero y la base se pierde en cada reinicio (ADR 0008) |
 | Revisión de los checks | Trimestral | Ajustar umbrales y textos según cambios en las recomendaciones de seguridad y de SEO |
 | Revisión de pesos del puntaje | Con cada piloto o prueba de usabilidad | Contrastar con los resultados y las opiniones de los usuarios |
 | Actualización de la documentación | En cada cambio | Léame, manuales, trazabilidad y decisiones |

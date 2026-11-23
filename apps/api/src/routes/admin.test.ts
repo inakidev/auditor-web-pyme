@@ -1,12 +1,14 @@
 import type { Finding } from '@auditor/shared';
 import { afterEach, describe, expect, it } from 'vitest';
 import { buildApp, type AppDeps } from '../app.js';
-import { audits } from '../db/schema.js';
-import { login, testDeps } from '../testing/support.js';
+import { audits, findings, leads } from '../db/schema.js';
+import { createAuditRepository } from '../services/audits.js';
+import { TEST_ORIGIN, login, testDeps } from '../testing/support.js';
 
 // Lista explícita: toda ruta nueva tiene que figurar en una de las dos (RNF-02).
 const PUBLIC_ROUTES = [
   'GET /api/health',
+  'GET /api/config',
   'POST /api/audits',
   'GET /api/audits/:token',
   'GET /api/auth/csrf',
@@ -18,6 +20,8 @@ const ADMIN_ROUTES = [
   'GET /api/admin/audits',
   'GET /api/admin/audits/:id',
   'GET /api/admin/leads',
+  'DELETE /api/admin/audits/:id',
+  'DELETE /api/admin/leads/:id',
 ];
 
 const FINDING: Finding = {
@@ -245,5 +249,75 @@ describe('GET /api/admin/leads', () => {
       1,
     );
     expect((await get('?status=x')).statusCode).toBe(400);
+  });
+});
+
+describe('borrado manual (RF-16)', () => {
+  async function seeded() {
+    const ctx = setup();
+    await createAudit(ctx.app, 'https://uno.example.com', 'dueno@uno.example.com');
+    await drain(ctx.app);
+    const session = await login(ctx.app);
+    const del = (url: string, headers: Record<string, string> = {}) =>
+      ctx.app.inject({
+        method: 'DELETE',
+        url,
+        headers: {
+          cookie: session.cookie,
+          origin: TEST_ORIGIN,
+          'x-csrf-token': session.csrfToken,
+          ...headers,
+        },
+      });
+    return { ...ctx, del, session };
+  }
+
+  it('borra una auditoría con sus hallazgos', async () => {
+    const { db, del } = await seeded();
+    const res = await del('/api/admin/audits/1');
+    expect(res.statusCode).toBe(204);
+    expect(db.select().from(audits).all()).toHaveLength(0);
+    expect(db.select().from(findings).all()).toHaveLength(0);
+    expect((await del('/api/admin/audits/1')).statusCode).toBe(404);
+  });
+
+  it('borra un contacto y la auditoría queda sin vínculo', async () => {
+    const { db, del } = await seeded();
+    expect((await del('/api/admin/leads/1')).statusCode).toBe(204);
+    expect(db.select().from(leads).all()).toHaveLength(0);
+    expect(db.select({ leadId: audits.leadId }).from(audits).all()).toEqual([{ leadId: null }]);
+  });
+
+  it.each([
+    ['sin token CSRF', { 'x-csrf-token': '' }, 403],
+    ['con otro Origin', { origin: 'https://atacante.example' }, 403],
+  ])('rechaza el borrado %s', async (_name, headers, status) => {
+    const { db, del } = await seeded();
+    expect((await del('/api/admin/audits/1', headers)).statusCode).toBe(status);
+    expect((await del('/api/admin/leads/1', headers)).statusCode).toBe(status);
+    expect(db.select().from(audits).all()).toHaveLength(1);
+    expect(db.select().from(leads).all()).toHaveLength(1);
+  });
+
+  it.each(['abc', '0', '999'])('id %s -> 404', async (id) => {
+    const { del } = await seeded();
+    expect((await del(`/api/admin/audits/${id}`)).statusCode).toBe(404);
+    expect((await del(`/api/admin/leads/${id}`)).statusCode).toBe(404);
+  });
+});
+
+describe('purga al arrancar (H14)', () => {
+  it('borra los informes vencidos apenas arranca la app', async () => {
+    const deps = testDeps({ now: () => now });
+    createAuditRepository(deps.db).create({
+      tokenHash: 'viejo',
+      url: 'https://viejo.example.com/',
+      domain: 'viejo.example.com',
+      now: new Date(now.getTime() - 31 * 24 * 60 * 60 * 1000),
+    });
+    const app = buildApp(deps);
+    apps.push(app);
+    await app.ready();
+    expect(deps.db.select().from(audits).all()).toHaveLength(0);
   });
 });

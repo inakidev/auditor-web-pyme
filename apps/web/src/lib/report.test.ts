@@ -2,7 +2,7 @@ import type { AuditView, Finding } from '@auditor/shared';
 import { describe, expect, it } from 'vitest';
 import { ApiRequestError } from './api-client.js';
 import { POLL_INTERVAL_MS, pollInterval, retryDelay, shouldRetry } from './polling.js';
-import { countByStatus, sortFindings } from './report.js';
+import { countByStatus, sortFindings, widthClass } from './report.js';
 
 const view = (status: AuditView['status']): AuditView => ({
   status,
@@ -77,5 +77,21 @@ describe('orden y resumen del informe', () => {
       na: 0,
       not_evaluated: 0,
     });
+  });
+});
+
+describe('widthClass', () => {
+  it.each([
+    [0, 'w-0'],
+    [2, 'w-0'],
+    [3, 'w-[5%]'],
+    [50, 'w-[50%]'],
+    [77, 'w-[75%]'],
+    [98, 'w-full'],
+    [100, 'w-full'],
+    [-5, 'w-0'],
+    [150, 'w-full'],
+  ])('%i %% -> %s', (percent, cls) => {
+    expect(widthClass(percent)).toBe(cls);
   });
 });

@@ -5,7 +5,9 @@ import type {
   AuditView,
   Finding,
   Page,
+  PublicConfig,
 } from '@auditor/shared';
+import { AUDIT_RETENTION_DAYS, LEAD_RETENTION_DAYS } from '@auditor/shared';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { createMemoryRouter, RouterProvider } from 'react-router';
@@ -15,6 +17,7 @@ import { FindingsList } from './components/FindingsList.js';
 import { ApiRequestError } from './lib/api-client.js';
 import { SESSION_KEY, auditDetailKey, auditsKey, leadsKey, needsLogin } from './lib/panel.js';
 import { phaseProgress } from './lib/report.js';
+import { PUBLIC_CONFIG_KEY } from './pages/HomePage.js';
 
 // renderToStaticMarkup no agrega separadores de texto: se comparan cadenas planas.
 const plain = (html: string) => html.replace(/<!-- -->/g, '');
@@ -52,8 +55,10 @@ describe('P1: portada', () => {
     expect(html).toContain('Solo hacemos un análisis pasivo');
   });
 
-  it('ofrece el correo opcional con la casilla de consentimiento y el aviso de privacidad', () => {
-    const html = renderAt('/');
+  it('con la captura habilitada ofrece el correo opcional con la casilla y el aviso de privacidad', () => {
+    const client = new QueryClient();
+    client.setQueryData(PUBLIC_CONFIG_KEY, { contactCapture: true, demoNotice: true });
+    const html = renderAt('/', client);
     expect(html).toMatch(/<input[^>]*type="email"/);
     expect(html).toContain('Tu correo (opcional)');
     expect(html).toMatch(/<input[^>]*type="checkbox"/);
@@ -61,8 +66,8 @@ describe('P1: portada', () => {
     expect(html).toContain('href="/privacidad"');
   });
 
-  it('el aviso de privacidad todavía está en preparación', () => {
-    expect(renderAt('/privacidad')).toContain('en preparación');
+  it('el aviso de privacidad ya no dice "en preparación"', () => {
+    expect(renderAt('/privacidad')).not.toContain('en preparación');
   });
 
   it('una ruta desconocida muestra un mensaje en español', () => {
@@ -327,6 +332,7 @@ describe('P4: panel de consultores', () => {
         phase: null,
       },
       lead: {
+        id: 1,
         email: 'dueno@uno.example.com',
         consentAt: '2026-11-18T12:00:00.000Z',
         consentTextVersion: '2026-11-18',
@@ -339,5 +345,149 @@ describe('P4: panel de consultores', () => {
     expect(html).toContain('Nivel C');
     expect(html).not.toContain('<script>alert(1)</script>');
     expect(html).toContain('&lt;script&gt;');
+  });
+});
+
+describe('CSP: sin estilos inline', () => {
+  it('las barras de progreso y de puntaje usan clases, no el atributo style', () => {
+    const token = 'C'.repeat(43);
+    const client = new QueryClient();
+    client.setQueryData(['audit', token], {
+      status: 'done',
+      url: 'https://ejemplo.com/',
+      createdAt: '2026-11-18T12:00:00.000Z',
+      finishedAt: '2026-11-18T12:00:09.000Z',
+      expiresAt: '2026-12-18T12:00:00.000Z',
+      error: null,
+      findings: [],
+      scores: {
+        total: 72,
+        band: 'C',
+        categories: { security: 60, seo: 80, analytics: 50, trust: null, performance: 100 },
+        categoriesUsed: 4,
+        categoriesTotal: 5,
+      },
+      phase: null,
+    } satisfies AuditView);
+    const html = renderAt(`/informe/${token}`, client);
+    expect(html).not.toMatch(/style="/);
+    expect(html).toContain('w-[60%]');
+    const running = new QueryClient();
+    running.setQueryData(['audit', token], {
+      status: 'running',
+      url: 'https://ejemplo.com/',
+      createdAt: '2026-11-18T12:00:00.000Z',
+      finishedAt: null,
+      expiresAt: '2026-12-18T12:00:00.000Z',
+      error: null,
+      findings: [],
+      scores: null,
+      phase: 'seo',
+    } satisfies AuditView);
+    expect(renderAt(`/informe/${token}`, running)).not.toMatch(/style="/);
+  });
+});
+
+describe('portada según la configuración del despliegue', () => {
+  const withConfig = (config: PublicConfig) => {
+    const client = new QueryClient();
+    client.setQueryData(PUBLIC_CONFIG_KEY, config);
+    return renderAt('/', client);
+  };
+
+  it('muestra el aviso de demo', () => {
+    const html = withConfig({ contactCapture: false, demoNotice: true });
+    expect(html).toContain('Esto es una demo');
+    expect(html).toContain('no se conservan entre reinicios');
+    expect(html).toContain('hasta un minuto');
+  });
+
+  it('con la captura apagada no ofrece dejar el correo', () => {
+    const html = withConfig({ contactCapture: false, demoNotice: false });
+    expect(html).not.toMatch(/type="email"/);
+    expect(html).not.toContain('Esto es una demo');
+  });
+
+  it('mientras no sabe la configuración tampoco lo ofrece (falla cerrado)', () => {
+    expect(renderAt('/')).not.toMatch(/type="email"/);
+  });
+
+  it('remite a los términos y pide declarar la titularidad', () => {
+    const html = withConfig({ contactCapture: true, demoNotice: true });
+    expect(html).toContain('href="/terminos"');
+    expect(html).toContain('el sitio es tuyo o que tenés autorización');
+  });
+});
+
+describe('textos legales (borradores)', () => {
+  it('el aviso de privacidad cubre lo pedido y coincide con las constantes de retención', () => {
+    const html = renderAt('/privacidad');
+    for (const text of [
+      'Borrador',
+      'Última actualización',
+      'Iñaki Nicolás Antonena',
+      'Ley 25.326',
+      'AGENCIA DE ACCESO A LA INFORMACIÓN PÚBLICA',
+      'fuera de la Argentina',
+      'Render',
+      'no cargues datos personales reales',
+      'acceso a tus datos, que los corrijamos o que los borremos',
+      'huella irreversible',
+      'no usa cookies',
+      'la base de datos se borra cada vez que el servicio se reinicia',
+      `a los ${String(AUDIT_RETENTION_DAYS)} días`,
+      `${String(LEAD_RETENTION_DAYS)} días después de la última revisión`,
+    ]) {
+      expect(html).toContain(text);
+    }
+  });
+
+  it('los términos cubren titularidad, análisis pasivo, sin garantías y exclusión de sitios', () => {
+    const html = renderAt('/terminos');
+    for (const text of [
+      'Borrador',
+      'sos titular del sitio o que tenés autorización',
+      'No es una prueba de intrusión',
+      'tal cual',
+      'no querés que lo revisemos',
+      'medianoche (hora de Buenos Aires)',
+    ]) {
+      expect(html).toContain(text);
+    }
+  });
+
+  it('el pie enlaza los dos textos desde cualquier página', () => {
+    const html = renderAt('/');
+    expect(html).toContain('href="/terminos"');
+    expect(html).toContain('href="/privacidad"');
+  });
+
+  it('el detalle del panel ofrece borrar la auditoría y el contacto', () => {
+    const client = new QueryClient();
+    client.setQueryData(SESSION_KEY, { email: 'c@agencia.example.test', csrfToken: 's' });
+    client.setQueryData(auditDetailKey('7'), {
+      id: 7,
+      domain: 'uno.example.com',
+      audit: {
+        status: 'failed',
+        url: 'https://uno.example.com/',
+        createdAt: '2026-11-18T12:00:00.000Z',
+        finishedAt: null,
+        expiresAt: '2026-12-18T12:00:00.000Z',
+        error: { code: 'TIMEOUT', message: 'Tardó demasiado.' },
+        findings: [],
+        scores: null,
+        phase: null,
+      },
+      lead: {
+        id: 3,
+        email: 'd@uno.example.com',
+        consentAt: '2026-11-18T12:00:00.000Z',
+        consentTextVersion: 'v',
+      },
+    } satisfies AdminAuditDetail);
+    const html = renderAt('/panel/auditorias/7', client);
+    expect(html).toContain('Borrar auditoría');
+    expect(html).toContain('Borrar contacto');
   });
 });

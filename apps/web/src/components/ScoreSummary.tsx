@@ -1,5 +1,5 @@
 import { CATEGORIES, type Scores } from '@auditor/shared';
-import { CATEGORY_LABEL } from '../lib/report.js';
+import { CATEGORY_LABEL, widthClass } from '../lib/report.js';
 
 const SHORT_LABEL = { ...CATEGORY_LABEL, trust: 'Confianza' } as const;
 
@@ -34,10 +34,7 @@ export function ScoreSummary({ scores }: { readonly scores: Scores }) {
                   aria-valuemax={100}
                   aria-valuenow={value ?? 0}
                 >
-                  <span
-                    className="block h-3 rounded bg-blue-700"
-                    style={{ width: `${String(value ?? 0)}%` }}
-                  />
+                  <span className={`block h-3 rounded bg-blue-700 ${widthClass(value ?? 0)}`} />
                 </span>
                 <span className="text-right text-sm font-medium">{value ?? 'sin datos'}</span>
               </li>

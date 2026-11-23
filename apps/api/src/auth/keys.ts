@@ -51,6 +51,11 @@ export function attemptKeys(salt: string, email: string, ip: string) {
   return { pair: hmacHex(salt, `pair|${email}|${net}`), ip: hmacHex(salt, `ip|${net}`) };
 }
 
+/** Clave de los límites de uso por IP (H13): HMAC con sal, nunca la IP en claro. */
+export function usageKey(salt: string, ip: string): string {
+  return hmacHex(salt, `usage|${normalizeIp(ip)}`);
+}
+
 export function safeEqual(a: string, b: string): boolean {
   const left = Buffer.from(a);
   const right = Buffer.from(b);

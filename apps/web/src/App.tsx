@@ -1,6 +1,8 @@
 import { Link, Outlet, type RouteObject } from 'react-router';
 import { HomePage } from './pages/HomePage.js';
 import { ReportPage } from './pages/ReportPage.js';
+import { PrivacyPage } from './pages/legal/PrivacyPage.js';
+import { TermsPage } from './pages/legal/TermsPage.js';
 import { AuditDetailPage } from './pages/panel/AuditDetailPage.js';
 import { AuditsPanel } from './pages/panel/AuditsPanel.js';
 import { LeadsPanel } from './pages/panel/LeadsPanel.js';
@@ -21,19 +23,19 @@ function Layout({ wide = false }: { readonly wide?: boolean }) {
       <main className={`mx-auto ${width} px-4 py-8`}>
         <Outlet />
       </main>
-    </div>
-  );
-}
-
-/** Borrador: el aviso real se publica en H15, antes de exponer el sistema. */
-function PrivacyPage() {
-  return (
-    <div className="space-y-3">
-      <h1 className="text-2xl font-bold">Aviso de privacidad</h1>
-      <p>
-        El aviso de privacidad está en preparación. Mientras tanto, no dejes tu correo: esta versión
-        es solo de prueba.
-      </p>
+      <footer className="border-t border-slate-200">
+        <nav
+          aria-label="Textos legales"
+          className={`mx-auto flex ${width} gap-4 px-4 py-4 text-sm text-slate-700`}
+        >
+          <Link to="/terminos" className="underline">
+            Términos de uso
+          </Link>
+          <Link to="/privacidad" className="underline">
+            Aviso de privacidad
+          </Link>
+        </nav>
+      </footer>
     </div>
   );
 }
@@ -57,6 +59,7 @@ export const routes: RouteObject[] = [
       { index: true, element: <HomePage /> },
       { path: 'informe/:token', element: <ReportPage /> },
       { path: 'privacidad', element: <PrivacyPage /> },
+      { path: 'terminos', element: <TermsPage /> },
       { path: 'panel/ingresar', element: <LoginPage /> },
       { path: '*', element: <NotFound /> },
     ],

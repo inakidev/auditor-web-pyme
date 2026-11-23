@@ -29,6 +29,9 @@ export const IP_POLICY: LockoutPolicy = {
   lockMs: () => MAX_LOCK_MS,
 };
 
+/** Pasado este lapso sin fallos, cualquier contador vuelve a cero (lo usa la purga). */
+export const COUNTER_DECAY_MS = Math.max(PAIR_POLICY.resetAfterMs, IP_POLICY.resetAfterMs);
+
 export function recordFailure(
   counter: Counter | undefined,
   now: number,

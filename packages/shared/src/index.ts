@@ -191,8 +191,24 @@ export interface AdminAuditDetail {
   readonly domain: string;
   readonly audit: AuditView;
   readonly lead: {
+    readonly id: number;
     readonly email: string;
     readonly consentAt: string;
     readonly consentTextVersion: string;
   } | null;
+}
+
+// --- Retención y configuración pública (H14, H15) ---
+
+/** Días que se conserva un informe antes de la purga automática (RF-09, RF-16). */
+export const AUDIT_RETENTION_DAYS = 30;
+/** Días que se conserva un contacto después de su última auditoría (RNF-05). */
+export const LEAD_RETENTION_DAYS = 30;
+
+/** Lo que la web necesita saber del despliegue (GET /api/config). */
+export interface PublicConfig {
+  /** Si se puede dejar el correo. Apagado hasta publicar los textos legales. */
+  readonly contactCapture: boolean;
+  /** Aviso de demo: base efímera y arranque en frío. */
+  readonly demoNotice: boolean;
 }

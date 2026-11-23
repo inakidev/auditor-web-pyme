@@ -1,6 +1,6 @@
 # Requisitos: Auditor Web Pyme
 
-Versión 0.3 (borrador a validar con las técnicas de la sección 4). Todo lo marcado como **[Hipótesis]** o **[Supuesto]** debe confirmarse con usuarios reales antes de darlo por cerrado.
+Versión 0.4 (borrador a validar con las técnicas de la sección 4). Todo lo marcado como **[Hipótesis]** o **[Supuesto]** debe confirmarse con usuarios reales antes de darlo por cerrado.
 
 ## 1. Propósito y contexto
 
@@ -81,7 +81,7 @@ Prioridad según MoSCoW: **M** (debe), **S** (debería), **C** (podría).
 | RNF-08 | Usabilidad | Interfaz en español rioplatense, móvil primero, contraste AA, lenguaje no técnico. | Prueba de usabilidad con 3 personas; revisión de contraste. |
 | RNF-09 | Confiabilidad | Fallos del sitio objetivo (timeout, WAF, caídas) se informan sin romper la auditoría ni penalizar el puntaje. | Pruebas con servidor de fixture que falla a propósito. |
 | RNF-10 | Mantenibilidad | Cada check es un módulo independiente; TypeScript estricto; cobertura ≥ 80 % en el scanner y ≥ 70 % en el resto. | Reporte de cobertura en CI. |
-| RNF-11 | Portabilidad | Se despliega con Docker en un VPS económico. | `docker compose up` funciona en un entorno limpio. |
+| RNF-11 | Portabilidad | Se despliega con Docker en un VPS económico o en un PaaS gratuito (la demo usa Render; ver ADR 0008). | `docker compose up` funciona en un entorno limpio y la misma imagen corre en Render. |
 | RNF-12 | Observabilidad | Logs estructurados sin datos personales; métricas básicas (auditorías, errores, duración). | Revisión de logs; endpoint de salud. |
 | RNF-13 | Ética y legalidad | Solo análisis pasivo, identificable (User-Agent), con límites de tasa y respeto de `robots.txt`. | Revisión del catálogo de checks; términos de uso publicados. |
 

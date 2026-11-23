@@ -109,10 +109,19 @@ export function createAdminRepository(db: Db) {
       };
     },
 
+    /** Borrado manual (RF-16). Las auditorías quedan sin contacto (D-02: sin SET NULL en la base). */
+    deleteLead(id: number): boolean {
+      return db.transaction((tx) => {
+        tx.update(audits).set({ leadId: null }).where(eq(audits.leadId, id)).run();
+        return tx.delete(leads).where(eq(leads.id, id)).run().changes > 0;
+      });
+    },
+
     leadOf(leadId: number | null) {
       if (leadId === null) return null;
       const row = db
         .select({
+          id: leads.id,
           email: leads.email,
           consentAt: leads.consentAt,
           consentTextVersion: leads.consentTextVersion,

@@ -14,6 +14,8 @@ Aplicación web que revisa de forma **pasiva** el sitio público de una pyme y d
 | Nombre del informe | Avance 3: Repositorio y avance del proyecto (Auditor Web Pyme) |
 | Integrantes | 1 (trabajo individual) |
 
+> **Demo pública:** los informes no se conservan entre reinicios del servicio y el primer acceso puede tardar hasta un minuto (plan gratuito de Render). Ver [Despliegue](#despliegue-en-render).
+
 ## Qué problema resuelve
 
 Los sitios de las pymes suelen tener fallas que sus dueños no ven: certificados vencidos, falta de cabeceras de seguridad, metadatos incompletos, formularios rotos o falta de medición. Una revisión manual lleva tiempo y reúne herramientas dispersas. Esta aplicación hace la revisión en minutos y la entrega en un informe claro, con las acciones ordenadas por prioridad.
@@ -24,10 +26,10 @@ El avance se mide en **puntos de historia** sobre el alcance de la versión entr
 
 | Indicador | Valor |
 |---|---|
-| Puntos terminados | 61 de 85 |
-| Avance | 71,8 % |
+| Puntos terminados | 69 de 85 |
+| Avance | 81,2 % |
 | Meta del Avance 3 | 51 puntos (60 %) |
-| Última actualización | 18/11/2026 (H12, cierre de la etapa 5) |
+| Última actualización | 23/11/2026 (H13 y H14; H15 en revisión hasta el primer despliegue en Render y la revisión de los textos legales) |
 
 > Actualizá esta tabla cada vez que se cierra una historia. Una historia cuenta solo si cumple su definición de hecho (pruebas en verde, revisión hecha y documentación al día).
 
@@ -68,7 +70,12 @@ cp .env.example .env              # PowerShell: Copy-Item .env.example .env
 | `PUBLIC_ORIGIN` | Si queda el valor de ejemplo, usa `http://localhost:5173` | Obligatoria: origen exacto de la web, con https y sin barra final |
 | `IP_HASH_SALT` | Opcional | Obligatoria: 32 caracteres aleatorios o más |
 | `ADMIN_EMAIL` y `ADMIN_PASSWORD_HASH` | Solo si querés entrar al panel | Obligatorias |
-| `DATABASE_PATH`, `HOST`, `PORT`, `LOG_LEVEL` | Tienen valores por defecto | Tienen valores por defecto |
+| `PORT` | 3000 por defecto | Obligatoria (Render la define sola) |
+| `TRUST_PROXY_HOPS` | 0 (conexión directa) | 1 detrás del proxy de Render |
+| `CONTACT_CAPTURE_ENABLED` | `true` | `false` hasta publicar los textos legales |
+| `DEMO_NOTICE` | `true` | `true` en la demo |
+| `AUDIT_LIMIT_PER_IP`, `AUDIT_LIMIT_WINDOW_MINUTES`, `DOMAIN_COOLDOWN_SECONDS`, `DAILY_AUDIT_CAP`, `AUDIT_CONCURRENCY`, `AUDIT_MAX_PENDING` | 20 por hora, 30 s, 300 por día, 2 y 20 | Igual (ver `.env.example`) |
+| `DATABASE_PATH`, `HOST`, `LOG_LEVEL` | Tienen valores por defecto | Tienen valores por defecto |
 
 En producción la API no arranca si falta una variable obligatoria o si quedó el valor de ejemplo de `.env.example`.
 
@@ -117,6 +124,35 @@ pnpm build          # compila todos los paquetes
 pnpm check:guides   # verifica a mano que las guías de las recomendaciones respondan
 docker compose up   # API en contenedor con la imagen de producción (lee .env)
 ```
+
+## Despliegue en Render
+
+La demo corre en el plan gratuito de Render: un solo servicio web con Docker que sirve la API y la web compilada. La configuración está en [render.yaml](render.yaml) (Blueprint) y las decisiones en el [ADR 0008](docs/decisiones/0008-despliegue-en-render-y-limites.md).
+
+**Ciclo de vida del plan gratuito:**
+- Se apaga tras 15 minutos sin tráfico y tarda hasta un minuto en volver.
+- Render puede reiniciarlo en cualquier momento.
+- El disco es efímero: la base SQLite se pierde en cada reinicio, redeploy o apagado. Al arrancar, la API crea la base vacía, corre las migraciones y crea el usuario del panel desde `ADMIN_EMAIL` y `ADMIN_PASSWORD_HASH`. No hay que hacer nada para recrearlo.
+- Da 750 horas por mes. Un ping externo a `/api/health` cada pocos minutos mantiene el servicio despierto (unas 744 horas en un mes de 31 días). Un segundo servicio gratuito en la misma cuenta agotaría las horas.
+
+**Crear el servicio:**
+1. En Render, **New → Blueprint**, elegí este repositorio. Render lee `render.yaml`.
+2. Completá las variables que pide:
+   - `PUBLIC_ORIGIN`: la URL final del servicio, por ejemplo `https://auditor-web-pyme.onrender.com`, sin barra final. Tiene que coincidir **exactamente**. Si Render le agrega un sufijo al nombre porque ya existe, corregila en el panel. Un `PUBLIC_ORIGIN` incorrecto rompe el ingreso al panel por la verificación de Origin.
+   - `ADMIN_EMAIL` y `ADMIN_PASSWORD_HASH`: el hash se genera en tu máquina con `pnpm --filter @auditor/api user:hash`. En el panel de Render pegalo **tal cual, sin comillas y sin escapar los `$`**: Render no interpreta el valor. Si quedara mal (comillas o sin los `$`), la API no arranca y el log dice cuál de los dos problemas tiene.
+   - `AUDITOR_CONTACT_URL`: por ahora, `https://github.com/inakidev/auditor-web-pyme`.
+3. `IP_HASH_SALT` se genera sola una única vez. Cambiarla reinicia los contadores de uso, que de todas formas viven en memoria y se pierden con cada reinicio.
+4. La región es `virginia`, la más cercana a la Argentina de la lista de Render. No se puede cambiar después.
+5. En el primer despliegue, poné `LOG_PROXY_CHAIN=true` un rato y fijate en el log cuántas entradas trae `X-Forwarded-For` (el log nunca muestra las IP). Si son 2 o más, ajustá `TRUST_PROXY_HOPS`. Después volvé a `false`.
+
+Si falta alguna variable obligatoria, la API no arranca y el log las lista todas juntas.
+
+### Antes de entregar
+
+- [ ] Textos legales revisados y publicados; recién entonces `CONTACT_CAPTURE_ENABLED=true`.
+- [ ] `autoDeployTrigger` en `off` (en el panel o en `render.yaml`): cada deploy borra la base y reinicia en frío.
+- [ ] Ping externo activo contra `/api/health`.
+- [ ] Credenciales del docente cargadas en el panel.
 
 ## Metodología y planificación
 

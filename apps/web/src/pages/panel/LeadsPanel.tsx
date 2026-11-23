@@ -1,8 +1,9 @@
 import { LEAD_STATUSES } from '@auditor/shared';
 import { useQuery } from '@tanstack/react-query';
 import { Link, useSearchParams } from 'react-router';
-import { listAdminLeads, toQueryString } from '../../lib/api-client.js';
+import { deleteAdminLead, listAdminLeads, toQueryString } from '../../lib/api-client.js';
 import { LEAD_STATUS_LABEL, filtersFrom, formatDate, leadsKey } from '../../lib/panel.js';
+import { DeleteButton } from './DeleteButton.js';
 import { Filters, Pager, Table, type FilterField } from './Filters.js';
 
 const FIELDS: readonly FilterField[] = [
@@ -39,7 +40,17 @@ export function LeadsPanel() {
       )}
       {query.isSuccess && (
         <>
-          <Table headers={['Fecha', 'Correo', 'Dominio', 'Estado', 'Consentimiento', 'Informe']}>
+          <Table
+            headers={[
+              'Fecha',
+              'Correo',
+              'Dominio',
+              'Estado',
+              'Consentimiento',
+              'Informe',
+              'Acciones',
+            ]}
+          >
             {query.data.items.map((l) => (
               <tr key={l.id} className="border-b border-slate-200">
                 <td className="px-2 py-2">{formatDate(l.createdAt)}</td>
@@ -60,6 +71,13 @@ export function LeadsPanel() {
                       Ver informe
                     </Link>
                   )}
+                </td>
+                <td className="px-2 py-2">
+                  <DeleteButton
+                    label="Borrar"
+                    confirmText={`¿Borrar el contacto ${l.email}? No se puede deshacer.`}
+                    onDelete={(csrf) => deleteAdminLead(l.id, csrf)}
+                  />
                 </td>
               </tr>
             ))}

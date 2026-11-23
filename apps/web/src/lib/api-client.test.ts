@@ -2,7 +2,10 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
   ApiRequestError,
   createAudit,
+  deleteAdminAudit,
+  deleteAdminLead,
   getAudit,
+  getPublicConfig,
   listAdminAudits,
   login,
   logout,
@@ -101,5 +104,25 @@ describe('api-client', () => {
       expect.anything(),
     );
     expect(toQueryString({ a: '' })).toBe('');
+  });
+
+  it('getPublicConfig consulta /api/config', async () => {
+    const fetchMock = vi.fn(() => json(200, { contactCapture: false, demoNotice: true }));
+    vi.stubGlobal('fetch', fetchMock);
+    expect(await getPublicConfig()).toEqual({ contactCapture: false, demoNotice: true });
+    expect(fetchMock).toHaveBeenCalledWith('/api/config', expect.anything());
+  });
+
+  it('los borrados del panel usan DELETE con el token CSRF en la cabecera', async () => {
+    const fetchMock = vi.fn(() => Promise.resolve(new Response(null, { status: 204 })));
+    vi.stubGlobal('fetch', fetchMock);
+    await deleteAdminAudit(7, 'tok');
+    await deleteAdminLead(3, 'tok');
+    const calls = fetchMock.mock.calls as unknown as [string, RequestInit][];
+    expect(calls.map(([path]) => path)).toEqual(['/api/admin/audits/7', '/api/admin/leads/3']);
+    for (const [, init] of calls) {
+      expect(init.method).toBe('DELETE');
+      expect(init.headers).toMatchObject({ 'x-csrf-token': 'tok' });
+    }
   });
 });

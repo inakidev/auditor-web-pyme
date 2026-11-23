@@ -106,3 +106,37 @@ export function priorityFindings(findings: readonly Finding[], limit = 5): Findi
 export function isActionable(finding: Finding): boolean {
   return finding.status === 'fail' || finding.status === 'warn';
 }
+
+/**
+ * Ancho de una barra sin estilos inline (la CSP no permite 'unsafe-inline'). Se redondea a pasos
+ * de 5 %; el valor exacto va en aria-valuenow. Las clases están escritas enteras para que
+ * Tailwind las genere.
+ */
+const WIDTH_CLASSES = [
+  'w-0',
+  'w-[5%]',
+  'w-[10%]',
+  'w-[15%]',
+  'w-[20%]',
+  'w-[25%]',
+  'w-[30%]',
+  'w-[35%]',
+  'w-[40%]',
+  'w-[45%]',
+  'w-[50%]',
+  'w-[55%]',
+  'w-[60%]',
+  'w-[65%]',
+  'w-[70%]',
+  'w-[75%]',
+  'w-[80%]',
+  'w-[85%]',
+  'w-[90%]',
+  'w-[95%]',
+  'w-full',
+] as const;
+
+export function widthClass(percent: number): string {
+  const step = Math.round(Math.min(Math.max(percent, 0), 100) / 5);
+  return WIDTH_CLASSES[step] ?? 'w-0';
+}

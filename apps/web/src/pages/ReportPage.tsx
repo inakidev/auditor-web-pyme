@@ -5,7 +5,7 @@ import { FindingsList, PriorityList } from '../components/FindingsList.js';
 import { ScoreSummary } from '../components/ScoreSummary.js';
 import { getAudit } from '../lib/api-client.js';
 import { pollInterval, retryDelay, shouldRetry } from '../lib/polling.js';
-import { PHASE_LABEL, phaseProgress } from '../lib/report.js';
+import { PHASE_LABEL, phaseProgress, widthClass } from '../lib/report.js';
 
 const NEW_AUDIT_LINK = (
   <Link to="/" className="font-medium text-blue-800 underline">
@@ -32,7 +32,7 @@ function Progress({ audit }: { readonly audit: AuditView }) {
           aria-valuemax={100}
           aria-valuenow={percent}
         >
-          <div className="h-4 rounded bg-blue-700" style={{ width: `${String(percent)}%` }} />
+          <div className={`h-4 rounded bg-blue-700 ${widthClass(percent)}`} />
         </div>
         <p className="mt-1 text-right text-sm font-medium">{percent} %</p>
       </div>

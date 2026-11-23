@@ -7,8 +7,10 @@ import {
   type CreateAuditResponse,
 } from '@auditor/shared';
 import type { FastifyInstance } from 'fastify';
+import { usageKey } from '../auth/keys.js';
 import { isErrorCode, messageFor, sendError } from '../errors.js';
 import type { JobQueue } from '../jobs/queue.js';
+import { retryAfterSeconds, type UsageLimiter } from '../limits/usage-limits.js';
 import { scoresOf, type AuditRepository, type AuditRow } from '../services/audits.js';
 import { generateToken, hashToken } from '../tokens.js';
 
@@ -41,10 +43,14 @@ export interface AuditRoutesDeps {
   readonly queue: JobQueue<number>;
   readonly now: () => Date;
   readonly phaseOf: (id: number) => AuditPhase | null;
+  readonly limiter: UsageLimiter;
+  readonly ipHashSalt: string;
+  /** Apagado: se rechazan los correos (hasta publicar los textos legales). */
+  readonly contactCaptureEnabled: boolean;
 }
 
 export function registerAuditRoutes(app: FastifyInstance, deps: AuditRoutesDeps): void {
-  const { repo, queue, now, phaseOf } = deps;
+  const { repo, queue, now, phaseOf, limiter, ipHashSalt, contactCaptureEnabled } = deps;
 
   app.post('/api/audits', { bodyLimit: MAX_BODY_BYTES }, (req, reply) => {
     const parsed = createAuditRequestSchema.safeParse(req.body);
@@ -56,9 +62,20 @@ export function registerAuditRoutes(app: FastifyInstance, deps: AuditRoutesDeps)
 
     // Sin consentimiento expreso no se guarda el correo (RF-11).
     const { email, consent } = parsed.data;
+    if (email !== undefined && !contactCaptureEnabled) {
+      return sendError(reply, 400, 'CONTACT_DISABLED');
+    }
     if (email !== undefined && consent !== true) return sendError(reply, 400, 'CONSENT_REQUIRED');
 
+    // Límites de uso (RF-15): se revisan todos antes de consumir cupo.
+    const usage = { ipKey: usageKey(ipHashSalt, req.ip), domain: target.domain };
+    const verdict = limiter.check(usage, now().getTime());
+    if (!verdict.ok) {
+      reply.header('retry-after', String(retryAfterSeconds(verdict.retryAfterMs)));
+      return sendError(reply, 429, verdict.code);
+    }
     if (!queue.canAccept()) return sendError(reply, 503, 'QUEUE_FULL');
+    limiter.commit(usage, now().getTime());
 
     const token = generateToken();
     const id = repo.create({

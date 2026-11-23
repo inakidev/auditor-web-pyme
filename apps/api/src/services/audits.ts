@@ -1,5 +1,6 @@
 import { scoreFindings } from '@auditor/scanner';
 import {
+  AUDIT_RETENTION_DAYS,
   CATEGORIES,
   CONSENT_TEXT_VERSION,
   type Category,
@@ -11,7 +12,7 @@ import type { Db } from '../db/client.js';
 import { audits, findings, leads } from '../db/schema.js';
 
 /** Los informes vencen a los 30 días (RF-09). */
-export const RETENTION_MS = 30 * 24 * 60 * 60 * 1000;
+export const RETENTION_MS = AUDIT_RETENTION_DAYS * 24 * 60 * 60 * 1000;
 
 export type AuditRow = typeof audits.$inferSelect;
 
@@ -55,6 +56,11 @@ export function createAuditRepository(db: Db) {
           .returning({ id: audits.id })
           .get().id;
       });
+    },
+
+    /** Borrado manual (RF-16): los hallazgos se van por ON DELETE CASCADE. */
+    deleteAudit(id: number): boolean {
+      return db.delete(audits).where(eq(audits.id, id)).run().changes > 0;
     },
 
     findById(id: number): AuditRow | undefined {

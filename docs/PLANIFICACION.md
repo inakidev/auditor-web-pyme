@@ -56,9 +56,9 @@ Total de la versión entregable: **85 puntos**. Prioridad: M (debe) o S (deberí
 | H10 | Checks de confianza y resto de seguridad | RF-03, RF-06 | 5 | S | Hecho |
 | H11 | Captura de contacto con consentimiento | RF-11, RNF-05 | 3 | M | Hecho |
 | H12 | Inicio de sesión y panel de consultores | RF-12, RNF-02 | 8 | M | Hecho |
-| H13 | Límites de uso por IP, dominio y día | RF-15 | 5 | M | Pendiente |
-| H14 | Retención, purga y borrado de datos | RF-16, RNF-05 | 3 | M | Pendiente |
-| H15 | Despliegue con Docker, HTTPS, términos y privacidad | RNF-11 | 5 | M | Pendiente |
+| H13 | Límites de uso por IP, dominio y día | RF-15 | 5 | M | Hecho |
+| H14 | Retención, purga y borrado de datos | RF-16, RNF-05 | 3 | M | Hecho |
+| H15 | Despliegue con Docker, HTTPS, términos y privacidad | RNF-11 | 5 | M | En revisión |
 | H16 | Pruebas e2e y prueba de usabilidad | RNF-06, 07, 08 | 5 | M | Pendiente |
 | H17 | Exportar el informe a PDF | RF-10 | 3 | S | Pendiente |
 | H18 | Estados y notas de contactos | RF-14 | 3 | S | Pendiente |

@@ -20,7 +20,7 @@ export interface AdminRoutesDeps {
 
 const ID_PATTERN = /^[1-9]\d{0,15}$/;
 
-/** Panel de consultores (RF-12): todo exige sesión vigente. Por ahora solo lectura. */
+/** Panel de consultores (RF-12, RF-16): todo exige sesión vigente; borrar exige además CSRF. */
 export function registerAdminRoutes(app: FastifyInstance, deps: AdminRoutesDeps): void {
   const { admin, audits, guards, phaseOf } = deps;
   const onRequest = guards.requireSession;
@@ -42,6 +42,27 @@ export function registerAdminRoutes(app: FastifyInstance, deps: AdminRoutesDeps)
       lead: admin.leadOf(audit.leadId),
     };
     return reply.send(body);
+  });
+
+  // Borrado manual (RF-16): mutaciones con sesión, Origin y token CSRF.
+  const mutation = { onRequest, preHandler: guards.requireCsrf };
+
+  app.delete<{ Params: { id: string } }>('/api/admin/audits/:id', mutation, (req, reply) => {
+    const { id } = req.params;
+    if (!ID_PATTERN.test(id) || !audits.deleteAudit(Number(id))) {
+      return sendError(reply, 404, 'NOT_FOUND');
+    }
+    req.log.info({ auditId: Number(id) }, 'auditoría borrada desde el panel');
+    return reply.code(204).send();
+  });
+
+  app.delete<{ Params: { id: string } }>('/api/admin/leads/:id', mutation, (req, reply) => {
+    const { id } = req.params;
+    if (!ID_PATTERN.test(id) || !admin.deleteLead(Number(id))) {
+      return sendError(reply, 404, 'NOT_FOUND');
+    }
+    req.log.info({ leadId: Number(id) }, 'contacto borrado desde el panel');
+    return reply.code(204).send();
   });
 
   app.get('/api/admin/leads', { onRequest }, (req, reply) => {

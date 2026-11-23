@@ -1,16 +1,25 @@
 import { CONSENT_TEXT, MAX_EMAIL_LENGTH, MAX_URL_LENGTH } from '@auditor/shared';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router';
-import { createAudit } from '../lib/api-client.js';
+import { createAudit, getPublicConfig } from '../lib/api-client.js';
+
+export const PUBLIC_CONFIG_KEY = ['public-config'] as const;
 
 export function HomePage() {
   const [url, setUrl] = useState('');
   const [email, setEmail] = useState('');
   const [consent, setConsent] = useState(false);
   const navigate = useNavigate();
+  const config = useQuery({
+    queryKey: PUBLIC_CONFIG_KEY,
+    queryFn: getPublicConfig,
+    staleTime: Number.POSITIVE_INFINITY,
+  });
+  // Falla cerrado: hasta saber que está habilitado, no se ofrece dejar el correo.
+  const contactCapture = config.data?.contactCapture === true;
   const mutation = useMutation({
-    mutationFn: () => createAudit(url, { email, consent }),
+    mutationFn: () => createAudit(url, contactCapture ? { email, consent } : undefined),
     onSuccess: ({ token }) => {
       void navigate(`/informe/${token}`);
     },
@@ -18,6 +27,12 @@ export function HomePage() {
 
   return (
     <div className="space-y-6">
+      {config.data?.demoNotice === true && (
+        <p role="note" className="rounded border border-amber-600 bg-amber-50 p-3 text-amber-950">
+          <strong>Esto es una demo.</strong> Los informes no se conservan entre reinicios del
+          servicio y el primer acceso puede tardar hasta un minuto.
+        </p>
+      )}
       <div className="space-y-2">
         <h1 className="text-3xl font-bold text-blue-950">Revisá tu sitio web en un minuto</h1>
         <p className="text-lg">
@@ -52,40 +67,44 @@ export function HomePage() {
           aria-describedby={mutation.isError ? 'url-error' : undefined}
           className="w-full rounded-lg border border-slate-400 px-4 py-3 text-lg focus:outline-2 focus:outline-blue-700"
         />
-        <label htmlFor="email" className="block font-medium">
-          Tu correo (opcional)
-        </label>
-        <input
-          id="email"
-          name="email"
-          type="email"
-          autoComplete="email"
-          placeholder="nombre@empresa.com"
-          maxLength={MAX_EMAIL_LENGTH}
-          value={email}
-          onChange={(e) => {
-            setEmail(e.target.value);
-          }}
-          className="w-full rounded-lg border border-slate-400 px-4 py-3 text-lg focus:outline-2 focus:outline-blue-700"
-        />
-        <label className="flex items-start gap-2">
-          <input
-            type="checkbox"
-            name="consent"
-            checked={consent}
-            onChange={(e) => {
-              setConsent(e.target.checked);
-            }}
-            className="mt-1 h-5 w-5"
-          />
-          <span>
-            {CONSENT_TEXT}. Ver el{' '}
-            <Link to="/privacidad" className="text-blue-800 underline">
-              aviso de privacidad
-            </Link>
-            .
-          </span>
-        </label>
+        {contactCapture && (
+          <>
+            <label htmlFor="email" className="block font-medium">
+              Tu correo (opcional)
+            </label>
+            <input
+              id="email"
+              name="email"
+              type="email"
+              autoComplete="email"
+              placeholder="nombre@empresa.com"
+              maxLength={MAX_EMAIL_LENGTH}
+              value={email}
+              onChange={(e) => {
+                setEmail(e.target.value);
+              }}
+              className="w-full rounded-lg border border-slate-400 px-4 py-3 text-lg focus:outline-2 focus:outline-blue-700"
+            />
+            <label className="flex items-start gap-2">
+              <input
+                type="checkbox"
+                name="consent"
+                checked={consent}
+                onChange={(e) => {
+                  setConsent(e.target.checked);
+                }}
+                className="mt-1 h-5 w-5"
+              />
+              <span>
+                {CONSENT_TEXT}. Ver el{' '}
+                <Link to="/privacidad" className="text-blue-800 underline">
+                  aviso de privacidad
+                </Link>
+                .
+              </span>
+            </label>
+          </>
+        )}
         {mutation.isError && (
           <p id="url-error" role="alert" className="text-red-800">
             {mutation.error.message}
@@ -100,6 +119,13 @@ export function HomePage() {
         </button>
       </form>
 
+      <p className="text-sm text-slate-700">
+        Al pedir la revisión aceptás los{' '}
+        <Link to="/terminos" className="text-blue-800 underline">
+          términos de uso
+        </Link>{' '}
+        y declarás que el sitio es tuyo o que tenés autorización de su titular.
+      </p>
       <p className="text-sm text-slate-700">
         Solo hacemos un análisis pasivo: miramos tu sitio como lo haría un navegador, sin pruebas de
         intrusión y sin guardar el contenido de tus páginas.

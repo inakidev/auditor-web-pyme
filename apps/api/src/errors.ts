@@ -24,6 +24,13 @@ const MESSAGES = {
   INTERRUPTED: 'La revisión se interrumpió por un reinicio del servicio. Pedí una nueva.',
   INTERNAL_ERROR: 'Tuvimos un problema al revisar el sitio. Probá de nuevo más tarde.',
   QUEUE_FULL: 'Hay muchas revisiones en curso. Probá de nuevo en unos minutos.',
+  RATE_LIMITED: 'Hiciste muchas revisiones seguidas. Esperá un rato y probá de nuevo.',
+  DOMAIN_COOLDOWN: 'Ese sitio se acaba de revisar. Esperá unos segundos y probá de nuevo.',
+  DAILY_CAP:
+    'Se alcanzó el tope diario de revisiones. Se renueva a la medianoche (hora de Buenos Aires).',
+  SERVICE_BUSY: 'El servicio está saturado. Probá de nuevo en unos minutos.',
+  CONTACT_DISABLED:
+    'Por ahora no estamos guardando correos. Borralo y pedí la revisión sin correo.',
   CONSENT_REQUIRED:
     'Para guardar tu correo necesitamos que marques la casilla de consentimiento. Si no querés dejarlo, borralo.',
   PAYLOAD_TOO_LARGE: 'El pedido es demasiado grande.',
