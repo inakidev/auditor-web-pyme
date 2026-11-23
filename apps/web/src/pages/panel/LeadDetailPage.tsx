@@ -55,7 +55,10 @@ export function LeadDetailPage() {
   const selected = status === '' ? lead.status : status;
   return (
     <div className="space-y-6">
-      <Link to="/panel/contactos" className="text-sm font-medium text-blue-800 underline">
+      <Link
+        to="/panel/contactos"
+        className="text-sm font-medium text-blue-600 hover:underline focus-visible:underline"
+      >
         Volver a los contactos
       </Link>
       <div className="flex flex-wrap items-start justify-between gap-3">
@@ -67,7 +70,7 @@ export function LeadDetailPage() {
           {lead.lastAuditId !== null && (
             <Link
               to={`/panel/auditorias/${String(lead.lastAuditId)}`}
-              className="text-sm font-medium text-blue-800 underline"
+              className="text-sm font-medium text-blue-600 hover:underline focus-visible:underline"
             >
               Ver el informe
             </Link>

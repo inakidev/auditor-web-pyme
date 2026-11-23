@@ -25,7 +25,10 @@ export function AuditDetailPage() {
   const auditId = query.data.id;
   return (
     <div className="space-y-6">
-      <Link to="/panel" className="text-sm font-medium text-blue-800 underline">
+      <Link
+        to="/panel"
+        className="text-sm font-medium text-blue-600 hover:underline focus-visible:underline"
+      >
         Volver a las auditorías
       </Link>
       <div className="flex flex-wrap items-start justify-between gap-3">

@@ -31,10 +31,10 @@ function Layout({ wide = false }: { readonly wide?: boolean }) {
           aria-label="Textos legales"
           className={`mx-auto flex ${width} gap-4 px-4 py-4 text-sm text-slate-700`}
         >
-          <Link to="/terminos" className="underline">
+          <Link to="/terminos" className="text-blue-600 hover:underline focus-visible:underline">
             Términos de uso
           </Link>
-          <Link to="/privacidad" className="underline">
+          <Link to="/privacidad" className="text-blue-600 hover:underline focus-visible:underline">
             Aviso de privacidad
           </Link>
         </nav>
@@ -47,7 +47,7 @@ function NotFound() {
   return (
     <div className="space-y-3">
       <h1 className="text-2xl font-bold">No encontramos esta página</h1>
-      <Link to="/" className="font-medium text-blue-800 underline">
+      <Link to="/" className="font-medium text-blue-600 hover:underline focus-visible:underline">
         Volver al inicio
       </Link>
     </div>

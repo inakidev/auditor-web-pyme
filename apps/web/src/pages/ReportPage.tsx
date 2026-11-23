@@ -10,7 +10,10 @@ import { pollInterval, retryDelay, shouldRetry } from '../lib/polling.js';
 import { PHASE_LABEL, phaseProgress, widthClass } from '../lib/report.js';
 
 const NEW_AUDIT_LINK = (
-  <Link to="/" className="font-medium text-blue-800 underline print:hidden">
+  <Link
+    to="/"
+    className="font-medium text-blue-600 hover:underline focus-visible:underline print:hidden"
+  >
     Pedir otra revisión
   </Link>
 );

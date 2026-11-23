@@ -48,7 +48,7 @@ export function AuditsPanel() {
                 <td className="px-2 py-2">
                   <Link
                     to={`/panel/auditorias/${String(a.id)}`}
-                    className="font-medium text-blue-800 underline"
+                    className="font-medium text-blue-600 hover:underline focus-visible:underline"
                   >
                     {a.domain}
                   </Link>

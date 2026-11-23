@@ -4,7 +4,7 @@ import { getSession, logout } from '../../lib/api-client.js';
 import { SESSION_KEY, needsLogin } from '../../lib/panel.js';
 
 const tabClass = ({ isActive }: { isActive: boolean }) =>
-  `rounded px-3 py-1 font-medium ${isActive ? 'bg-blue-800 text-white' : 'text-blue-800 underline'}`;
+  `rounded px-3 py-1 font-medium ${isActive ? 'bg-blue-800 text-white' : 'text-blue-600 hover:underline focus-visible:underline'}`;
 
 /** Todo lo que está bajo /panel exige sesión: sin ella vuelve al ingreso. */
 export function PanelLayout() {

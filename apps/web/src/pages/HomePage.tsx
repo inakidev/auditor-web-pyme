@@ -97,7 +97,10 @@ export function HomePage() {
               />
               <span>
                 {CONSENT_TEXT}. Ver el{' '}
-                <Link to="/privacidad" className="text-blue-800 underline">
+                <Link
+                  to="/privacidad"
+                  className="text-blue-600 hover:underline focus-visible:underline"
+                >
                   aviso de privacidad
                 </Link>
                 .
@@ -119,9 +122,9 @@ export function HomePage() {
         </button>
       </form>
 
-      <p className="text-sm text-slate-700">
+      <p className="text-sm">
         Al pedir la revisión aceptás los{' '}
-        <Link to="/terminos" className="text-blue-800 underline">
+        <Link to="/terminos" className="text-blue-600 hover:underline focus-visible:underline">
           términos de uso
         </Link>{' '}
         y declarás que el sitio es tuyo o que tenés autorización de su titular.

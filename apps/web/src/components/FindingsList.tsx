@@ -70,7 +70,7 @@ function FindingItem({ finding }: { readonly finding: Finding }) {
           href={finding.guide}
           target="_blank"
           rel="noopener noreferrer"
-          className="mt-2 inline-block font-medium text-blue-800 underline"
+          className="mt-2 inline-block font-medium text-blue-700 hover:underline focus-visible:underline"
         >
           Ver una guía paso a paso{finding.guide.includes('/en-US/') ? ' (en inglés)' : ''}
         </a>

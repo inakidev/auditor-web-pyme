@@ -57,7 +57,7 @@ export function LeadsPanel() {
                 <td className="px-2 py-2">
                   <Link
                     to={`/panel/contactos/${String(l.id)}`}
-                    className="font-medium text-blue-800 underline"
+                    className="font-medium text-blue-600 hover:underline focus-visible:underline"
                   >
                     {l.email}
                   </Link>
@@ -73,7 +73,7 @@ export function LeadsPanel() {
                   ) : (
                     <Link
                       to={`/panel/auditorias/${String(l.lastAuditId)}`}
-                      className="font-medium text-blue-800 underline"
+                      className="font-medium text-blue-600 hover:underline focus-visible:underline"
                     >
                       Ver informe
                     </Link>
