@@ -26,10 +26,10 @@ El avance se mide en **puntos de historia** sobre el alcance de la versión entr
 
 | Indicador | Valor |
 |---|---|
-| Puntos terminados | 69 de 85 |
-| Avance | 81,2 % |
+| Puntos terminados | 74 de 85 |
+| Avance | 87,1 % |
 | Meta del Avance 3 | 51 puntos (60 %) |
-| Última actualización | 23/11/2026 (H13 y H14; H15 en revisión hasta el primer despliegue en Render y la revisión de los textos legales) |
+| Última actualización | 23/11/2026 (H13, H14 y H15, cierre de la etapa 6) |
 
 > Actualizá esta tabla cada vez que se cierra una historia. Una historia cuenta solo si cumple su definición de hecho (pruebas en verde, revisión hecha y documentación al día).
 
@@ -149,7 +149,7 @@ Si falta alguna variable obligatoria, la API no arranca y el log las lista todas
 
 ### Antes de entregar
 
-- [ ] Textos legales revisados y publicados; recién entonces `CONTACT_CAPTURE_ENABLED=true`.
+- [x] Textos legales revisados y publicados (23/11/2026); `CONTACT_CAPTURE_ENABLED=true`.
 - [ ] `autoDeployTrigger` en `off` (en el panel o en `render.yaml`): cada deploy borra la base y reinicia en frío.
 - [ ] Ping externo activo contra `/api/health`.
 - [ ] Credenciales del docente cargadas en el panel.

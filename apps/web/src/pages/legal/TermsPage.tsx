@@ -2,7 +2,7 @@ import { AUDIT_RETENTION_DAYS } from '@auditor/shared';
 import { LEGAL_CONTACT_EMAIL, LEGAL_OWNER } from '../../lib/legal.js';
 import { LegalLayout, Section } from './LegalLayout.js';
 
-/** Términos de uso (borrador, H15). */
+/** Términos de uso (H15). */
 export function TermsPage() {
   return (
     <LegalLayout title="Términos de uso">

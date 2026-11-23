@@ -23,9 +23,9 @@ services:
         value: 'false'
       - key: DEMO_NOTICE
         value: 'true'
-      # Apagado hasta publicar los textos legales revisados.
+      # Textos legales revisados y publicados el 23/11/2026: se puede dejar el correo.
       - key: CONTACT_CAPTURE_ENABLED
-        value: 'false'
+        value: 'true'
       # Se genera una sola vez al crear el servicio. Cambiarla reinicia los contadores de uso.
       - key: IP_HASH_SALT
         generateValue: true

@@ -2,7 +2,7 @@ import { AUDIT_RETENTION_DAYS, LEAD_RETENTION_DAYS } from '@auditor/shared';
 import { LEGAL_CONTACT_EMAIL, LEGAL_OWNER } from '../../lib/legal.js';
 import { LegalLayout, Section } from './LegalLayout.js';
 
-/** Aviso de privacidad (borrador, H15). Describe lo que la app hace de verdad. */
+/** Aviso de privacidad (H15). Describe lo que la app hace de verdad. */
 export function PrivacyPage() {
   return (
     <LegalLayout title="Aviso de privacidad">

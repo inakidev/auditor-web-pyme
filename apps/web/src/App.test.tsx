@@ -419,11 +419,11 @@ describe('portada según la configuración del despliegue', () => {
   });
 });
 
-describe('textos legales (borradores)', () => {
+describe('textos legales', () => {
   it('el aviso de privacidad cubre lo pedido y coincide con las constantes de retención', () => {
     const html = renderAt('/privacidad');
     for (const text of [
-      'Borrador',
+      'Esto es una demo',
       'Última actualización',
       'Iñaki Nicolás Antonena',
       'iantonena@alumnos.kennedy.edu.ar',
@@ -446,7 +446,7 @@ describe('textos legales (borradores)', () => {
   it('los términos cubren titularidad, análisis pasivo, sin garantías y exclusión de sitios', () => {
     const html = renderAt('/terminos');
     for (const text of [
-      'Borrador',
+      'Esto es una demo',
       'sos titular del sitio o que tenés autorización',
       'No es una prueba de intrusión',
       'tal cual',
